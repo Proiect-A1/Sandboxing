@@ -16,3 +16,5 @@ do
 	sudo mkdir -p .$(dirname $file)
 	sudo cp $file .$file
 done
+
+

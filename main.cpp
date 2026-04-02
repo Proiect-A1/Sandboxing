@@ -80,6 +80,26 @@ int read_consistent(int fd , void *data , int len)
     return len;
 }
 
+void * main_thread(void *arg)
+{
+    int thread_count = *((int *) arg);
+    //campeze coada
+    return nullptr;
+}
+
+void create_threads()
+{
+    pthread_t *thread_ids = (pthread_t *) malloc(num_of_threads * sizeof(pthread_t));
+    int *thread_counts = (int *) malloc(num_of_threads * sizeof(int));
+
+    for(int i = 0 ; i < num_of_threads ; i++)
+    {
+        thread_counts[i] = i;
+        if(pthread_create(&thread_ids[i] , nullptr , main_thread , (void *) &thread_counts[i]) != 0) handle_error(1 , "pthread_create()");
+        if(pthread_detach(thread_ids[i]) != 0) handle_error(1 , "pthread_detach()");
+    }
+}
+
 int main(int argc , char *argv[])
 {
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
@@ -88,6 +108,7 @@ int main(int argc , char *argv[])
     set_socket();
     create_epoll();
     add_fd(sockfd , EPOLLIN);
+    create_threads();
 
     epoll_event ev[EVENTS_BUFF_SIZE];
     int num_events;
@@ -115,7 +136,7 @@ int main(int argc , char *argv[])
 
         cerr << "events"; fflush(stderr);
     }
-
+    
     handle_error(1 , "epoll_wait()");  
     close(epollfd);
 
