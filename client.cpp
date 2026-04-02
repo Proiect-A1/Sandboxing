@@ -2,9 +2,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
+#include "headers/json.hpp"
 
 #define handle_error(ret_code , ...) { fprintf(stderr , __VA_ARGS__); exit(ret_code); }
 using namespace std;
+using json = nlohmann::json;
 
 
 char *ip;
@@ -30,6 +32,13 @@ sockaddr_in prepare_ip()
 } 
 
 
+void send(int fd , string data)
+{
+    int length = data.size(); 
+    write(fd , &length , sizeof(length));
+    write(fd , data.c_str() , length);
+}
+
 int main(int argc , char *argv[])
 {
     if(argc != 3) handle_error(1 , "Provide IP PORT");
@@ -39,10 +48,21 @@ int main(int argc , char *argv[])
     sockfd = socket(AF_INET , SOCK_STREAM , 0); if(sockfd == -1) handle_error(1 , "socket()");
     if(connect(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "connect()");
 
-    sleep(3);
-    if(write(sockfd , "hello dexter morgan" , strlen("hello dexter morgan") + 1) == -1) handle_error(1 , "write()");
-    sleep(5);
-    close(sockfd);
+    while(1)
+    {
+        char ch;
+        string filename;
+        cin >> filename;
+
+        json j;
+        ifstream f(filename);
+        f >> j;
+
+        send(sockfd , j.dump());
+
+        f.close();
+    }
+
     return 0;
 }
 

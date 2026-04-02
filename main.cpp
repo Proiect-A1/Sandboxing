@@ -2,10 +2,15 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
+#include "headers/json.hpp"
+#include "headers/IO.hpp"
+
 #define EVENTS_BUFF_SIZE 4096
 
 #define handle_error(ret_code , ...) { fprintf(stderr , __VA_ARGS__); exit(ret_code); }
+
 using namespace std;
+using json = nlohmann::json;
 
 char *ip;
 short port;
@@ -73,7 +78,7 @@ int read_consistent(int fd , void *data , int len)
     while(len)
     {
         int read_len = read(fd , data , len); if(read_len == -1) return -1;
-        data = data + read_len;
+        data = (void *)((long long)(data) + read_len);
         len -= read_len;
     }
 
@@ -83,7 +88,7 @@ int read_consistent(int fd , void *data , int len)
 void * main_thread(void *arg)
 {
     int thread_count = *((int *) arg);
-    //campeze coada
+    //campeaza coada
     return nullptr;
 }
 
@@ -98,6 +103,24 @@ void create_threads()
         if(pthread_create(&thread_ids[i] , nullptr , main_thread , (void *) &thread_counts[i]) != 0) handle_error(1 , "pthread_create()");
         if(pthread_detach(thread_ids[i]) != 0) handle_error(1 , "pthread_detach()");
     }
+}
+
+void receive_request(int client_fd)
+{
+    int len_read;
+    int length; if((len_read = read(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read()");
+    if(len_read == 0) {rem_fd(client_fd); return;}
+
+    string request_string;
+
+    for(int i = 0 ; i < length ; i++)
+    {
+        char ch = IOhelper::get_char_fd(client_fd);
+        request_string += ch;
+    }
+
+    json j = json::parse(request_string);
+    cerr << j.dump(); fflush(stderr);
 }
 
 int main(int argc , char *argv[])
@@ -125,16 +148,15 @@ int main(int argc , char *argv[])
                 if(fd == sockfd)
                 {
                     int fd_client = accept_new_connection();
+                    cerr << "Connection received\n"; fflush(stderr);
                     add_fd(fd_client , EPOLLIN | EPOLLET);
                 }   
                 else 
                 {
-                    //to do
+                    receive_request(fd);
                 }
             }
         }
-
-        cerr << "events"; fflush(stderr);
     }
     
     handle_error(1 , "epoll_wait()");  
