@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <sys/epoll.h>
 #include "headers/json.hpp"
+#include <fcntl.h>
 
 #define handle_error(ret_code , ...) { fprintf(stderr , __VA_ARGS__); exit(ret_code); }
 using namespace std;
@@ -56,9 +57,21 @@ int main(int argc , char *argv[])
 
         cerr << "[client] received path:" << filename << '\n'; fflush(stderr);
 
-        if(filename.find_last_of(".zip") == filename.size() - strlen(".zip"))
+        if(filename.find_last_of(".zip") == filename.size() - 1)
         {
+            int fd = open(filename.c_str() , O_RDONLY);
+            int length = lseek(fd , 0 , SEEK_END);
+            lseek(fd , 0 , SEEK_SET);
+            write(sockfd , &length , sizeof(length));
+            
+            cerr << length << '\n'; fflush(stderr);
 
+            for(int i = 0 ; i < length ; i++)
+            {
+                char ch; read(fd , &ch , sizeof(ch));
+                cerr << (int) ch << '\n'; fflush(stderr);
+                write(sockfd , &ch , sizeof(ch));
+            }
         }
         else 
         {

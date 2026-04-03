@@ -4,6 +4,7 @@
 #include <sys/epoll.h>
 #include "headers/json.hpp"
 #include "headers/IO.hpp"
+#include <fcntl.h>
 
 #define EVENTS_BUFF_SIZE 4096
 
@@ -49,6 +50,7 @@ void add_fd(int fd , int events)
 void rem_fd(int fd)
 {
     if(epoll_ctl(epollfd , EPOLL_CTL_DEL , fd , nullptr) == -1) handle_error(1 , "epoll_ctl()");
+    cerr << "[server] connection closed\n"; fflush(stderr);
 }
 void set_socket()
 {
@@ -110,6 +112,27 @@ void receive_request(int client_fd)
 
     json j = json::parse(request_string);
     cerr << j.dump() << '\n'; fflush(stderr);
+
+    if(j.contains("zip"))
+    {
+        int len_read;
+        int length; if((len_read = IOhelper::read_consistent(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
+        if(len_read == 0) {rem_fd(client_fd); return;}
+
+        string filename = j["zip"].get < string > ();
+        int fd = open(filename.c_str() , O_WRONLY | O_CREAT | O_TRUNC , 0600);
+
+        for(int i = 0 ; i < length ; i++)
+        {
+            char byte = IOhelper::get_char_fd(client_fd);
+            cerr << (int) byte << '\n';
+            write(fd , &byte , sizeof(byte));
+        }
+
+        close(fd);
+        cerr << "[server] received zip\n"; fflush(stderr);
+    }
+    
 }
 
 int main(int argc , char *argv[])
