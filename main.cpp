@@ -109,7 +109,7 @@ void receive_request(int client_fd)
     }
 
     json j = json::parse(request_string);
-    cerr << j.dump(); fflush(stderr);
+    cerr << j.dump() << '\n'; fflush(stderr);
 }
 
 int main(int argc , char *argv[])

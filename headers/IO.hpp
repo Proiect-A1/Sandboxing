@@ -32,6 +32,7 @@ namespace IOhelper
             length = read(fd , buff , BUFF_SIZE);
             if(length == -1) handle_error(1 , "get_char_fd()");
             if(length == 0) handle_error(1 , "get_char_fd()");
+            current_pos = 0;
         }
 
         return buff[current_pos++];
