@@ -54,13 +54,23 @@ int main(int argc , char *argv[])
         string filename;
         cin >> filename;
 
-        json j;
-        ifstream f(filename);
-        f >> j;
+        cerr << "[client] received path:" << filename << '\n'; fflush(stderr);
 
-        send(sockfd , j.dump());
+        if(filename.find_last_of(".zip") == filename.size() - strlen(".zip"))
+        {
 
-        f.close();
+        }
+        else 
+        {
+            json j;
+            ifstream f(filename);
+            f >> j;
+
+            send(sockfd , j.dump());
+            cerr << "[client] sent file: " << j.dump() << '\n'; fflush(stderr);
+
+            f.close();
+        }
     }
 
     return 0;
