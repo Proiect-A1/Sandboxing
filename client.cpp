@@ -63,15 +63,14 @@ int main(int argc , char *argv[])
             int length = lseek(fd , 0 , SEEK_END);
             lseek(fd , 0 , SEEK_SET);
             write(sockfd , &length , sizeof(length));
-            
-            cerr << length << '\n'; fflush(stderr);
 
             for(int i = 0 ; i < length ; i++)
             {
                 char ch; read(fd , &ch , sizeof(ch));
-                cerr << (int) ch << '\n'; fflush(stderr);
                 write(sockfd , &ch , sizeof(ch));
             }
+
+            cerr << "[client] sent zip\n"; fflush(stderr);
         }
         else 
         {

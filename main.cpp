@@ -125,7 +125,6 @@ void receive_request(int client_fd)
         for(int i = 0 ; i < length ; i++)
         {
             char byte = IOhelper::get_char_fd(client_fd);
-            cerr << (int) byte << '\n';
             write(fd , &byte , sizeof(byte));
         }
 
