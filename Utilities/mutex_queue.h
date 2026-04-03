@@ -16,4 +16,4 @@ class mutex_queue {
   T front();
 };
 
-
+#endif // MUTEX_QUEUE_H
