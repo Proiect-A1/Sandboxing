@@ -57,6 +57,7 @@ void set_socket()
     int on = 1; if(setsockopt(sockfd , SOL_SOCKET , SO_REUSEPORT , (const char *) &on , sizeof(on)) == -1) handle_error(1 , "setsockopt()")
     if(bind(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "bind()");
     if(listen(sockfd , 5) == -1) handle_error(1 , "listen()")
+    cerr << "[server] Socket set\n"; fflush(stderr);
 }
 
 void create_epoll()
@@ -67,22 +68,10 @@ void create_epoll()
 int accept_new_connection()
 {
     sockaddr_in client_address;
-    socklen_t len_client_address;
+    socklen_t len_client_address = sizeof(client_address);
     int fd;
     if((fd = accept(sockfd , (sockaddr *) &client_address , &len_client_address)) == -1) handle_error(1 , "accept()");
     return fd;
-}
-
-int read_consistent(int fd , void *data , int len)
-{
-    while(len)
-    {
-        int read_len = read(fd , data , len); if(read_len == -1) return -1;
-        data = (void *)((long long)(data) + read_len);
-        len -= read_len;
-    }
-
-    return len;
 }
 
 void * main_thread(void *arg)
@@ -108,7 +97,7 @@ void create_threads()
 void receive_request(int client_fd)
 {
     int len_read;
-    int length; if((len_read = read(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read()");
+    int length; if((len_read = IOhelper::read_consistent(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
     if(len_read == 0) {rem_fd(client_fd); return;}
 
     string request_string;
@@ -133,6 +122,7 @@ int main(int argc , char *argv[])
     add_fd(sockfd , EPOLLIN);
     create_threads();
 
+    cerr << "[server] epoll set\n"; fflush(stderr);
     epoll_event ev[EVENTS_BUFF_SIZE];
     int num_events;
 
@@ -148,11 +138,12 @@ int main(int argc , char *argv[])
                 if(fd == sockfd)
                 {
                     int fd_client = accept_new_connection();
-                    cerr << "Connection received\n"; fflush(stderr);
+                    cerr << "[server] Connection received\n"; fflush(stderr);
                     add_fd(fd_client , EPOLLIN | EPOLLET);
                 }   
                 else 
                 {
+                    cerr << "[server] request received\n"; fflush(stderr);
                     receive_request(fd);
                 }
             }
