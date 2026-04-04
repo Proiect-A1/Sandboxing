@@ -2,20 +2,27 @@
 #define RUNNER_TASK_H
 #include <string>
 #include <result_enum.h>
+#include <task.h>
 
-class stdio_runner_task
+class stdio_runner_task : public task
 {
   std::string exec_path;
   std::string input_path;
   std::string output_path;
-  float time_limit;  // in milliseconds
-  long memory_limit; // in bytes
+  float time_limit;     // in milliseconds
+  long memory_limit;    // in bytes
+  float time_consumed;  // in milliseconds
+  long memory_consumed; // in bytes
 
 public:
-  stdio_runner_task(std::string exec_path, std::string input_path, std::string output_path, float time_limit, long memory_limit) : exec_path(exec_path), input_path(input_path), output_path(output_path), time_limit(time_limit), memory_limit(memory_limit) {}
+  stdio_runner_task(std::string exec_path, std::string input_path, std::string output_path, float time_limit, long memory_limit)
+      : exec_path(exec_path), input_path(input_path), output_path(output_path), time_limit(time_limit), memory_limit(memory_limit), time_consumed(0), memory_consumed(0) {}
 
-  bool check_permissions();
-  result_enum execute();
+  bool check_permissions() override;
+  result_enum execute(int thread_id, int user_id) override;
+
+  float get_time_consumed() const { return time_consumed; }
+  long get_memory_consumed() const { return memory_consumed; }
 };
 
 #endif
