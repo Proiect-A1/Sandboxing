@@ -1,7 +1,7 @@
 #ifndef RESULT_ENUM_H
 #define RESULT_ENUM_H
 
-enum result_enum{
+enum class result_enum{
   OK, // full points
   WA, // wrong answer
   PA, // partial answer

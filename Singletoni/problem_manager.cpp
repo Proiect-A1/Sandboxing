@@ -20,13 +20,13 @@ problem_manager& problem_manager::get_instance() {
   return *instance;
 }
 
-void problem_manager::add_revision(int problem_id, int rev_id, problem_metadata metadata) {
+void problem_manager::add_revision(std::string problem_id, int rev_id, problem_metadata metadata) {
   pthread_mutex_lock(&mtx);
   problems[problem_id][rev_id] = metadata;
   pthread_mutex_unlock(&mtx);
 }
 
-void problem_manager::delete_revision(int problem_id, int rev_id) {
+void problem_manager::delete_revision(std::string problem_id, int rev_id) {
   pthread_mutex_lock(&mtx);
   if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
     // trebe sters si folderu
@@ -39,7 +39,7 @@ void problem_manager::delete_revision(int problem_id, int rev_id) {
   pthread_mutex_unlock(&mtx);
 }
 
-int problem_manager::delete_old_revisions(int problem_id, int keep_count) {
+int problem_manager::delete_old_revisions(std::string problem_id, int keep_count) {
   pthread_mutex_lock(&mtx);
   if (problems.count(problem_id)) {
     auto& revisions = problems[problem_id];
@@ -59,7 +59,7 @@ int problem_manager::delete_old_revisions(int problem_id, int keep_count) {
   return 0;
 }
 
-int problem_manager::get_latest_revision(int problem_id) {
+int problem_manager::get_latest_revision(std::string problem_id) {
   pthread_mutex_lock(&mtx);
   if (problems.count(problem_id) && !problems[problem_id].empty()) {
     auto& revisions = problems[problem_id];
@@ -70,21 +70,21 @@ int problem_manager::get_latest_revision(int problem_id) {
   return -1; // return -1 if problem does not exist or has no revisions
 }
 
-bool problem_manager::exists_revision(int problem_id, int rev_id) {
+bool problem_manager::exists_revision(std::string problem_id, int rev_id) {
   pthread_mutex_lock(&mtx);
   bool exists = problems.count(problem_id) && problems[problem_id].count(rev_id);
   pthread_mutex_unlock(&mtx);
   return exists;
 }
 
-int problem_manager::count_revisions(int problem_id) {
+int problem_manager::count_revisions(std::string problem_id) {
   pthread_mutex_lock(&mtx);
   int count = problems.count(problem_id) ? problems[problem_id].size() : 0;
   pthread_mutex_unlock(&mtx);
   return count;
 }
 
-problem_metadata problem_manager::get_metadata(int problem_id, int rev_id) {
+problem_metadata problem_manager::get_metadata(std::string problem_id, int rev_id) {
   pthread_mutex_lock(&mtx);
   if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
     auto metadata = problems[problem_id][rev_id];

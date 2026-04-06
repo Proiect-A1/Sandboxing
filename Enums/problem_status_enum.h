@@ -1,7 +1,7 @@
 #ifndef PROBLEM_STATUS_ENUM_H
 #define PROBLEM_STATUS_ENUM_H
 
-enum problem_status_enum{
+enum class problem_status_enum{
   NOT_EXISTS, // not loaded locally
   DOWNLOADING, // downloading from the DB
   DOWNLOADED, // downloaded but not processed

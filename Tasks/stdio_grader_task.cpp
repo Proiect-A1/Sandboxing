@@ -1,52 +1,109 @@
-#include <stdio_grader_task.h>
-#include <stdio_runner_task.h>
-result_enum stdio_grader_task::execute()
+#include <Tasks/stdio_grader_task.h>
+#include <iostream>
+namespace
 {
-  char command[1024];
-  snprintf(command, sizeof(command), "cp %s main", main_exec_path.c_str());
-  if (system(command) != 0)
+  bool copy_file(const std::string &from, const std::string &to, mode_t mode)
   {
-    test->result = FAIL;
-    test->points = 0;
-    return FAIL;
+    std::error_code ec;
+    std::filesystem::copy_file(from, to, std::filesystem::copy_options::overwrite_existing, ec);
+    if (ec)
+    {
+      return false;
+    }
+
+    return chmod(to.c_str(), mode) == 0;
   }
-  snprintf(command, sizeof(command), "cp %s input.txt", input_path.c_str());
-  if (system(command) != 0)
+}
+
+
+result_enum stdio_grader_task::execute(int thread_id, int user_id){
+  if(!check_permissions()){
+    return result_enum::FAIL;
+  }
+  if(user_id <= 0){
+    return result_enum::FAIL;
+  }
+
+  problem_manager& pm = problem_manager::get_instance();
+  submission_manager& sm = submission_manager::get_instance();
+  /*std::unique_ptr<task> stdio_runner_factory(
+    language_enum language,
+    long submission_id,
+    std::string input_path,
+    std::string output_path,
+    float run_time_limit,
+    long run_memory_limit,
+    uint8_t priority = 0);*/
+
+  problem_metadata problem = pm.get_metadata(problem_id, rev_id);
+  problem.time_limit = 3000;
+  problem.memory_limit = 1024ll * 1024 * 50; // 50MB
+  // submission_data submission = sm.get_submission(submission_id);
+  submission_data submission;
+  submission.language = language_enum::CPP;
+  utilities::change_dir_to_user("amarat" + std::to_string(user_id));
+
+  std::string submission_exec_path = submission_info_utilities::get_submission_exec_path(submission_id);
+  std::string problem_input_path = submission_info_utilities::get_problem_input_path(problem_id, rev_id, test);
+  std::string problem_correct_output_path = submission_info_utilities::get_problem_correct_output_path(problem_id, rev_id, test);
+  
+  std::string input_path = "input";
+  std::string output_path = "output";
+  std::string exec_path = "main_exec";
+  std::string correct_output_path = "correct_output";
+  std::string username = "amarat" + std::to_string(user_id);
+
+  utilities::change_dir_to_user(username);
+  
+  if (!copy_file(submission_exec_path, exec_path, 0755)){
+    return result_enum::FAIL;
+  }
+
+  if (!copy_file(problem_input_path, input_path, 0644)){
+    return result_enum::FAIL;
+  }
+
+  auto runner_task = stdio_runner_factory(
+    submission.language,
+    submission_id,
+    exec_path,
+    input_path,
+    output_path,
+    problem.time_limit,
+    problem.memory_limit,
+    0);
+  if(runner_task == nullptr){
+    return result_enum::FAIL;
+  }
+
+
+  utilities::change_dir_to_sandbox();
+
+  result_enum result = runner_task->execute(thread_id, user_id);
+  if (result != result_enum::OK)
   {
-    test->result = FAIL;
-    test->points = 0;
-    return FAIL;
+    return result;
   }
-  stdio_runner_task runner(main_exec_path, "input.txt", "output.txt", time_limit, memory_limit);
-  result_enum runner_result = runner.execute(0, 0);
-  if (runner_result != OK)
+
+  // de checkuit in pula mea
+
+  // checkuim doar cu diff se va mai baga altceva
+  
+  utilities::change_dir_to_user(username);
+
+  if (!copy_file(problem_correct_output_path, correct_output_path, 0644)){
+    return result_enum::FAIL;
+  }
+  result = result_enum::OK;
+  if (system(("diff -q " + output_path + " " + correct_output_path).c_str()) != 0)
   {
-    test->result = runner_result;
-    test->points = 0;
-    snprintf(command, sizeof(command), "rm * -r");
-    system(command);
-    return runner_result;
+    result = result_enum::WA;
   }
-  snprintf(command, sizeof(command), "cp %s correct.txt", correct_output_path.c_str());
-  if (system(command) != 0)
-  {
-    test->result = FAIL;
-    test->points = 0;
-    return FAIL;
-  }
-  snprintf(command, sizeof(command), "%s input.txt output.txt correct.txt", checker_path.c_str());
-  int checker_result = system(command);
-  if (checker_result == 0)
-  {
-    test->result = OK;
-    test->points = 100;
-  }
-  else
-  {
-    test->result = WA;
-    test->points = 0; // this is a placeholder, the actual points should be determined by the checker
-  }
-  snprintf(command, sizeof(command), "rm -r");
-  system(command);
-  return test->result;
+
+  // system("pwd");
+  // system(("cat " + output_path).c_str());
+  // system(("cat " + correct_output_path).c_str());
+  system("rm -rf *");
+
+  return result;
 }

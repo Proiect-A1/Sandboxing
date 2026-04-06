@@ -1,8 +1,8 @@
 #ifndef RUNNER_TASK_H
 #define RUNNER_TASK_H
 #include <string>
-#include <result_enum.h>
-#include <task.h>
+#include <Enums/result_enum.h>
+#include <Tasks/task.h>
 
 class stdio_runner_task : public task
 {

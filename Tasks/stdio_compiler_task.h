@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <task.h>
+#include <Tasks/task.h>
 
 class stdio_compiler_task : public task
 {
@@ -11,7 +11,7 @@ class stdio_compiler_task : public task
     std::string source_file_name;
     std::string output_file_name;
 
-    long submission_id;
+    std::string submission_id;
     float time_limit;     // in milliseconds
     long exec_size_limit; // in bytes
 
@@ -20,7 +20,7 @@ public:
         std::string compile_command,
         std::string source_file_name,
         std::string output_file_name,
-        long submission_id,
+        std::string submission_id,
         float time_limit,
         long exec_size_limit)
         : compile_command(compile_command),

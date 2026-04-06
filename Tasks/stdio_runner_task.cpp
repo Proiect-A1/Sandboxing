@@ -1,4 +1,4 @@
-#include <stdio_runner_task.h>
+#include <Tasks/stdio_runner_task.h>
 
 #include <Singletoni/memory_manager.h>
 
@@ -14,7 +14,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
+#include <iostream>
 namespace
 {
   bool copy_file(const std::string &from, const std::string &to, mode_t mode)
@@ -54,18 +54,18 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
 
   if (!check_permissions())
   {
-    return FAIL;
+    return result_enum::FAIL;
   }
 
   if (user_id <= 0)
   {
-    return FAIL;
+    return result_enum::FAIL;
   }
 
   const char *sandbox_path = getenv("SANDBOX_PATH");
   if (sandbox_path == nullptr || sandbox_path[0] == '\0')
   {
-    return FAIL;
+    return result_enum::FAIL;
   }
 
   const std::string run_username = "amarat" + std::to_string(user_id);
@@ -77,20 +77,14 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
 
   if (exec_file_name.empty() || input_file_name.empty() || output_file_name.empty())
   {
-    return FAIL;
+    return result_enum::FAIL;
   }
 
-  const std::string run_exec_path = run_dir + "/" + exec_file_name;
 
   struct passwd *pw = getpwnam(run_username.c_str());
   if (pw == nullptr)
   {
-    return FAIL;
-  }
-
-  if (!copy_file(exec_path, run_exec_path, 0755))
-  {
-    return FAIL;
+    return result_enum::FAIL;
   }
 
   memory_manager &memory = memory_manager::get_instance();
@@ -103,7 +97,7 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
   if (pid < 0)
   {
     memory.release_memory(requested_memory);
-    return FAIL;
+    return result_enum::FAIL;
   }
 
   if (pid == 0)
@@ -112,17 +106,7 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
 
     if (chdir(run_dir.c_str()) != 0)
     {
-      _exit(127);
-    }
-
-    if (chroot(run_dir.c_str()) != 0)
-    {
-      _exit(127);
-    }
-
-    if (chdir("/") != 0)
-    {
-      _exit(127);
+        _exit(127);
     }
 
     if (initgroups(run_username.c_str(), pw->pw_gid) != 0)
@@ -140,8 +124,8 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
       _exit(127);
     }
 
-    const std::string jailed_input_path = "/" + input_file_name;
-    const std::string jailed_output_path = "/" + output_file_name;
+    const std::string jailed_input_path = input_file_name;
+    const std::string jailed_output_path = output_file_name;
 
     int in_fd = open(jailed_input_path.c_str(), O_RDONLY);
     if (in_fd < 0)
@@ -174,7 +158,7 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
       _exit(127);
     }
 
-    const std::string jailed_exec_path = "/" + exec_file_name;
+    const std::string jailed_exec_path = "./" + exec_file_name;
     char *const argv[] = {const_cast<char *>(jailed_exec_path.c_str()), nullptr};
     execv(jailed_exec_path.c_str(), argv);
     _exit(127);
@@ -199,7 +183,7 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
       killpg(pid, SIGKILL);
       wait4(pid, &status, 0, &usage);
       memory.release_memory(requested_memory);
-      return FAIL;
+      return result_enum::FAIL;
     }
 
     const auto now = std::chrono::steady_clock::now();
@@ -223,12 +207,12 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
 
   if (timed_out)
   {
-    return TLE;
+    return result_enum::TLE;
   }
 
   if (memory_consumed > memory_limit)
   {
-    return MLE;
+    return result_enum::MLE;
   }
 
   if (WIFEXITED(status))
@@ -236,13 +220,13 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
     const int code = WEXITSTATUS(status);
     if (code == 0)
     {
-      return OK;
+      return result_enum::OK;
     }
     if (code == 127)
     {
-      return FAIL;
+      return result_enum::FAIL;
     }
-    return RTE;
+    return result_enum::RTE;
   }
 
   if (WIFSIGNALED(status))
@@ -250,10 +234,10 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
     const int sig = WTERMSIG(status);
     if (sig == SIGKILL && memory_consumed > memory_limit)
     {
-      return MLE;
+      return result_enum::MLE;
     }
-    return RTE;
+    return result_enum::RTE;
   }
 
-  return FAIL;
+  return result_enum::OK;
 }

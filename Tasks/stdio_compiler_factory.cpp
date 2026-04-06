@@ -1,10 +1,10 @@
-#include <stdio_compiler_factory.h>
+#include <Tasks/stdio_compiler_factory.h>
 
-#include <stdio_compiler_task.h>
+#include <Tasks/stdio_compiler_task.h>
 
 std::unique_ptr<task> stdio_compiler_factory(
     language_enum language,
-    long submission_id,
+    std::string submission_id,
     float compile_time_limit,
     long exec_size_limit,
     uint8_t priority)

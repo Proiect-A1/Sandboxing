@@ -1,14 +1,15 @@
-#include <stdio_runner_factory.h>
+#include <Tasks/stdio_runner_factory.h>
 
 #include <cstdio>
 #include <cstdlib>
 #include <string>
 
-#include <stdio_runner_task.h>
+#include <Tasks/stdio_runner_task.h>
 
 std::unique_ptr<task> stdio_runner_factory(
     language_enum language,
-    long submission_id,
+    std::string submission_id,
+    std::string exec_path,
     std::string input_path,
     std::string output_path,
     float run_time_limit,
@@ -20,7 +21,7 @@ std::unique_ptr<task> stdio_runner_factory(
         return nullptr;
     }
 
-    if (submission_id <= 0)
+    if (submission_id.empty() || exec_path.empty() || input_path.empty() || output_path.empty())
     {
         return nullptr;
     }
@@ -31,8 +32,7 @@ std::unique_ptr<task> stdio_runner_factory(
         return nullptr;
     }
 
-    const std::string exec_path =
-        std::string(sandbox_path) + "/submissions/" + std::to_string(submission_id) + "/main_exec";
+
 
     std::unique_ptr<task> created = std::make_unique<stdio_runner_task>(
         exec_path,

@@ -1,4 +1,4 @@
-#include <stdio_compiler_task.h>
+#include <Tasks/stdio_compiler_task.h>
 
 #include <chrono>
 #include <csignal>
@@ -12,6 +12,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <iostream>
 namespace
 {
     bool copy_file(const std::string &from, const std::string &to, mode_t mode)
@@ -42,7 +43,7 @@ bool stdio_compiler_task::check_permissions()
     {
         return false;
     }
-    if (submission_id <= 0)
+    if (submission_id.empty())
     {
         return false;
     }
@@ -59,24 +60,24 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
     if (!check_permissions())
     {
-        return FAIL;
+        return result_enum::FAIL;
     }
     if (user_id <= 0)
     {
-        return FAIL;
+        return result_enum::FAIL;
     }
 
     const char *sandbox_path = getenv("SANDBOX_PATH");
     if (sandbox_path == nullptr || sandbox_path[0] == '\0')
     {
-        return FAIL;
+        return result_enum::FAIL;
     }
 
     const std::string run_username = "amarat" + std::to_string(user_id);
     const std::string run_dir = std::string(sandbox_path) + "/runs/" + run_username;
-    const std::string submissions_dir = std::string(sandbox_path) + "/submissions/" + std::to_string(submission_id);
+    const std::string submissions_dir = std::string(sandbox_path) + "/submissions/" + submission_id;
 
-    const std::string source_host_path = submissions_dir + "/" + source_file_name;
+    const std::string source_host_path = submissions_dir + "/" + source_file_name;  
     const std::string output_host_path = submissions_dir + "/" + output_file_name;
     const std::string source_run_path = run_dir + "/" + source_file_name;
     const std::string output_run_path = run_dir + "/" + output_file_name;
@@ -84,12 +85,12 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
     struct passwd *pw = getpwnam(run_username.c_str());
     if (pw == nullptr)
     {
-        return FAIL;
+        return result_enum::FAIL;
     }
 
     if (!copy_file(source_host_path, source_run_path, 0644))
     {
-        return FAIL;
+        return result_enum::FAIL;
     }
 
     unlink(output_run_path.c_str());
@@ -98,7 +99,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
     pid_t pid = fork();
     if (pid < 0)
     {
-        return FAIL;
+        return result_enum::FAIL;
     }
 
     if (pid == 0)
@@ -110,28 +111,11 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
             _exit(127);
         }
 
-        if (chroot(run_dir.c_str()) != 0)
-        {
-            _exit(127);
-        }
+        // if (chroot(sandbox_path) != 0)
+        // {
+        //     _exit(127);
+        // }
 
-        if (chdir("/") != 0)
-        {
-            _exit(127);
-        }
-
-        if (initgroups(run_username.c_str(), pw->pw_gid) != 0)
-        {
-            _exit(127);
-        }
-        if (setgid(pw->pw_gid) != 0)
-        {
-            _exit(127);
-        }
-        if (setuid(pw->pw_uid) != 0)
-        {
-            _exit(127);
-        }
 
         int null_fd = open("/dev/null", O_RDONLY);
         if (null_fd >= 0)
@@ -140,8 +124,8 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
             close(null_fd);
         }
 
-        std::string source_in_jail = "/" + source_file_name;
-        std::string output_in_jail = "/" + output_file_name;
+        std::string source_in_jail = source_file_name;
+        std::string output_in_jail = output_file_name;
 
         char *const argv[] = {
             const_cast<char *>(compile_command.c_str()),
@@ -151,6 +135,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
             const_cast<char *>(output_in_jail.c_str()),
             const_cast<char *>(source_in_jail.c_str()),
             nullptr};
+
         execv(compile_command.c_str(), argv);
         _exit(127);
     }
@@ -171,7 +156,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
         {
             killpg(pid, SIGKILL);
             waitpid(pid, &status, 0);
-            return FAIL;
+            return result_enum::FAIL;
         }
 
         const auto now = std::chrono::steady_clock::now();
@@ -189,34 +174,34 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
     if (timed_out)
     {
-        return TLE;
+        return result_enum::TLE;
     }
 
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
     {
-        return CPE;
+        return result_enum::CPE;
     }
 
     struct stat st;
     if (stat(output_run_path.c_str(), &st) != 0)
     {
-        return CPE;
+        return result_enum::CPE;
     }
     if ((long)st.st_size > exec_size_limit)
     {
         unlink(output_run_path.c_str());
-        return CPE;
+        return result_enum::CPE;
     }
 
     if (rename(output_run_path.c_str(), output_host_path.c_str()) != 0)
     {
         if (!copy_file(output_run_path, output_host_path, 0755))
         {
-            return FAIL;
+            return result_enum::FAIL;
         }
         unlink(output_run_path.c_str());
     }
 
     chmod(output_host_path.c_str(), 0755);
-    return OK;
+    return result_enum::OK;
 }

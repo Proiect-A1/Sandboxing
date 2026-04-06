@@ -1,7 +1,7 @@
 #ifndef SUBMISSION_TEST_H
 #define SUBMISSION_TEST_H
 
-#include <result_enum.h>
+#include <Enums/result_enum.h>
 #include <string>
 
 struct submission_data;
