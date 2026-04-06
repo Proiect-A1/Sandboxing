@@ -2,6 +2,7 @@
 #define PROBLEM_METADATA_H
 
 #include <string>
+#include <vector>
 #include <Enums/problem_status_enum.h>
 #include <Chestii_cu_data/group_metadata.h>
 #include <Chestii_cu_data/test_metadata.h>
