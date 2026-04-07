@@ -61,3 +61,20 @@ bool utilities::copy_file(const std::string &from, const std::string &to, mode_t
 
   return chmod(to.c_str(), mode) == 0;
 }
+
+void utilities::print_enum(result_enum result){
+  switch(result) {
+      case result_enum::OK: std::cout << "OK"; break;
+      case result_enum::WA: std::cout << "WA"; break;
+      case result_enum::PA: std::cout << "PA"; break;
+      case result_enum::TLE: std::cout << "TLE"; break;
+      case result_enum::MLE: std::cout << "MLE"; break;
+      case result_enum::RTE: std::cout << "RTE"; break;
+      case result_enum::CPE: std::cout << "CPE"; break;
+      case result_enum::FAIL: std::cout << "FAIL"; break;
+      case result_enum::SKIP: std::cout << "SKIP"; break;
+      case result_enum::ILE: std::cout << "ILE"; break;
+      case result_enum::NONE: std::cout << "NONE"; break;
+      case result_enum::OTHER: std::cout << "OTHER"; break;
+    }
+}
