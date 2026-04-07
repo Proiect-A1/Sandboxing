@@ -73,10 +73,6 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
             _exit(127);
         }
 
-        if (!utilities::change_root_to_sandbox()){
-            _exit(127);
-        }
-
 
         int null_fd = open("/dev/null", O_RDONLY);
         if (null_fd >= 0)
