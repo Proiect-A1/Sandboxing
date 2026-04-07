@@ -37,11 +37,10 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
     }
 
     const std::string run_username = "amarat" + std::to_string(user_id);
-    const std::string run_dir = std::string(sandbox_path) + "/runs/" + run_username;
-    const std::string submissions_dir = submission_info_utilities::get_submission_exec_path(submission_id);
+    const std::string run_dir = submission_info_utilities::get_run_dir(run_username);
 
-    const std::string source_host_path = submissions_dir + "/" + source_file_name;  
-    const std::string output_host_path = submissions_dir + "/" + output_file_name;
+    const std::string source_host_path = submission_info_utilities::get_submission_source_path(submission_id);  
+    const std::string output_host_path = submission_info_utilities::get_submission_exec_path(submission_id);  
     const std::string source_run_path = run_dir + "/" + source_file_name;
     const std::string output_run_path = run_dir + "/" + output_file_name;
 

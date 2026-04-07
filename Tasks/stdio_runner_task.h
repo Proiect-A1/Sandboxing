@@ -4,6 +4,7 @@
 #include <Enums/result_enum.h>
 #include <Tasks/task.h>
 #include <Utilities/utilities.h>
+#include <Utilities/submission_info_utilities.h>
 #include <Singletoni/memory_manager.h>
 
 #include <chrono>
