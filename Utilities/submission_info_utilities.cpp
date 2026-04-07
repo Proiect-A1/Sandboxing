@@ -9,6 +9,9 @@ std::string submission_info_utilities::left_zero_pad (int number, int width) {
   return std::string(width - num_str.length(), '0') + num_str;
 }
 
+std::string submission_info_utilities::get_run_dir(std::string username){
+  return std::string(getenv("SANDBOX_PATH")) + "/runs/" + username;
+}
 
 std::string submission_info_utilities::get_submission_dir(std::string submission_id){
   return std::string(getenv("SANDBOX_PATH")) + "/submissions/" + submission_id;
