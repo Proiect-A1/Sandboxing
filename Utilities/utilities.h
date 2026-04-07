@@ -12,7 +12,7 @@ namespace utilities{
   bool change_root_to_sandbox(); 
   bool change_dir_to_user(std::string username); 
   bool change_dir_to_sandbox(); 
-  bool copy_file(std::string from, std::string to, mode_t mode);
+  bool copy_file(const std::string& from, const std::string& to, mode_t mode);
 }
 
 
