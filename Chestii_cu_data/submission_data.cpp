@@ -1,5 +1,5 @@
 #include <Chestii_cu_data/submission_data.h>
-submission_data::submission_data(std::string problem_id, int rev_id, int socket_fd=1){
+submission_data::submission_data(std::string problem_id, int rev_id, int socket_fd){
     problem_metadata pmd=problem_manager::get_instance().get_metadata(problem_id,rev_id);
     tests_completed=0;
     test_count=pmd.test_count;
