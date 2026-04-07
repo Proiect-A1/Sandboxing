@@ -12,7 +12,7 @@ struct submission_test{
     float points; // percentage of the total points for the test (between 0 and 1)
     std::string message; // message to be sent to the user after the test is completed
     float time_used; // in milliseconds
-    long memory_used; // in bytes
+    long long memory_used; // in bytes
     result_enum result; 
     std::vector<int> groups;
     submission_data *parent_submission;

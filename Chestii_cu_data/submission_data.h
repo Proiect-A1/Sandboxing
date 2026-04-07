@@ -6,7 +6,10 @@
 #include <Chestii_cu_data/submission_group.h>
 #include <Chestii_cu_data/problem_metadata.h>
 #include <Singletoni/problem_manager.h>
+#include <Enums/language_enum.h>
 struct submission_data{
+    language_enum language;
+
     int tests_completed;
     int test_count; 
     
