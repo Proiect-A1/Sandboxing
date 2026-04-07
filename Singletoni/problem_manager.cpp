@@ -1,22 +1,15 @@
 #include <Singletoni/problem_manager.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <pthread.h>
-#include <unordered_map>
-#include <map>
 
 problem_manager* problem_manager::instance = nullptr;
 pthread_mutex_t problem_manager::mtx = PTHREAD_MUTEX_INITIALIZER;
 
 problem_manager& problem_manager::get_instance() {
-  pthread_mutex_lock(&mtx);
   if (instance == nullptr) {
+    pthread_mutex_lock(&mtx);
+    if (instance == nullptr)
     instance = new problem_manager();
-    void *ptr = mmap(NULL, sizeof(problem_manager), PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
-    memcpy(ptr, instance, sizeof(problem_manager));
-    instance = (problem_manager*)ptr;
+    pthread_mutex_unlock(&mtx);
   }
-  pthread_mutex_unlock(&mtx);
   return *instance;
 }
 

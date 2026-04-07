@@ -5,6 +5,8 @@
 #include <map>
 #include <pthread.h>
 #include <sys/mman.h>
+#include <string.h>
+#include <unordered_map>
 
 class problem_manager {
   //Singleton

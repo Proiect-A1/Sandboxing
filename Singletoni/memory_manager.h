@@ -2,7 +2,6 @@
 #define MEMORY_MANAGER_H
 
 #include <pthread.h>
-#include <sys/mman.h>
 #include <string.h>
 class memory_manager {
   //Singleton

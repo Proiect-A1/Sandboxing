@@ -5,14 +5,12 @@ memory_manager* memory_manager::instance = nullptr;
 pthread_mutex_t memory_manager::mtx = PTHREAD_MUTEX_INITIALIZER;
 
 memory_manager& memory_manager::get_instance() {
-	pthread_mutex_lock(&mtx);
   if (instance == nullptr) {
+    pthread_mutex_lock(&mtx);
+    if (instance == nullptr)
     instance = new memory_manager();
-    void *ptr = mmap(NULL, sizeof(memory_manager), PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
-    memcpy(ptr, instance, sizeof(memory_manager));
-    instance = (memory_manager*)ptr;
+    pthread_mutex_unlock(&mtx);
   }
-	pthread_mutex_unlock(&mtx);
 	return *instance;
 }
 
