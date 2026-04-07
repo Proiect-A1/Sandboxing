@@ -9,14 +9,15 @@
 
 struct problem_metadata {
   problem_status_enum problem_status;
-  long founding_submission_id;
-  float time_limit;
-  long memory_limit;
-  long problem_id;
+  std::string problem_id;
+  std::string founding_submission_id;
   int rev_id;
-  int test_count;
-  float total_points;
+
   int group_count;
+  int test_count;
+  float time_limit;
+  float total_points;
+  long long memory_limit;
   std::vector<group_metadata> groups;
   std::vector<test_metadata> tests;
 };
