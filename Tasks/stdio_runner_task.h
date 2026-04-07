@@ -3,7 +3,22 @@
 #include <string>
 #include <Enums/result_enum.h>
 #include <Tasks/task.h>
+#include <Utilities/utilities.h>
+#include <Singletoni/memory_manager.h>
 
+#include <chrono>
+#include <cstdlib>
+#include <csignal>
+#include <filesystem>
+#include <fcntl.h>
+#include <grp.h>
+#include <pwd.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <iostream>
 class stdio_runner_task : public task
 {
   std::string exec_path;

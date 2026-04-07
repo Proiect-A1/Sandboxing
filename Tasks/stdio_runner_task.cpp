@@ -15,23 +15,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <iostream>
-namespace
-{
-  bool copy_file(const std::string &from, const std::string &to, mode_t mode)
-  {
-    std::error_code ec;
-    std::filesystem::copy_file(from, to, std::filesystem::copy_options::overwrite_existing, ec);
-    if (ec)
-    {
-      return false;
-    }
-
-    return chmod(to.c_str(), mode) == 0;
-  }
-}
 
 bool stdio_runner_task::check_permissions()
 {
+  //trebuie facut ceva calumea aici
   if (exec_path.empty() || input_path.empty() || output_path.empty())
   {
     return false;
@@ -107,6 +94,11 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
     if (chdir(run_dir.c_str()) != 0)
     {
         _exit(127);
+    }
+    
+    if (!(utilities::change_root_to_sandbox()))
+    {
+      _exit(127);
     }
 
     if (initgroups(run_username.c_str(), pw->pw_gid) != 0)

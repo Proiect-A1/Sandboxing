@@ -1,20 +1,4 @@
 #include <Tasks/stdio_grader_task.h>
-#include <iostream>
-namespace
-{
-  bool copy_file(const std::string &from, const std::string &to, mode_t mode)
-  {
-    std::error_code ec;
-    std::filesystem::copy_file(from, to, std::filesystem::copy_options::overwrite_existing, ec);
-    if (ec)
-    {
-      return false;
-    }
-
-    return chmod(to.c_str(), mode) == 0;
-  }
-}
-
 
 result_enum stdio_grader_task::execute(int thread_id, int user_id){
   if(!check_permissions()){
@@ -55,11 +39,11 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
 
   utilities::change_dir_to_user(username);
   
-  if (!copy_file(submission_exec_path, exec_path, 0755)){
+  if (!utilities::copy_file(submission_exec_path, exec_path, 0755)){
     return result_enum::FAIL;
   }
 
-  if (!copy_file(problem_input_path, input_path, 0644)){
+  if (!utilities::copy_file(problem_input_path, input_path, 0644)){
     return result_enum::FAIL;
   }
 
@@ -91,7 +75,7 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
   
   utilities::change_dir_to_user(username);
 
-  if (!copy_file(problem_correct_output_path, correct_output_path, 0644)){
+  if (!utilities::copy_file(problem_correct_output_path, correct_output_path, 0644)){
     return result_enum::FAIL;
   }
   result = result_enum::OK;

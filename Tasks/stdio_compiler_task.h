@@ -4,6 +4,21 @@
 #include <string>
 
 #include <Tasks/task.h>
+#include <Utilities/utilities.h>
+#include <Utilities/submission_info_utilities.h>
+#include <chrono>
+#include <csignal>
+#include <cstdlib>
+#include <filesystem>
+#include <fcntl.h>
+#include <grp.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include <iostream>
 
 class stdio_compiler_task : public task
 {

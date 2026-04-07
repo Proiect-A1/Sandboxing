@@ -1,42 +1,5 @@
 #include <Tasks/stdio_compiler_task.h>
 
-#include <chrono>
-#include <csignal>
-#include <cstdlib>
-#include <filesystem>
-#include <fcntl.h>
-#include <grp.h>
-#include <pwd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-#include <iostream>
-namespace
-{
-    bool copy_file(const std::string &from, const std::string &to, mode_t mode)
-    {
-        std::error_code ec;
-        std::filesystem::copy_file(
-            from,
-            to,
-            std::filesystem::copy_options::overwrite_existing,
-            ec);
-        if (ec)
-        {
-            return false;
-        }
-
-        if (chmod(to.c_str(), mode) != 0)
-        {
-            return false;
-        }
-
-        return true;
-    }
-}
-
 bool stdio_compiler_task::check_permissions()
 {
     if (compile_command.empty() || source_file_name.empty() || output_file_name.empty())
@@ -75,7 +38,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
     const std::string run_username = "amarat" + std::to_string(user_id);
     const std::string run_dir = std::string(sandbox_path) + "/runs/" + run_username;
-    const std::string submissions_dir = std::string(sandbox_path) + "/submissions/" + submission_id;
+    const std::string submissions_dir = submission_info_utilities::get_submission_exec_path(submission_id);
 
     const std::string source_host_path = submissions_dir + "/" + source_file_name;  
     const std::string output_host_path = submissions_dir + "/" + output_file_name;
@@ -88,7 +51,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
         return result_enum::FAIL;
     }
 
-    if (!copy_file(source_host_path, source_run_path, 0644))
+    if (!utilities::copy_file(source_host_path, source_run_path, 0644))
     {
         return result_enum::FAIL;
     }
@@ -111,10 +74,9 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
             _exit(127);
         }
 
-        // if (chroot(sandbox_path) != 0)
-        // {
-        //     _exit(127);
-        // }
+        if (!utilities::change_root_to_sandbox()){
+            _exit(127);
+        }
 
 
         int null_fd = open("/dev/null", O_RDONLY);
@@ -195,7 +157,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
     if (rename(output_run_path.c_str(), output_host_path.c_str()) != 0)
     {
-        if (!copy_file(output_run_path, output_host_path, 0755))
+        if (!utilities::copy_file(output_run_path, output_host_path, 0755))
         {
             return result_enum::FAIL;
         }

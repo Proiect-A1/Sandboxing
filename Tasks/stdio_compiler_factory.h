@@ -6,6 +6,7 @@
 
 #include <Enums/language_enum.h>
 #include <Tasks/task.h>
+#include <Tasks/stdio_compiler_task.h>
 
 std::unique_ptr<task> stdio_compiler_factory(
     language_enum language,
