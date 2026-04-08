@@ -1,10 +1,5 @@
 #include <Tasks/stdio_runner_factory.h>
 
-#include <cstdio>
-#include <cstdlib>
-#include <string>
-
-#include <Tasks/stdio_runner_task.h>
 
 std::unique_ptr<task> stdio_runner_factory(
     language_enum language,
