@@ -98,3 +98,8 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
 
   return result;
 }
+
+
+void stdio_grader_task:: print_error(int thread_id, int user_id,const std::string& message){
+  fprintf(stderr, "STDIO_Grader task running on thread %d, with user %d: %s\n", thread_id, user_id, message.c_str());
+}

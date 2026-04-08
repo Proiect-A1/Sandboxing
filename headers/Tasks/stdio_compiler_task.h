@@ -49,6 +49,7 @@ public:
 
     bool check_permissions() override;
     result_enum execute(int thread_id, int user_id) override;
+    void print_error(int thread_id, int user_id, const std::string& message) override;
 };
 
 #endif

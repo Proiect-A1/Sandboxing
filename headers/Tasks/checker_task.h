@@ -17,6 +17,7 @@ class checker_task : public task{
   bool check_permissions() override {
     return true;
   }
+  void print_error(int thread_id, int user_id, const std::string& message) override;
 
   result_enum execute(int thread_id, int user_id) override;
   float get_point_percentage() const {

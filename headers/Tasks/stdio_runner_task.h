@@ -39,6 +39,7 @@ public:
 
   float get_time_consumed() const { return time_consumed; }
   long get_memory_consumed() const { return memory_consumed; }
+  void print_error(int thread_id, int user_id, const std::string& message) override;
 };
 
 #endif

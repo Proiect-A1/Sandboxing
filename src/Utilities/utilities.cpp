@@ -76,6 +76,6 @@ std::string utilities::enum_to_string(result_enum result){
       case result_enum::ILE: return "ILE";
       case result_enum::NONE: return "NONE";
       case result_enum::OTHER: return "OTHER";
-      default: return "TROLLEZI";
     }
+    return "TROLLEZI";
 }

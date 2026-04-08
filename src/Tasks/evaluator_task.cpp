@@ -84,3 +84,7 @@ result_enum evaluator_task::execute(int thread_id, int user_id) {
   return result_enum::OK;
 
 }
+
+void evaluator_task:: print_error(int thread_id, int user_id,const std::string& message){
+  fprintf(stderr, "Evaluator task running on thread %d, with user %d: %s\n", thread_id, user_id, message.c_str());
+}

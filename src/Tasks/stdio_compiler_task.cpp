@@ -41,8 +41,8 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
     const std::string source_host_path = submission_info_utilities::get_submission_source_path(submission_id);  
     const std::string output_host_path = submission_info_utilities::get_submission_exec_path(submission_id);  
-    const std::string source_run_path = run_dir + "/" + "source";
-    const std::string output_run_path = run_dir + "/" + "executable";
+    const std::string source_run_path = run_dir + "/" + source_file_name;
+    const std::string output_run_path = run_dir + "/" + output_file_name;
 
     struct passwd *pw = getpwnam(run_username.c_str());
     if (pw == nullptr)
@@ -161,4 +161,8 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
     chmod(output_host_path.c_str(), 0755);
     return result_enum::OK;
+}
+
+void stdio_compiler_task:: print_error(int thread_id, int user_id,const std::string& message){
+  fprintf(stderr, "Compiler task running on thread %d, with user %d: %s\n", thread_id, user_id, message.c_str());
 }

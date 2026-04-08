@@ -218,3 +218,6 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
 
   return result_enum::OK;
 }
+void stdio_runner_task:: print_error(int thread_id, int user_id,const std::string& message){
+  fprintf(stderr, "STDIO_Runner task running on thread %d, with user %d: %s\n", thread_id, user_id, message.c_str());
+}
