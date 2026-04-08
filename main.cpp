@@ -26,18 +26,6 @@ void read_args(int argc , char *argv[])
     sscanf(argv[3] , "%hd" , &num_of_threads);
 }
 
-sockaddr_in prepare_ip()
-{
-    in_addr addr;
-    inet_aton(ip , &addr);
-
-    sockaddr_in socket_address;
-    socket_address.sin_family = AF_INET;
-    socket_address.sin_port = htons(port);
-    socket_address.sin_addr = addr;
-    return socket_address;
-} 
-
 void add_fd(int fd , int events)
 {
     epoll_event event;
@@ -50,16 +38,20 @@ void add_fd(int fd , int events)
 void rem_fd(int fd)
 {
     if(epoll_ctl(epollfd , EPOLL_CTL_DEL , fd , nullptr) == -1) handle_error(1 , "epoll_ctl()");
-    cerr << "[server] connection closed\n"; fflush(stderr);
+    sockaddr_in client_address;
+    socklen_t len_client_address = sizeof(client_address);
+    if(getpeername(fd , (sockaddr *) &client_address , &len_client_address) == -1) handle_error(1 , "getperrname()");
+    fprintf(stderr , "[server] connection closed by %s:%hu\n" , inet_ntoa(client_address.sin_addr) , ntohs(client_address.sin_port)); fflush(stderr);
 }
+
 void set_socket()
 {
-    sockaddr_in socket_address = prepare_ip();
+    sockaddr_in socket_address = IOhelper::prepare_ip(ip , port);
     sockfd = socket(AF_INET , SOCK_STREAM , 0); if(sockfd == -1) handle_error(1 , "socket()");
     int on = 1; if(setsockopt(sockfd , SOL_SOCKET , SO_REUSEPORT , (const char *) &on , sizeof(on)) == -1) handle_error(1 , "setsockopt()")
     if(bind(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "bind()");
     if(listen(sockfd , 5) == -1) handle_error(1 , "listen()")
-    cerr << "[server] Socket set\n"; fflush(stderr);
+    cerr << "[server] socket set\n"; fflush(stderr);
 }
 
 void create_epoll()
@@ -73,6 +65,7 @@ int accept_new_connection()
     socklen_t len_client_address = sizeof(client_address);
     int fd;
     if((fd = accept(sockfd , (sockaddr *) &client_address , &len_client_address)) == -1) handle_error(1 , "accept()");
+    fprintf(stderr , "[server] connection received from %s:%hu\n" , inet_ntoa(client_address.sin_addr) , ntohs(client_address.sin_port)); fflush(stderr);
     return fd;
 }
 
@@ -138,6 +131,10 @@ int main(int argc , char *argv[])
 {
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
 
+    IOhelper::done_test_request("hello" , 1 , 10 , "abcd" , 10.5 , 100.4 , 32 , 1000 , 10000);
+
+    return 0;
+    
     read_args(argc , argv);
     set_socket();
     create_epoll();
@@ -160,7 +157,6 @@ int main(int argc , char *argv[])
                 if(fd == sockfd)
                 {
                     int fd_client = accept_new_connection();
-                    cerr << "[server] Connection received\n"; fflush(stderr);
                     add_fd(fd_client , EPOLLIN | EPOLLET);
                 }   
                 else 

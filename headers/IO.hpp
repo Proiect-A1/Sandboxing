@@ -1,45 +1,31 @@
+#pragma once 
 #include <bits/stdc++.h>
 #include "header_helper.hpp"
+#include <sys/socket.h>
+#include <arpa/inet.h>
 #define BUFF_SIZE 4096
 
 using namespace std;
 
 namespace IOhelper 
 {
-    int current_pos = 0 , length = 0;
-    char buff[BUFF_SIZE];
+    extern int current_pos , length;
+    extern char buff[BUFF_SIZE];
 
-    int read_consistent(int fd , void *data , int len)
-    {
-        int total_read = 0;
+    int read_consistent(int fd , void *data , int len);
+    char get_char_fd(int fd);
+    void send(const char *msg , int fd);
+    char *recv(int fd);
 
-        while(len)
-        {
-            int read_len = read(fd , data , len); if(read_len == -1) return -1;
-            if(read_len == 0) return total_read;
-            total_read += read_len;
-            data = (void *)((long long)(data) + read_len);
-            len -= read_len;
-        }
+    int create_socket();
+    sockaddr_in prepare_ip(const char *ip , short port);
 
-        return total_read;
-    }
+    void done_test_request(string submissionId , int testId , int verdict , string message , float score , float maxScore , float scorePercent , long long memory , long long time);
+    // void done_subtask_request(string submissionId , int subtaskId , float score , float maScore , float scorePercent , long long max_memory , long long max_time);
+    // void done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long max_memory , long long max_time);
+    // void upload_tests_request(string problemId , int revId , string archiveType , vector < vector < int > > groups , int archive_fd);
+    // void pull_problem_request(string problemId);
 
-    char get_char_fd(int fd)
-    {
-        if(current_pos == length)
-        {
-            length = read(fd , buff , BUFF_SIZE);
-            if(length == -1) handle_error(1 , "get_char_fd()");
-            if(length == 0) handle_error(1 , "get_char_fd()");
-            current_pos = 0;
-        }
-
-        return buff[current_pos++];
-    }
-
-    void write_fd(int fd)
-    {
-        //to do
-    }
+    // void evaluate_request(json request , int fd);
+    // void send_problem_request(json request , int fd);
 }
