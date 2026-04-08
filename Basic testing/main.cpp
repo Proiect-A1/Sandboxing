@@ -29,7 +29,11 @@ int main(){
 
   pm.add_revision(new_problem);
 
-  sm.insert("ANDREI", "Problem", 0, 1);
+
+  sm.insert("ANDREI", language_enum::CPP, "Problem", 0, 1);
+
+  submission_data submission = sm.get_submission("ANDREI");
+
 
   evaluator_task eva("ANDREI", "Problem", 0);
   eva.execute(0, 1);

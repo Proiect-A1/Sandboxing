@@ -56,50 +56,63 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
 
   utilities::change_dir_to_sandbox();
 
-  result_enum result = runner_task->execute(thread_id, user_id);
-  if (result == result_enum::FAIL)
+
+  submission_test test_result = submission_manager::get_instance().get_submission(submission_id).tests[test];
+  test_result.result = runner_task->execute(thread_id, user_id);
+  test_result.time_used = runner_task->get_time_consumed();
+  test_result.memory_used = runner_task->get_memory_consumed();
+  
+  if (test_result.result == result_enum::FAIL)
   {
     print_error(thread_id, user_id, "Runner task execution failed");
     return result_enum::FAIL;
   }
 
-  submission_test test_result;
-  test_result.time_used = runner_task->get_time_consumed();
-  test_result.memory_used = runner_task->get_memory_consumed();
-  test_result.result = result;
-
-  if (result != result_enum::OK)
+  if (test_result.result != result_enum::OK)
   {
-    return result;
+    test_result.points = 0;
+    test_result.result = test_result.result;
+    sm.add_completed_test(submission_id, test, test_result);
+    return test_result.result;
   }
-
+  
   utilities::change_dir_to_user(username);
-
+  
   if (!utilities::copy_file(problem_correct_output_path, correct_output_path, 0644)){
     print_error(thread_id, user_id, "Couldn't copy problem correct output to run directory");
     return result_enum::FAIL;
   }
-
+  
   checker_task checker(input_path, output_path, correct_output_path, "");
-
+  
   if (checker.execute(thread_id, user_id) != result_enum::OK){
     print_error(thread_id, user_id, "Checker task execution failed");
     return result_enum::FAIL;
   }
-
+  
   if (checker.get_point_percentage() == 1){
-    result = result_enum::OK;
+    test_result.points = 1;
+    test_result.result = result_enum::OK;
   } else if (checker.get_point_percentage() > 0){
-    result = result_enum::PA;
+    test_result.points = 0.5;
+    test_result.result = result_enum::PA;
   } else {
-    result = result_enum::WA;
+    test_result.points = 0;
+    test_result.result = result_enum::WA;
   }
+  
+  test_result.message = checker.get_message();
+  
   // system("pwd");
   // system(("cat " + output_path).c_str());
   // system(("cat " + correct_output_path).c_str());
   system("rm -rf *");
 
-  return result;
+  // print_error(thread_id, user_id, "Test " + std::to_string(test) + " completed with result " + checker.get_message() + ", points: " + std::to_string(test_result.points) + ", time used: " + std::to_string(test_result.time_used) + " ms, memory used: " + std::to_string(test_result.memory_used) + " B");
+
+  sm.add_completed_test(submission_id, test, test_result);
+  
+  return test_result.result;
 }
 
 

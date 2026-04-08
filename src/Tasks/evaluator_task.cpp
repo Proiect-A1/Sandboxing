@@ -27,11 +27,8 @@ result_enum evaluator_task::execute(int thread_id, int user_id) {
   }
 
   problem_metadata problem = pm.get_metadata(problem_id, rev_id);
-  problem.time_limit = 1000;
-  problem.memory_limit = 1024ll * 1024 * 100; // 100MB
-  problem.test_count = 10;
-  std::vector<result_enum> test_results(problem.test_count + 1);
-  for (int test_id = 1; test_id <= problem.test_count; test_id++) {
+  std::vector<result_enum> test_results(problem.test_count);
+  for (int test_id = 0; test_id < problem.test_count; test_id++) {
     test_results[test_id] = stdio_grader_task(
       submission_id,
       problem_id,
@@ -60,7 +57,7 @@ result_enum evaluator_task::execute(int thread_id, int user_id) {
   }
 
   std::map<result_enum, int> result_counts;
-  for (int i = 1; i <= problem.test_count; i++) {
+  for (int i = 0; i < problem.test_count; i++) {
     result_counts[test_results[i]]++;
   }
 
