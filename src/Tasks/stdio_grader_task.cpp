@@ -11,19 +11,11 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
 
   problem_manager& pm = problem_manager::get_instance();
   submission_manager& sm = submission_manager::get_instance();
-  /*std::unique_ptr<task> stdio_runner_factory(
-    language_enum language,
-    long submission_id,
-    std::string input_path,
-    std::string output_path,
-    float run_time_limit,
-    long run_memory_limit,
-    uint8_t priority = 0);*/
 
   problem_metadata problem = pm.get_metadata(problem_id, rev_id);
-  problem.time_limit = 3000;
-  problem.memory_limit = 1024ll * 1024 * 50; // 50MB
-  // submission_data submission = sm.get_submission(submission_id);
+  submission_data submission = sm.get_submission(submission_id);
+
+  
   submission_data submission;
   submission.language = language_enum::CPP;
   utilities::change_dir_to_user("amarat" + std::to_string(user_id));

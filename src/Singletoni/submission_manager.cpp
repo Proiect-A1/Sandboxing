@@ -12,6 +12,16 @@ submission_manager& submission_manager::get_instance(){
     }
     return *instance;
   }
+
+submission_data submission_manager::get_submission(std::string submission_id){
+    pthread_mutex_lock(&submission_manager::mtx);
+    submission_data retval;
+    if(submission_table.count(submission_id)){
+        retval=submission_table[submission_id];
+    }
+    pthread_mutex_unlock(&submission_manager::mtx);
+    return retval;
+}
 std::map<std::string, submission_data> submission_manager::get_submission_table(){
     pthread_mutex_lock(&mtx);
     std::map<std::string, submission_data> retval=this->submission_table;
