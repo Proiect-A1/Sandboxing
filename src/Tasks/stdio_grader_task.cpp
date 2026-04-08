@@ -1,9 +1,11 @@
 #include <Tasks/stdio_grader_task.h>
 result_enum stdio_grader_task::execute(int thread_id, int user_id){
   if(!check_permissions()){
+    print_error(thread_id, user_id, "Permission check failed");
     return result_enum::FAIL;
   }
   if(user_id <= 0){
+    print_error(thread_id, user_id, "Invalid user ID");
     return result_enum::FAIL;
   }
 
@@ -39,10 +41,12 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
   utilities::change_dir_to_user(username);
   
   if (!utilities::copy_file(submission_exec_path, exec_path, 0755)){
+    print_error(thread_id, user_id, "Couldn't copy submission_exec to run directory");
     return result_enum::FAIL;
   }
 
   if (!utilities::copy_file(problem_input_path, input_path, 0644)){
+    print_error(thread_id, user_id, "Couldn't copy problem input to run directory");
     return result_enum::FAIL;
   }
 
@@ -56,6 +60,7 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
     problem.memory_limit,
     0);
   if(runner_task == nullptr){
+    print_error(thread_id, user_id, "Failed to create runner task");
     return result_enum::FAIL;
   }
 
@@ -63,6 +68,11 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
   utilities::change_dir_to_sandbox();
 
   result_enum result = runner_task->execute(thread_id, user_id);
+  if (result == result_enum::FAIL)
+  {
+    print_error(thread_id, user_id, "Runner task execution failed");
+    return result_enum::FAIL;
+  }
   if (result != result_enum::OK)
   {
     return result;
@@ -75,12 +85,14 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
   utilities::change_dir_to_user(username);
 
   if (!utilities::copy_file(problem_correct_output_path, correct_output_path, 0644)){
+    print_error(thread_id, user_id, "Couldn't copy problem correct output to run directory");
     return result_enum::FAIL;
   }
 
   checker_task checker(input_path, output_path, correct_output_path, "");
 
   if (checker.execute(thread_id, user_id) != result_enum::OK){
+    print_error(thread_id, user_id, "Checker task execution failed");
     return result_enum::FAIL;
   }
 
