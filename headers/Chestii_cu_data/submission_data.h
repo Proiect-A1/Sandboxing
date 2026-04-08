@@ -29,7 +29,7 @@ struct submission_data{
     std::vector<submission_test> tests;
     std::vector<submission_group> groups;
     submission_data(){}
-    submission_data(std::string problem_id, int rev_id, int socket_fd=1);
+    submission_data(std::string problem_id, int rev_id, int socket_fd=1, language_enum language);
     void add_completed_test(int test_id, const submission_test& completed_test);
     void add_completed_subtask(const submission_group& completed_group);
 };

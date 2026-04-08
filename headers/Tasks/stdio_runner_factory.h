@@ -15,7 +15,7 @@
 
 #include <Tasks/stdio_runner_task.h>
 
-std::unique_ptr<task> stdio_runner_factory(
+stdio_runner_task* stdio_runner_factory(
     language_enum language,
     std::string submission_id,
     std::string exec_path,

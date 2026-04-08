@@ -29,6 +29,7 @@ int main(){
 
   pm.add_revision(new_problem);
 
+  sm.insert("ANDREI", "Problem", 0, 1);
 
   evaluator_task eva("ANDREI", "Problem", 0);
   eva.execute(0, 1);

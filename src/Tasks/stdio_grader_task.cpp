@@ -15,9 +15,6 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
   problem_metadata problem = pm.get_metadata(problem_id, rev_id);
   submission_data submission = sm.get_submission(submission_id);
 
-  
-  submission_data submission;
-  submission.language = language_enum::CPP;
   utilities::change_dir_to_user("amarat" + std::to_string(user_id));
 
   std::string submission_exec_path = submission_info_utilities::get_submission_exec_path(submission_id);
@@ -65,15 +62,17 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
     print_error(thread_id, user_id, "Runner task execution failed");
     return result_enum::FAIL;
   }
+
+  submission_test test_result;
+  test_result.time_used = runner_task->get_time_consumed();
+  test_result.memory_used = runner_task->get_memory_consumed();
+  test_result.result = result;
+
   if (result != result_enum::OK)
   {
     return result;
   }
 
-  // de checkuit in pula mea
-
-  // checkuim doar cu diff se va mai baga altceva
-  
   utilities::change_dir_to_user(username);
 
   if (!utilities::copy_file(problem_correct_output_path, correct_output_path, 0644)){

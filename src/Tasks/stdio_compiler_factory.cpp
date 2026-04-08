@@ -1,6 +1,6 @@
 #include <Tasks/stdio_compiler_factory.h>
 
-std::unique_ptr<task> stdio_compiler_factory(
+stdio_compiler_task* stdio_compiler_factory(
     language_enum language,
     std::string submission_id,
     uint8_t priority)
@@ -12,7 +12,7 @@ std::unique_ptr<task> stdio_compiler_factory(
     }
 
 
-    std::unique_ptr<task> created = std::make_unique<stdio_compiler_task>(
+    stdio_compiler_task* created = new stdio_compiler_task(
         "/usr/bin/g++",
         "main.cpp",
         "main_exec",

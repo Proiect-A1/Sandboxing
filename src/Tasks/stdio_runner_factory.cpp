@@ -1,7 +1,7 @@
 #include <Tasks/stdio_runner_factory.h>
 
 
-std::unique_ptr<task> stdio_runner_factory(
+stdio_runner_task* stdio_runner_factory(
     language_enum language,
     std::string submission_id,
     std::string exec_path,
@@ -29,7 +29,7 @@ std::unique_ptr<task> stdio_runner_factory(
 
 
 
-    std::unique_ptr<task> created = std::make_unique<stdio_runner_task>(
+    stdio_runner_task* created = new stdio_runner_task(
         exec_path,
         input_path,
         output_path,
