@@ -62,19 +62,19 @@ bool utilities::copy_file(const std::string &from, const std::string &to, mode_t
   return chmod(to.c_str(), mode) == 0;
 }
 
-void utilities::print_enum(result_enum result){
+std::string utilities::enum_to_string(result_enum result){
   switch(result) {
-      case result_enum::OK: std::cout << "OK"; break;
-      case result_enum::WA: std::cout << "WA"; break;
-      case result_enum::PA: std::cout << "PA"; break;
-      case result_enum::TLE: std::cout << "TLE"; break;
-      case result_enum::MLE: std::cout << "MLE"; break;
-      case result_enum::RTE: std::cout << "RTE"; break;
-      case result_enum::CPE: std::cout << "CPE"; break;
-      case result_enum::FAIL: std::cout << "FAIL"; break;
-      case result_enum::SKIP: std::cout << "SKIP"; break;
-      case result_enum::ILE: std::cout << "ILE"; break;
-      case result_enum::NONE: std::cout << "NONE"; break;
-      case result_enum::OTHER: std::cout << "OTHER"; break;
+      case result_enum::OK: return "OK";
+      case result_enum::WA: return "WA";
+      case result_enum::PA: return "PA";
+      case result_enum::TLE: return "TLE";
+      case result_enum::MLE: return "MLE";
+      case result_enum::RTE: return "RTE";
+      case result_enum::CPE: return "CPE";
+      case result_enum::FAIL: return "FAIL";
+      case result_enum::SKIP: return "SKIP";
+      case result_enum::ILE: return "ILE";
+      case result_enum::NONE: return "NONE";
+      case result_enum::OTHER: return "OTHER";
     }
 }

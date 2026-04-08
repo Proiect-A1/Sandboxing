@@ -15,7 +15,7 @@ namespace utilities{
   bool change_dir_to_user(std::string username); 
   bool change_dir_to_sandbox(); 
   bool copy_file(const std::string& from, const std::string& to, mode_t mode);
-  void print_enum(result_enum result);
+  std::string enum_to_string(result_enum result);
 }
 
 
