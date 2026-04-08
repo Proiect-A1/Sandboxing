@@ -21,12 +21,14 @@ std::string submission_info_utilities::get_submission_source_path(std::string su
   if (language == language_enum::CPP) {
     return std::string(getenv("SANDBOX_PATH")) + "/submissions/" + submission_id + "/main.cpp";
   }
+  return "";
 }
 
 std::string submission_info_utilities::get_submission_exec_path(std::string submission_id, language_enum language) {
   if (language == language_enum::CPP) {
     return std::string(getenv("SANDBOX_PATH")) + "/submissions/" + submission_id + "/main_exec";
   }
+  return "";
 }
 std::string submission_info_utilities::get_problem_input_path(std::string problem_id, int rev_id, int test) {
   return std::string(getenv("SANDBOX_PATH")) + "/inputs/" + problem_id + "." + std::to_string(rev_id) + "/" + left_zero_pad(test, 3) + ".in";

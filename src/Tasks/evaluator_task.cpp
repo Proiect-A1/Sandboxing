@@ -12,8 +12,6 @@ result_enum evaluator_task::execute(int thread_id, int user_id) {
   auto compiler = stdio_compiler_factory(
     language_enum::CPP,
     submission_id,
-    60 * 1000, // compile time limit in ms
-    1024ll * 1024 * 100, // exec size limit in bytes (100MB)
     0 // priority
   );
 

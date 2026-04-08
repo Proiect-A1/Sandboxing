@@ -1,5 +1,4 @@
 #include <Tasks/stdio_grader_task.h>
-
 result_enum stdio_grader_task::execute(int thread_id, int user_id){
   if(!check_permissions()){
     return result_enum::FAIL;
@@ -78,12 +77,20 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
   if (!utilities::copy_file(problem_correct_output_path, correct_output_path, 0644)){
     return result_enum::FAIL;
   }
-  result = result_enum::OK;
-  if (system(("diff -q " + output_path + " " + correct_output_path).c_str()) != 0)
-  {
-    result = result_enum::WA;
+
+  checker_task checker(input_path, output_path, correct_output_path, "");
+
+  if (checker.execute(thread_id, user_id) != result_enum::OK){
+    return result_enum::FAIL;
   }
 
+  if (checker.get_point_percentage() == 1){
+    result = result_enum::OK;
+  } else if (checker.get_point_percentage() > 0){
+    result = result_enum::PA;
+  } else {
+    result = result_enum::WA;
+  }
   // system("pwd");
   // system(("cat " + output_path).c_str());
   // system(("cat " + correct_output_path).c_str());

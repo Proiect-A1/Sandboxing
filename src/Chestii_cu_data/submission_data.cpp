@@ -28,6 +28,7 @@ void submission_data::add_completed_test(int test_id, const submission_test& com
     // de trimis packet cu testul terminat
     if(tests_completed==test_count){
         // de trimis packet cu submisia terminata
+        std::cout << "Submission " << problem_id << " rev " << rev_id << " completed with " << points << " points, time used: " << time_used << " ms, memory used: " << memory_used << " B\n";
     }
         
 }

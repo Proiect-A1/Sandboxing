@@ -41,8 +41,8 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
     const std::string source_host_path = submission_info_utilities::get_submission_source_path(submission_id);  
     const std::string output_host_path = submission_info_utilities::get_submission_exec_path(submission_id);  
-    const std::string source_run_path = run_dir + "/" + source_file_name;
-    const std::string output_run_path = run_dir + "/" + output_file_name;
+    const std::string source_run_path = run_dir + "/" + "source";
+    const std::string output_run_path = run_dir + "/" + "executable";
 
     struct passwd *pw = getpwnam(run_username.c_str());
     if (pw == nullptr)
