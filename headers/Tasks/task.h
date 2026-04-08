@@ -2,6 +2,7 @@
 #define TASK_H
 
 #include <cstdint>
+#include <string>
 #include <Enums/result_enum.h>
 
 struct task
