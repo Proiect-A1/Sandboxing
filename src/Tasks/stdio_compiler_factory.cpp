@@ -1,7 +1,5 @@
 #include <Tasks/stdio_compiler_factory.h>
 
-#include <Tasks/stdio_compiler_task.h>
-
 std::unique_ptr<task> stdio_compiler_factory(
     language_enum language,
     std::string submission_id,
