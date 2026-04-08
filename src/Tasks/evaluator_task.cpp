@@ -1,6 +1,7 @@
 #include <Tasks/evaluator_task.h> 
 result_enum evaluator_task::execute(int thread_id, int user_id) {
   if (user_id <= 0) {
+    print_error(thread_id, user_id, "Invalid user ID");
     return result_enum::FAIL;
   }
   result_enum result;
@@ -16,6 +17,7 @@ result_enum evaluator_task::execute(int thread_id, int user_id) {
   );
 
   if (!compiler) {
+    print_error(thread_id, user_id, "Failed to create compiler task");
     return result_enum::FAIL;
   }
 

@@ -23,17 +23,20 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
     if (!check_permissions())
     {
-        return result_enum::FAIL;
+      print_error(thread_id, user_id, "Permission check failed");
+      return result_enum::FAIL;
     }
     if (user_id <= 0)
     {
-        return result_enum::FAIL;
+      print_error(thread_id, user_id, "Invalid user ID");
+      return result_enum::FAIL;
     }
 
     const char *sandbox_path = getenv("SANDBOX_PATH");
     if (sandbox_path == nullptr || sandbox_path[0] == '\0')
     {
-        return result_enum::FAIL;
+      print_error(thread_id, user_id, "Sandbox path is not set in environment variables");
+      return result_enum::FAIL;
     }
 
     const std::string run_username = "amarat" + std::to_string(user_id);
@@ -47,12 +50,14 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
     struct passwd *pw = getpwnam(run_username.c_str());
     if (pw == nullptr)
     {
-        return result_enum::FAIL;
+      print_error(thread_id, user_id, "Failed to get user information for sandbox user");
+      return result_enum::FAIL;
     }
 
     if (!utilities::copy_file(source_host_path, source_run_path, 0644))
     {
-        return result_enum::FAIL;
+      print_error(thread_id, user_id, "Couldn't copy source file to run directory");
+      return result_enum::FAIL;
     }
 
     unlink(output_run_path.c_str());
@@ -70,6 +75,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
         if (chdir(run_dir.c_str()) != 0)
         {
+          print_error(thread_id, user_id, "Failed to change directory to run directory");
             _exit(127);
         }
 
@@ -113,6 +119,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
         {
             killpg(pid, SIGKILL);
             waitpid(pid, &status, 0);
+            print_error(thread_id, user_id, "Error while waiting for compiler process");
             return result_enum::FAIL;
         }
 
