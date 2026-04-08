@@ -10,6 +10,7 @@ result_enum checker_task::execute(int thread_id, int user_id) {
   }
 
   point_percentage = 1;
+  message = "OK!";
   return result_enum::OK;
 
 }

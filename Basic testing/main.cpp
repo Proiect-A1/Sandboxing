@@ -6,7 +6,7 @@ using namespace std;
 
 int main(){
 
-  stdio_grader_task grader("ANDREI", "Problem", 1, 0);
+  stdio_grader_task grader("ANDREI", "Problem", 0, 0);
   cout << utilities::enum_to_string(grader.execute(0, 1)) << endl;
 
   // cout << "eyooo" << endl;
