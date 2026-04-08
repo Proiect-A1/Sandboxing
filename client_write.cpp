@@ -42,19 +42,19 @@ int main(int argc , char *argv[])
     if(bind(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "bind()");
     if(listen(sockfd , 5) == -1) handle_error(1 , "listen()")
  
-    sockaddr_in client_address;
-    socklen_t len_client_address = sizeof(client_address);
-    int fd;
-    if((fd = accept(sockfd , (sockaddr *) &client_address , &len_client_address)) == -1) handle_error(1 , "accept()");
-
-    char *msg;
-
-    while(msg = IOhelper::recv(fd))
+    while(1)
     {
-        cout << msg << '\n'; fflush(stdout);
+        sockaddr_in client_address;
+        socklen_t len_client_address = sizeof(client_address);
+        int fd;
+        if((fd = accept(sockfd , (sockaddr *) &client_address , &len_client_address)) == -1) handle_error(1 , "accept()");
+
+        char *msg;
+
+        (msg = IOhelper::recv(fd));
+        cout << msg << '\n' ; fflush(stdout);
     }
-    
-    
+
     return 0;
 }
 

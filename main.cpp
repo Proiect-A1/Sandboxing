@@ -132,9 +132,10 @@ int main(int argc , char *argv[])
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
 
     IOhelper::done_test_request("hello" , 1 , 10 , "abcd" , 10.5 , 100.4 , 32 , 1000 , 10000);
-
-    return 0;
+    IOhelper::upload_tests_request("a" , 3 , "zip" , {{1 , 2 , 3} , {1 , 2 , 3}} , -1);
     
+    return 0;
+
     read_args(argc , argv);
     set_socket();
     create_epoll();

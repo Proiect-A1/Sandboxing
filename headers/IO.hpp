@@ -21,10 +21,10 @@ namespace IOhelper
     sockaddr_in prepare_ip(const char *ip , short port);
 
     void done_test_request(string submissionId , int testId , int verdict , string message , float score , float maxScore , float scorePercent , long long memory , long long time);
-    // void done_subtask_request(string submissionId , int subtaskId , float score , float maScore , float scorePercent , long long max_memory , long long max_time);
-    // void done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long max_memory , long long max_time);
-    // void upload_tests_request(string problemId , int revId , string archiveType , vector < vector < int > > groups , int archive_fd);
-    // void pull_problem_request(string problemId);
+    void done_subtask_request(string submissionId , int subtaskId , float score , float maScore , float scorePercent , long long max_memory , long long max_time);
+    void done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long max_memory , long long max_time);
+    void upload_tests_request(string problemId , int revId , string archiveType , vector < vector < int > > groups , int archive_fd);
+    void pull_problem_request(string problemId);
 
     // void evaluate_request(json request , int fd);
     // void send_problem_request(json request , int fd);
