@@ -7,25 +7,28 @@
 
 using namespace std;
 
-namespace IOhelper 
+class IO 
 {
-    extern int current_pos , length;
-    extern char buff[BUFF_SIZE];
+    private:
+        int current_pos , length;
+        char buff[BUFF_SIZE];
 
-    int read_consistent(int fd , void *data , int len);
-    char get_char_fd(int fd);
-    void send(const char *msg , int fd);
-    char *recv(int fd);
+    public:
+        IO();
+        static int read_consistent(int fd , void *data , int len);
+        char get_char_fd(int fd);
+        static void send(const char *msg , int fd);
+        static string recv(int fd);
 
-    int create_socket();
-    sockaddr_in prepare_ip(const char *ip , short port);
+        static sockaddr_in prepare_ip(const char *ip , short port);
+        static int create_socket();
 
-    void done_test_request(string submissionId , int testId , int verdict , string message , float score , float maxScore , float scorePercent , long long memory , long long time);
-    void done_subtask_request(string submissionId , int subtaskId , float score , float maScore , float scorePercent , long long max_memory , long long max_time);
-    void done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long max_memory , long long max_time);
-    void upload_tests_request(string problemId , int revId , string archiveType , vector < vector < int > > groups , int archive_fd);
-    void pull_problem_request(string problemId);
+        static void done_test_request(string submissionId , int testId , int verdict , string message , float score , float maxScore , float scorePercent , long long memory , long long time);
+        static void done_subtask_request(string submissionId , int subtaskId , float score , float maScore , float scorePercent , long long max_memory , long long max_time);
+        static void done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long max_memory , long long max_time);
+        void upload_tests_request(string problemId , int revId , string archiveType , vector < vector < int > > groups , int archive_fd);
+        static void pull_problem_request(string problemId);
 
-    // void evaluate_request(json request , int fd);
-    // void send_problem_request(json request , int fd);
-}
+        void evaluate_request(json request , int fd);
+        void send_problem_request(json request , int fd);
+};
