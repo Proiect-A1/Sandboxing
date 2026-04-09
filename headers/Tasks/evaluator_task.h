@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <Singletoni/task_queue.h>
 class evaluator_task : public task {
   std::string submission_id;
   std::string problem_id;

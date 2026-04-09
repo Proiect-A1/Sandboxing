@@ -5,6 +5,8 @@
 #include <Singletoni/problem_manager.h>
 #include <Singletoni/submission_manager.h>
 #include <vector>
+#include <Singletoni/user_queue.h>
+#include <Singletoni/task_queue.h>
 using namespace std;
 
 int main(){
@@ -36,8 +38,23 @@ int main(){
 
 
   evaluator_task eva("ANDREI", "Problem", 0);
-  eva.execute(0, 1);
 
-  // cout << "eyooo" << endl;
+  task_queue::get_instance().push(&eva);
+
+  while (!task_queue::get_instance().empty()){
+    auto next_task = task_queue::get_instance().pop();
+
+    if (dynamic_cast<evaluator_task*>(next_task)){
+      cout << "Evaluator task popped from queue" << endl;
+    } else if (dynamic_cast<stdio_grader_task*>(next_task)){
+      cout << "Grader task popped from queue" << endl;
+    } else {
+      cout << "Unknown task type popped from queue" << endl;
+
+    }
+    next_task->execute(0, 1);
+  }
+
+  cout << "eyooo" << endl;
   return 0;
 }

@@ -16,6 +16,12 @@ namespace utilities{
   bool change_dir_to_sandbox(); 
   bool copy_file(const std::string& from, const std::string& to, mode_t mode);
   std::string enum_to_string(result_enum result);
+  template <typename T>
+  struct pointer_compare {
+    bool operator()(const T* a, const T* b) const {
+      return *a < *b; // Assuming T has operator< defined
+    }
+  };
 }
 
 
