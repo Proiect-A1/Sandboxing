@@ -19,7 +19,7 @@ int main(){
   new_problem.rev_id = 0;
   new_problem.group_count = 10;
   new_problem.test_count = 10;
-  new_problem.time_limit = 1.0;
+  new_problem.time_limit = 1000;
   new_problem.memory_limit = 256 * 1024 * 1024; // 256 MB
   new_problem.total_points = 100.0;
   new_problem.problem_status = problem_status_enum::DONE;

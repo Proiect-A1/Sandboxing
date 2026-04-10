@@ -53,6 +53,7 @@ bool submission_manager::is_done(std::string submission_id){
 }
 void submission_manager::add_completed_test(std::string submission_id, int test_id, submission_test test_result){
     pthread_mutex_lock(&submission_manager::mtx);
+    std::cout << utilities::enum_to_string(test_result.result) << ' ' << test_result.points << std::endl;
     submission_table[submission_id].add_completed_test(test_id, test_result);
     pthread_mutex_unlock(&submission_manager::mtx);
 }
