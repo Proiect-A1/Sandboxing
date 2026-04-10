@@ -63,7 +63,7 @@ do
     setfacl -m d:u:$uid_amarat:--- ./problem_data
     setfacl -m d:u:$uid_amarat:--- ./submissions
     setfacl -m d:u:$uid_amarat:--- ./tmp 
-    
+
     setfacl -m u:$uid_amarat:r-x ./runs
     setfacl -m u:$uid_amarat:r-x ./inputs
     setfacl -m u:$uid_amarat:rwx ./runs/$name_amarat 
@@ -71,6 +71,7 @@ do
     setfacl -m u:$uid_amarat:--- ./test_scripts
     setfacl -m u:$uid_amarat:--- ./problem_data
     setfacl -m u:$uid_amarat:--- ./submissions
+    setfacl -m u:$uid_amarat:--- ./tmp
 
     iptables -I OUTPUT -m owner --uid-owner $uid_amarat -j DROP
     usermod --password $(echo $name_amarat | openssl passwd -1 -stdin) $name_amarat
@@ -86,6 +87,7 @@ do
     setfacl -m d:u:$uid_marat:--- ./test_scripts
     setfacl -m d:u:$uid_marat:--- ./problem_data
     setfacl -m d:u:$uid_marat:--- ./submissions
+    setfacl -m d:u:$uid_marat:--- ./tmp
 
     setfacl -m u:$uid_marat:r-x ./runs
     setfacl -m u:$uid_marat:r-x ./inputs
@@ -94,6 +96,7 @@ do
     setfacl -m u:$uid_marat:--- ./test_scripts
     setfacl -m u:$uid_marat:--- ./problem_data
     setfacl -m u:$uid_marat:--- ./submissions
+    setfacl -m u:$uid_marat:--- ./tmp
 
     iptables -I OUTPUT -m owner --uid-owner $uid_marat -j DROP
     usermod --password $(echo $name_marat | openssl passwd -1 -stdin) $name_marat
