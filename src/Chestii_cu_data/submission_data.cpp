@@ -1,6 +1,9 @@
 #include <Chestii_cu_data/submission_data.h>
-submission_data::submission_data(std::string problem_id, int rev_id, int socket_fd){
+submission_data::submission_data(language_enum language, std::string problem_id, int rev_id, int socket_fd){
     problem_metadata pmd=problem_manager::get_instance().get_metadata(problem_id,rev_id);
+    points = 0;
+    time_used = 0;
+    memory_used = 0;
     tests_completed=0;
     test_count=pmd.test_count;
     time_limit=pmd.time_limit;
@@ -8,6 +11,7 @@ submission_data::submission_data(std::string problem_id, int rev_id, int socket_
     this->problem_id=problem_id;
     this->rev_id=rev_id;
     this->socket_fd=socket_fd; /// stdout by default
+    this->language=language;
     for(const group_metadata& gmd : pmd.groups){
         groups.push_back(submission_group(gmd, this));
     }
