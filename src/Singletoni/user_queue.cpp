@@ -21,14 +21,14 @@ int user_queue::size(){
   return queue.size();
 }
 
-void user_queue::push(const std::string& item){
+void user_queue::push(const int& item){
   queue.push(item);
 }
 
-std::string user_queue::pop(){
+int user_queue::pop(){
   return queue.pop();
 }
 
-std::string user_queue::front(){
+int user_queue::front(){
   return queue.front();
 }
