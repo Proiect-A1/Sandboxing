@@ -5,15 +5,31 @@
 
 using namespace std;
 
-const char *bd_ip = "127.0.0.1";
-const short bd_port = 6001;
+const char *bd_ip = "10.8.0.9";
+const short bd_port = 6767;
 
- 
 IO::IO()
 {
     current_pos = 0 , length = 0;
 }
-    
+
+int IO::read_consistent_w_buffer(int fd , void *data , int len)
+{
+    int total_read = 0;
+
+    while(len)
+    {
+        char byte = get_char_fd(fd); 
+        *((char *) data) = byte;
+        data = (void *)((unsigned long long)(data) + 1);
+        len--;
+        total_read++;
+    }
+
+    cerr << total_read << '\n' ; fflush(stderr);
+    return total_read;
+}
+
 int IO::read_consistent(int fd , void *data , int len)
 {
     int total_read = 0;
@@ -60,6 +76,7 @@ int IO::create_socket()
     sockaddr_in bd_address = prepare_ip(bd_ip , bd_port);
     int sockfd = socket(AF_INET , SOCK_STREAM  , 0); if(sockfd == -1) handle_error(1 , "socket() create_socket()")
     if(connect(sockfd , (sockaddr *) &bd_address , sizeof(bd_address)) == -1) handle_error(1 , "connect() create_socket()");
+    fprintf(stderr , "[thread] connected to %s:%hd\n" , inet_ntoa(bd_address.sin_addr) , ntohs(bd_address.sin_port)); fflush(stderr);
     return sockfd;
 }
 
@@ -79,7 +96,6 @@ string IO::recv(int fd) //need delete after usage
     if(read_consistent(fd , (void *) payload.c_str() , length) != length) handle_error(1 , "read_consistent()");
     payload[length] = '\0';
     return payload;
-
 }
 
 void IO::done_test_request(string submissionId , int testId , int verdict , string message , float score , float maxScore , float scorePercent , long long memory , long long time)
@@ -172,14 +188,19 @@ void IO::evaluate_request(json request , int fd)
 {
     char path[PATH_MAX];
     sprintf(path , "%s/submissions/%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str());
-    int submission_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0600);
-    int length; if(read_consistent(fd , &length , sizeof(length)) == -1) handle_error(1 , "read_consistent() evaluate_request()");
+    //cerr << path << '\n'; fflush(stderr);
+    //system("whoami");
+    //sprintf(path , "./chestie.txt");
+    int submission_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0600); if(submission_fd == -1) handle_error(1 , "open() evaluate_request()");
+    int length; if(read_consistent_w_buffer(fd , &length , sizeof(length)) != sizeof(length)) handle_error(1 , "read_consistent() evaluate_request()");
     //need to finish
+    cerr << length; fflush(stderr);
 
     for(int i = 1 ; i <= length ; i++)
     {
         char byte = get_char_fd(fd);
         if(write(submission_fd , &byte , sizeof(byte)) != sizeof(byte)) handle_error(1 , "write() send_problem_request()"); 
+        cerr << byte; fflush(stderr);
     }
 
     close(submission_fd);

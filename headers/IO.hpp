@@ -1,4 +1,6 @@
-#pragma once 
+#ifndef IO_H
+#define IO_H
+
 #include <bits/stdc++.h>
 #include "header_helper.hpp"
 #include <sys/socket.h>
@@ -16,6 +18,8 @@ class IO
     public:
         IO();
         static int read_consistent(int fd , void *data , int len);
+        int read_consistent_w_buffer(int fd , void *data , int len);
+        
         char get_char_fd(int fd);
         static void send(const char *msg , int fd);
         static string recv(int fd);
@@ -32,3 +36,5 @@ class IO
         void evaluate_request(json request , int fd);
         void send_problem_request(json request , int fd);
 };
+
+#endif 
