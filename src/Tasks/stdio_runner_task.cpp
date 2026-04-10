@@ -43,8 +43,8 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
     return result_enum::FAIL;
   }
 
-  const std::string run_username = "amarat" + std::to_string(user_id);
-  const std::string run_dir = architecture_utilities::get_run_dir(run_username);
+  const std::string run_username = architecture_utilities::get_weak_user(user_id);
+  const std::string run_dir = architecture_utilities::get_run_dir(user_id);
 
   const std::string exec_file_name = std::filesystem::path(exec_path).filename().string();
   const std::string input_file_name = std::filesystem::path(input_path).filename().string();
@@ -74,6 +74,7 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
   if (pid < 0)
   {
     memory.release_memory(requested_memory);
+    print_error(thread_id, user_id, "Failed to fork process for execution");
     return result_enum::FAIL;
   }
 
@@ -81,6 +82,8 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
   {
     setpgid(0, 0);
 
+    // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
+    // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
     if (chdir(run_dir.c_str()) != 0)
     {
       print_error(thread_id, user_id, "Failed to change directory to run directory");

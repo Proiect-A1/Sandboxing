@@ -12,12 +12,15 @@
 #include <system_error>
 namespace architecture_utilities {
   
-  bool change_root_to_user(std::string username); 
+  bool change_root_to_user(const int& user_id); 
   bool change_root_to_sandbox(); 
-  bool change_dir_to_user(std::string username); 
+  bool change_dir_to_user(const int& user_id); 
   bool change_dir_to_sandbox(); 
 
-  std::string get_run_dir(std::string username);
+
+  std::string get_weak_user(const int& user_id);
+  std::string get_strong_user(const int& user_id);
+  std::string get_run_dir(const int& user_id);
   std::string get_submission_dir(std::string submission_id);
   std::string get_submission_source_path(std::string submission_id, language_enum language = language_enum::CPP);
   std::string get_submission_exec_path(std::string submission_id, language_enum language = language_enum::CPP);

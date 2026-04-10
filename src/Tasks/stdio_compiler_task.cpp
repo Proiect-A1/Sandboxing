@@ -39,8 +39,8 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
       return result_enum::FAIL;
     }
 
-    const std::string run_username = "amarat" + std::to_string(user_id);
-    const std::string run_dir = architecture_utilities::get_run_dir(run_username);
+    const std::string run_username = architecture_utilities::get_weak_user(user_id);
+    const std::string run_dir = architecture_utilities::get_run_dir(user_id);
 
     const std::string source_host_path = architecture_utilities::get_submission_source_path(submission_id);  
     const std::string output_host_path = architecture_utilities::get_submission_exec_path(submission_id);  
@@ -73,9 +73,17 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
     {
         setpgid(0, 0);
 
-        if (chdir(run_dir.c_str()) != 0)
+        //daca vrem chroot trebe sa includem niste librarii in plus aduse aici, eventual mutam chroot in wrapperu de la comanda, dar again nu e necesar ca runneru oricum e jailed. adica e problema de user experience
+        // g++: fatal error: cannot execute 'cc1plus': posix_spawnp: No such file or directory
+        // if (!architecture_utilities::change_root_to_sandbox())
+        // {
+        //   print_error(thread_id, user_id, "Failed to change root to sandbox");
+        //   _exit(127);
+        // }
+
+        if (!architecture_utilities::change_dir_to_user(user_id))
         {
-          print_error(thread_id, user_id, "Failed to change directory to run directory");
+           print_error(thread_id, user_id, "Failed to change directory to user's run directory");
             _exit(127);
         }
 

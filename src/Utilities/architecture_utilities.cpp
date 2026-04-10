@@ -1,13 +1,13 @@
 #include <Utilities/architecture_utilities.h>
 
 
-bool architecture_utilities::change_root_to_user(std::string username){
+bool architecture_utilities::change_root_to_user(const int& user_id){
   const char *sandbox_path = getenv("SANDBOX_PATH");
   if (sandbox_path == nullptr || sandbox_path[0] == '\0')
   {
     return false;
   }
-  const std::string user_dir = std::string(sandbox_path) + "/runs/" + username;
+  const std::string user_dir = get_run_dir(user_id);
   chroot(user_dir.c_str());
   return true;
 
@@ -26,13 +26,13 @@ bool architecture_utilities::change_root_to_sandbox(){
   }
   return true;
 }
-bool architecture_utilities::change_dir_to_user(std::string username){
+bool architecture_utilities::change_dir_to_user(const int& user_id){
   const char *sandbox_path = getenv("SANDBOX_PATH");
   if (sandbox_path == nullptr || sandbox_path[0] == '\0')
   {
     return false;
   }
-  const std::string user_dir = std::string(sandbox_path) + "/runs/" + username;
+  const std::string user_dir = get_run_dir(user_id);
   chdir(user_dir.c_str());
   return true;
 
@@ -50,10 +50,15 @@ bool architecture_utilities::change_dir_to_sandbox(){
 }
 
 
+std::string architecture_utilities::get_weak_user(const int& user_id){
+  return "amarat" + std::to_string(user_id);
+}
+std::string architecture_utilities::get_strong_user(const int& user_id){
+  return "amarat" + std::to_string(user_id);  
+}
 
-
-std::string architecture_utilities::get_run_dir(std::string username){
-  return std::string(getenv("SANDBOX_PATH")) + "/runs/" + username;
+std::string architecture_utilities::get_run_dir(const int& user_id){
+  return std::string(getenv("SANDBOX_PATH")) + "/runs/" + get_weak_user(user_id);
 }
 
 std::string architecture_utilities::get_submission_dir(std::string submission_id){
