@@ -1,5 +1,5 @@
-#ifndef UTILITIES_H
-#define UTILITIES_H
+#ifndef GENERAL_UTILITIES_H
+#define GENERAL_UTILITIES_H
 
 #include <string>
 #include <unistd.h>
@@ -9,11 +9,8 @@
 #include <system_error>
 #include <iostream>
 #include <Enums/result_enum.h>
-namespace utilities{
-  bool change_root_to_user(std::string username); 
-  bool change_root_to_sandbox(); 
-  bool change_dir_to_user(std::string username); 
-  bool change_dir_to_sandbox(); 
+namespace general_utilities{
+  std::string left_zero_pad (int number, int width);
   bool copy_file(const std::string& from, const std::string& to, mode_t mode);
   std::string enum_to_string(result_enum result);
   template <typename T>
@@ -26,4 +23,4 @@ namespace utilities{
 
 
 
-#endif // UTILITIES_H
+#endif // GENERAL_UTILITIES_H

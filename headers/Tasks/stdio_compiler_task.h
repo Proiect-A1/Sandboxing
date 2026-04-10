@@ -4,8 +4,8 @@
 #include <string>
 
 #include <Tasks/task.h>
-#include <Utilities/utilities.h>
-#include <Utilities/submission_info_utilities.h>
+#include <Utilities/general_utilities.h>
+#include <Utilities/architecture_utilities.h>
 #include <chrono>
 #include <csignal>
 #include <cstdlib>

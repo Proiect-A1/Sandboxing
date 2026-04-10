@@ -15,11 +15,11 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
   problem_metadata problem = pm.get_metadata(problem_id, rev_id);
   submission_data submission = sm.get_submission(submission_id);
 
-  utilities::change_dir_to_user("amarat" + std::to_string(user_id));
+  architecture_utilities::change_dir_to_user("amarat" + std::to_string(user_id));
 
-  std::string submission_exec_path = submission_info_utilities::get_submission_exec_path(submission_id);
-  std::string problem_input_path = submission_info_utilities::get_problem_input_path(problem_id, rev_id, test);
-  std::string problem_correct_output_path = submission_info_utilities::get_problem_correct_output_path(problem_id, rev_id, test);
+  std::string submission_exec_path = architecture_utilities::get_submission_exec_path(submission_id);
+  std::string problem_input_path = architecture_utilities::get_problem_input_path(problem_id, rev_id, test);
+  std::string problem_correct_output_path = architecture_utilities::get_problem_correct_output_path(problem_id, rev_id, test);
   
   std::string input_path = "input";
   std::string output_path = "output";
@@ -27,14 +27,14 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
   std::string correct_output_path = "correct_output";
   std::string username = "amarat" + std::to_string(user_id);
 
-  utilities::change_dir_to_user(username);
+  architecture_utilities::change_dir_to_user(username);
   
-  if (!utilities::copy_file(submission_exec_path, exec_path, 0755)){
+  if (!general_utilities::copy_file(submission_exec_path, exec_path, 0755)){
     print_error(thread_id, user_id, "Couldn't copy submission_exec to run directory");
     return result_enum::FAIL;
   }
 
-  if (!utilities::copy_file(problem_input_path, input_path, 0644)){
+  if (!general_utilities::copy_file(problem_input_path, input_path, 0644)){
     print_error(thread_id, user_id, "Couldn't copy problem input to run directory");
     return result_enum::FAIL;
   }
@@ -54,7 +54,7 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
   }
 
 
-  utilities::change_dir_to_sandbox();
+  architecture_utilities::change_dir_to_sandbox();
 
 
   submission_test test_result = submission_manager::get_instance().get_submission(submission_id).tests[test];
@@ -76,9 +76,9 @@ result_enum stdio_grader_task::execute(int thread_id, int user_id){
     return test_result.result;
   }
   
-  utilities::change_dir_to_user(username);
+  architecture_utilities::change_dir_to_user(username);
   
-  if (!utilities::copy_file(problem_correct_output_path, correct_output_path, 0644)){
+  if (!general_utilities::copy_file(problem_correct_output_path, correct_output_path, 0644)){
     print_error(thread_id, user_id, "Couldn't copy problem correct output to run directory");
     return result_enum::FAIL;
   }

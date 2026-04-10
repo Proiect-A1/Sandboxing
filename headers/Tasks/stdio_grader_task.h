@@ -8,8 +8,8 @@
 #include <Tasks/stdio_runner_task.h>
 #include <Tasks/stdio_runner_factory.h>
 #include <Tasks/checker_task.h>
-#include <Utilities/submission_info_utilities.h>
-#include <Utilities/utilities.h>
+#include <Utilities/architecture_utilities.h>
+#include <Utilities/general_utilities.h>
 #include <string>
 #include <chrono>
 #include <cstdlib>

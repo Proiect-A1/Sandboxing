@@ -7,8 +7,8 @@
 
 #include <Enums/language_enum.h>
 #include <Tasks/task.h>
-#include <Utilities/submission_info_utilities.h>
-#include <Utilities/utilities.h>
+#include <Utilities/architecture_utilities.h>
+#include <Utilities/general_utilities.h>
 #include <cstdio>
 #include <cstdlib>
 #include <string>

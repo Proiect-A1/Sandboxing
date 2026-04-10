@@ -40,10 +40,10 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
     }
 
     const std::string run_username = "amarat" + std::to_string(user_id);
-    const std::string run_dir = submission_info_utilities::get_run_dir(run_username);
+    const std::string run_dir = architecture_utilities::get_run_dir(run_username);
 
-    const std::string source_host_path = submission_info_utilities::get_submission_source_path(submission_id);  
-    const std::string output_host_path = submission_info_utilities::get_submission_exec_path(submission_id);  
+    const std::string source_host_path = architecture_utilities::get_submission_source_path(submission_id);  
+    const std::string output_host_path = architecture_utilities::get_submission_exec_path(submission_id);  
     const std::string source_run_path = run_dir + "/" + source_file_name;
     const std::string output_run_path = run_dir + "/" + output_file_name;
 
@@ -54,7 +54,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
       return result_enum::FAIL;
     }
 
-    if (!utilities::copy_file(source_host_path, source_run_path, 0644))
+    if (!general_utilities::copy_file(source_host_path, source_run_path, 0644))
     {
       print_error(thread_id, user_id, "Couldn't copy source file to run directory");
       return result_enum::FAIL;
@@ -159,7 +159,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
 
     if (rename(output_run_path.c_str(), output_host_path.c_str()) != 0)
     {
-        if (!utilities::copy_file(output_run_path, output_host_path, 0755))
+        if (!general_utilities::copy_file(output_run_path, output_host_path, 0755))
         {
             return result_enum::FAIL;
         }

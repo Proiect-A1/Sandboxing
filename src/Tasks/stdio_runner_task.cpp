@@ -44,7 +44,7 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
   }
 
   const std::string run_username = "amarat" + std::to_string(user_id);
-  const std::string run_dir = submission_info_utilities::get_run_dir(run_username);
+  const std::string run_dir = architecture_utilities::get_run_dir(run_username);
 
   const std::string exec_file_name = std::filesystem::path(exec_path).filename().string();
   const std::string input_file_name = std::filesystem::path(input_path).filename().string();
@@ -87,7 +87,7 @@ result_enum stdio_runner_task::execute(int thread_id, int user_id)
         _exit(127);
     }
     
-    if (!(utilities::change_root_to_sandbox()))
+    if (!(architecture_utilities::change_root_to_sandbox()))
     {
       print_error(thread_id, user_id, "Failed to change root to sandbox");
       _exit(127);
