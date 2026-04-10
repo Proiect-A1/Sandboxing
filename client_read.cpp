@@ -45,41 +45,50 @@ void *read_thread(void *argv)
     int sockfd = socket(AF_INET , SOCK_STREAM , 0); if(sockfd == -1) handle_error(1 , "socket()");
     if(connect(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "connect()");
 
-    while(1)
+    int length = 1e6; write(sockfd , &length , sizeof(length));
+
+    for(int i = 1 ; i <= 1e6 ; i++)
     {
-        char ch;
-        string filename;
-        cin >> filename;
-
-        cerr << "[client] received path:" << filename << '\n'; fflush(stderr);
-
-        if(filename.find_last_of(".zip") == filename.size() - 1)
-        {
-            int fd = open(filename.c_str() , O_RDONLY);
-            int length = lseek(fd , 0 , SEEK_END);
-            lseek(fd , 0 , SEEK_SET);
-            write(sockfd , &length , sizeof(length));
-
-            for(int i = 0 ; i < length ; i++)
-            {
-                char ch; read(fd , &ch , sizeof(ch));
-                write(sockfd , &ch , sizeof(ch));
-            }
-
-            cerr << "[client] sent zip\n"; fflush(stderr);
-        }
-        else 
-        {
-            json j;
-            ifstream f(filename);
-            f >> j;
-
-            send(sockfd , j.dump());
-            cerr << "[client] sent file: " << j.dump() << '\n'; fflush(stderr);
-
-            f.close();
-        }
+        write(sockfd , "a" , 1);
+        if(i == 1e4)
+            return 0;
     }
+
+    // while(1)
+    // {
+    //     char ch;
+    //     string filename;
+    //     cin >> filename;
+
+    //     cerr << "[client] received path:" << filename << '\n'; fflush(stderr);
+
+    //     if(filename.find_last_of(".zip") == filename.size() - 1)
+    //     {
+    //         int fd = open(filename.c_str() , O_RDONLY);
+    //         int length = lseek(fd , 0 , SEEK_END);
+    //         lseek(fd , 0 , SEEK_SET);
+    //         write(sockfd , &length , sizeof(length));
+
+    //         for(int i = 0 ; i < length ; i++)
+    //         {
+    //             char ch; read(fd , &ch , sizeof(ch));
+    //             write(sockfd , &ch , sizeof(ch));
+    //         }
+
+    //         cerr << "[client] sent zip\n"; fflush(stderr);
+    //     }
+    //     else 
+    //     {
+    //         json j;
+    //         ifstream f(filename);
+    //         f >> j;
+
+    //         send(sockfd , j.dump());
+    //         cerr << "[client] sent file: " << j.dump() << '\n'; fflush(stderr);
+
+    //         f.close();
+    //     }
+    // }
 
     return nullptr;
 }

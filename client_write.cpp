@@ -42,6 +42,8 @@ int main(int argc , char *argv[])
     if(bind(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "bind()");
     if(listen(sockfd , 5) == -1) handle_error(1 , "listen()")
  
+    IO helper;
+
     while(1)
     {
         sockaddr_in client_address;
@@ -49,9 +51,9 @@ int main(int argc , char *argv[])
         int fd;
         if((fd = accept(sockfd , (sockaddr *) &client_address , &len_client_address)) == -1) handle_error(1 , "accept()");
 
-        char *msg;
+        string msg;
 
-        (msg = IOhelper::recv(fd));
+        (msg = helper.recv(fd));
         cout << msg << '\n' ; fflush(stdout);
     }
 

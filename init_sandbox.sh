@@ -23,7 +23,7 @@ declare -A folders=(["problem"]="./problem_data" ["input"]="./inputs" ["correct"
 echo Creating folders...
 
 setfacl -m d:o::r-x .
-
+setfacl -m d:g:sudo:rwx .
 
 for i in ${folders[@]}
 do 
@@ -121,5 +121,6 @@ then
     source $2
 fi 
 
+cat $2 | grep SANDBOX
 echo Done
 

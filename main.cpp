@@ -5,6 +5,7 @@
 #include "headers/json.hpp"
 #include "headers/IO.hpp"
 #include <fcntl.h>
+#include "headers/tests.hpp"
 
 #define EVENTS_BUFF_SIZE 4096
 
@@ -12,6 +13,8 @@
 
 using namespace std;
 using json = nlohmann::json;
+
+
 
 char *ip;
 short port;
@@ -46,12 +49,12 @@ void rem_fd(int fd)
 
 void set_socket()
 {
-    sockaddr_in socket_address = IOhelper::prepare_ip(ip , port);
+    sockaddr_in socket_address = IO::prepare_ip(ip , port);
     sockfd = socket(AF_INET , SOCK_STREAM , 0); if(sockfd == -1) handle_error(1 , "socket()");
     int on = 1; if(setsockopt(sockfd , SOL_SOCKET , SO_REUSEPORT , (const char *) &on , sizeof(on)) == -1) handle_error(1 , "setsockopt()")
     if(bind(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "bind()");
     if(listen(sockfd , 5) == -1) handle_error(1 , "listen()")
-    cerr << "[server] socket set\n"; fflush(stderr);
+    fprintf(stderr , "[server] listening socket on %s:%hd\n" , inet_ntoa(socket_address.sin_addr) , ntohs(socket_address.sin_port)); fflush(stderr);
 }
 
 void create_epoll()
@@ -89,51 +92,42 @@ void create_threads()
     }
 }
 
+IO helper;
+
 void receive_request(int client_fd)
 {
     int len_read;
-    int length; if((len_read = IOhelper::read_consistent(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
+    int length; if((len_read = helper.read_consistent(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
     if(len_read == 0) {rem_fd(client_fd); return;}
 
     string request_string;
 
     for(int i = 0 ; i < length ; i++)
     {
-        char ch = IOhelper::get_char_fd(client_fd);
+        char ch = helper.get_char_fd(client_fd);
         request_string += ch;
     }
 
     json j = json::parse(request_string);
-    cerr << j.dump() << '\n'; fflush(stderr);
+    cerr << j.dump() << '\n'; fflush(stderr);    
 
-    if(j.contains("zip"))
+    if(!j.contains("request"))
     {
-        int len_read;
-        int length; if((len_read = IOhelper::read_consistent(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
-        if(len_read == 0) {rem_fd(client_fd); return;}
-
-        string filename = j["zip"].get < string > ();
-        int fd = open(filename.c_str() , O_WRONLY | O_CREAT | O_TRUNC , 0600);
-
-        for(int i = 0 ; i < length ; i++)
-        {
-            char byte = IOhelper::get_char_fd(client_fd);
-            write(fd , &byte , sizeof(byte));
-        }
-
-        close(fd);
-        cerr << "[server] received zip\n"; fflush(stderr);
+        cerr << "[server] invalid request received\n"; fflush(stderr);
     }
-    
+    else 
+    {
+        string request_name = j["request"].get < string > ();
+        if(request_name == "evaluate") helper.evaluate_request(j , client_fd);
+        if(request_name == "sendProblem") helper.send_problem_request(j , client_fd);
+    }   
 }
 
 int main(int argc , char *argv[])
 {
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
 
-    IOhelper::done_test_request("hello" , 1 , 10 , "abcd" , 10.5 , 100.4 , 32 , 1000 , 10000);
-    IOhelper::upload_tests_request("a" , 3 , "zip" , {{1 , 2 , 3} , {1 , 2 , 3}} , -1);
-    
+    tests::test_create_file();
     return 0;
 
     read_args(argc , argv);
