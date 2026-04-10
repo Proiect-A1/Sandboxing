@@ -45,14 +45,14 @@ void *read_thread(void *argv)
     int sockfd = socket(AF_INET , SOCK_STREAM , 0); if(sockfd == -1) handle_error(1 , "socket()");
     if(connect(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "connect()");
 
-    int length = 1e6; write(sockfd , &length , sizeof(length));
+    // int length = 1e6; write(sockfd , &length , sizeof(length));
 
-    for(int i = 1 ; i <= 1e6 ; i++)
-    {
-        write(sockfd , "a" , 1);
-        if(i == 1e4)
-            return 0;
-    }
+    // for(int i = 1 ; i <= 1e6 ; i++)
+    // {
+    //     write(sockfd , "a" , 1);
+    //     if(i == 1e4)
+    //         return 0;
+    // }
 
     // while(1)
     // {
@@ -139,9 +139,6 @@ int main(int argc , char *argv[])
             f.close();
         }
     }
-
-
-    
 
     return 0;
 }

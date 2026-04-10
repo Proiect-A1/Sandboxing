@@ -97,7 +97,7 @@ IO helper;
 void receive_request(int client_fd)
 {
     int len_read;
-    int length; if((len_read = helper.read_consistent(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
+    int length; if((len_read = helper.read_consistent_w_buffer(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
     if(len_read == 0) {rem_fd(client_fd); return;}
 
     string request_string;
@@ -118,17 +118,13 @@ void receive_request(int client_fd)
     else 
     {
         string request_name = j["request"].get < string > ();
-        if(request_name == "evaluate") helper.evaluate_request(j , client_fd);
-        if(request_name == "sendProblem") helper.send_problem_request(j , client_fd);
+        helper.execute(request_name , j , client_fd);
     }   
 }
 
 int main(int argc , char *argv[])
 {
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
-
-    tests::test_create_file();
-    return 0;
 
     read_args(argc , argv);
     set_socket();

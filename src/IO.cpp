@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -11,6 +12,12 @@ const short bd_port = 6767;
 IO::IO()
 {
     current_pos = 0 , length = 0;
+}
+
+void IO::execute(string command , json j , int fd)
+{
+    if(command == "evaluate") evaluate_request(j , fd);
+    if(command == "sendProblem") send_problem_request(j , fd);
 }
 
 int IO::read_consistent_w_buffer(int fd , void *data , int len)
@@ -26,7 +33,6 @@ int IO::read_consistent_w_buffer(int fd , void *data , int len)
         total_read++;
     }
 
-    cerr << total_read << '\n' ; fflush(stderr);
     return total_read;
 }
 
@@ -188,19 +194,16 @@ void IO::evaluate_request(json request , int fd)
 {
     char path[PATH_MAX];
     sprintf(path , "%s/submissions/%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str());
-    //cerr << path << '\n'; fflush(stderr);
-    //system("whoami");
-    //sprintf(path , "./chestie.txt");
+    if(mkdir(path , 0700) == -1) handle_error(1 , "mkdir() evaluate_request()");
+    sprintf(path , "%s/submissions/%s/main.%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str() , request["language"].get < string > ().c_str());
+
     int submission_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0600); if(submission_fd == -1) handle_error(1 , "open() evaluate_request()");
     int length; if(read_consistent_w_buffer(fd , &length , sizeof(length)) != sizeof(length)) handle_error(1 , "read_consistent() evaluate_request()");
-    //need to finish
-    cerr << length; fflush(stderr);
 
     for(int i = 1 ; i <= length ; i++)
     {
         char byte = get_char_fd(fd);
-        if(write(submission_fd , &byte , sizeof(byte)) != sizeof(byte)) handle_error(1 , "write() send_problem_request()"); 
-        cerr << byte; fflush(stderr);
+        if(write(submission_fd , &byte , sizeof(byte)) != sizeof(byte)) handle_error(1 , "write() send_problem_request()");
     }
 
     close(submission_fd);
@@ -212,7 +215,7 @@ void IO::send_problem_request(json request , int fd)
     sprintf(path , "%s/tmp/%s.%d" , getenv("SANDBOX_PATH") , request["problemId"].get < string > ().c_str() , request["revId"].get < int > ());
     
     int problem_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0600);
-    int length; if(read_consistent(fd , &length , sizeof(length)) == -1) handle_error(1 , "read_consistent() evaluate_request()");
+    int length; if(read_consistent_w_buffer(fd , &length , sizeof(length)) == -1) handle_error(1 , "read_consistent() evaluate_request()");
     //need to finish
 
     for(int i = 1 ; i <= length ; i++)

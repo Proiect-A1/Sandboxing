@@ -18,7 +18,7 @@ then
     exit 2
 fi
 
-declare -A folders=(["problem"]="./problem_data" ["input"]="./inputs" ["correct"]="./correct_outputs" ["test"]="./test_scripts"  ["runs"]="./runs"  ["submissions"]="./submissions")
+declare -A folders=(["problem"]="./problem_data" ["input"]="./inputs" ["correct"]="./correct_outputs" ["test"]="./test_scripts"  ["runs"]="./runs"  ["submissions"]="./submissions"  ["tmp"]="./tmp")
 
 echo Creating folders...
 
@@ -62,7 +62,8 @@ do
     setfacl -m d:u:$uid_amarat:--- ./test_scripts
     setfacl -m d:u:$uid_amarat:--- ./problem_data
     setfacl -m d:u:$uid_amarat:--- ./submissions
-
+    setfacl -m d:u:$uid_amarat:--- ./tmp 
+    
     setfacl -m u:$uid_amarat:r-x ./runs
     setfacl -m u:$uid_amarat:r-x ./inputs
     setfacl -m u:$uid_amarat:rwx ./runs/$name_amarat 
@@ -80,7 +81,7 @@ do
 
     setfacl -m d:u:$uid_marat:r-x ./runs
     setfacl -m d:u:$uid_marat:r-x ./inputs
-    setfacl -m d:u:$uid_marat:r-x ./runs/$name 
+    setfacl -m d:u:$uid_marat:r-x ./runs/$name_amarat 
     setfacl -m d:u:$uid_marat:r-x ./correct_outputs
     setfacl -m d:u:$uid_marat:--- ./test_scripts
     setfacl -m d:u:$uid_marat:--- ./problem_data
@@ -88,7 +89,7 @@ do
 
     setfacl -m u:$uid_marat:r-x ./runs
     setfacl -m u:$uid_marat:r-x ./inputs
-    setfacl -m u:$uid_marat:r-x ./runs/$name 
+    setfacl -m u:$uid_marat:r-x ./runs/$name_amarat 
     setfacl -m u:$uid_marat:r-x ./correct_outputs
     setfacl -m u:$uid_marat:--- ./test_scripts
     setfacl -m u:$uid_marat:--- ./problem_data

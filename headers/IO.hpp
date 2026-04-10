@@ -17,9 +17,10 @@ class IO
 
     public:
         IO();
+        void execute(string command , json j , int fd);
         static int read_consistent(int fd , void *data , int len);
         int read_consistent_w_buffer(int fd , void *data , int len);
-        
+
         char get_char_fd(int fd);
         static void send(const char *msg , int fd);
         static string recv(int fd);

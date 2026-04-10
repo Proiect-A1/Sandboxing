@@ -7,5 +7,6 @@ namespace tests
     void test_pull_problem_request();
     void test_create_folder();
     void test_create_file();
+    void test_evaluate_request();
     void run_tests();
 }

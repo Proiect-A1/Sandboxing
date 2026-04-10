@@ -54,4 +54,13 @@ namespace tests
         if(open("/home/sochu/Documents/Projects/sandbox/sandbox/submissions/subm.txt" , O_CREAT | O_TRUNC | O_RDWR , 0600) == -1) handle_error(1 , "no file :/");
         if(remove("/home/sochu/Documents/Projects/sandbox/sandbox/submissions/subm.txt") == -1) handle_error(1 , "no rm file :/")
     }
+
+    void test_evaluate_request()
+    {
+        IO helper;
+        json j = {{"submissionId" , "10"} , {"language" , "cpp"}};
+        system("rm -r sandbox/submissions/10");
+        helper.evaluate_request(j , -1);
+        system("rm -r sandbox/submissions/10");
+    }
 }
