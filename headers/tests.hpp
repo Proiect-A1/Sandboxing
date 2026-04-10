@@ -8,5 +8,7 @@ namespace tests
     void test_create_folder();
     void test_create_file();
     void test_evaluate_request();
+    void test_throws();
     void run_tests();
+    void test_send_problem_request();
 }

@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include "../headers/tests.hpp"
 #include <sys/stat.h> 
+#include "../headers/exceptions.hpp"
 
 namespace tests 
 {
@@ -61,6 +62,38 @@ namespace tests
         json j = {{"submissionId" , "10"} , {"language" , "cpp"}};
         system("rm -r sandbox/submissions/10");
         helper.evaluate_request(j , -1);
+        system("rm -r sandbox/submissions/10");
+    }
+
+    void test_throws()
+    {
+        try 
+        {
+            try 
+            {
+                throw unfinished_request_exception();
+            }
+            catch(exception &e)
+            {
+                exception &f = e;
+                cerr << endl << "here" << f.what() << endl;
+                throw;
+            }
+            
+        }
+        catch(std::exception &e)
+        {
+            cerr << e.what();
+            fflush(stderr);
+        }
+    }
+
+    void test_send_problem_request()
+    {
+        IO helper;
+        json j = {{"problemId" , "10"} , {"revId" , 10}};
+        system("rm -r sandbox/submissions/10");
+        helper.send_problem_request(j , -1);
         system("rm -r sandbox/submissions/10");
     }
 }

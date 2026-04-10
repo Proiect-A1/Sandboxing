@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include "../headers/exceptions.hpp"
 
 using namespace std;
 
@@ -22,18 +23,26 @@ void IO::execute(string command , json j , int fd)
 
 int IO::read_consistent_w_buffer(int fd , void *data , int len)
 {
-    int total_read = 0;
-
-    while(len)
+    try 
     {
-        char byte = get_char_fd(fd); 
-        *((char *) data) = byte;
-        data = (void *)((unsigned long long)(data) + 1);
-        len--;
-        total_read++;
-    }
+        int total_read = 0;
 
-    return total_read;
+        while(len)
+        {
+            char byte = get_char_fd(fd); 
+            *((char *) data) = byte;
+            data = (void *)((unsigned long long)(data) + 1);
+            len--;
+            total_read++;
+        }
+
+        return total_read;
+    }
+    catch(exception &e)
+    {
+        throw;
+    }
+   
 }
 
 int IO::read_consistent(int fd , void *data , int len)
@@ -43,7 +52,7 @@ int IO::read_consistent(int fd , void *data , int len)
     while(len)
     {
         int read_len = read(fd , data , len); if(read_len == -1) return -1;
-        if(read_len == 0) return total_read;
+        if(read_len == 0) throw unfinished_request_exception();
         total_read += read_len;
         data = (void *)((unsigned long long)(data) + read_len);
         len -= read_len;
@@ -58,7 +67,7 @@ char IO::get_char_fd(int fd)
     {
         length = read(fd , buff , BUFF_SIZE);
         if(length == -1) handle_error(1 , "get_char_fd()");
-        if(length == 0) handle_error(1 , "get_char_fd()");
+        if(length == 0) throw unfinished_request_exception();
         current_pos = 0;
     }
 
@@ -93,15 +102,23 @@ void IO::send(const char *msg , int fd)
     if(write(fd , msg , length) != length) handle_error(1 , "write() send()")
 }
 
-string IO::recv(int fd) //need delete after usage
+string IO::recv(int fd) 
 {
-    int length; if(read_consistent(fd , &length , sizeof(length)) != sizeof(length)) handle_error(1 , "read_consistent()");
-    string payload;
-    payload.resize(length + 1);
+    try 
+    {
+        int length; if(read_consistent(fd , &length , sizeof(length)) != sizeof(length)) handle_error(1 , "read_consistent()");
+        string payload;
+        payload.resize(length + 1);
 
-    if(read_consistent(fd , (void *) payload.c_str() , length) != length) handle_error(1 , "read_consistent()");
-    payload[length] = '\0';
-    return payload;
+        if(read_consistent(fd , (void *) payload.c_str() , length) != length) handle_error(1 , "read_consistent()");
+        payload[length] = '\0';
+        return payload;
+    }
+    catch(exception &e)
+    {
+        throw;
+    }
+    
 }
 
 void IO::done_test_request(string submissionId , int testId , int verdict , string message , float score , float maxScore , float scorePercent , long long memory , long long time)
@@ -192,37 +209,52 @@ void IO::pull_problem_request(string problemId)
 
 void IO::evaluate_request(json request , int fd)
 {
-    char path[PATH_MAX];
-    sprintf(path , "%s/submissions/%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str());
-    if(mkdir(path , 0700) == -1) handle_error(1 , "mkdir() evaluate_request()");
-    sprintf(path , "%s/submissions/%s/main.%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str() , request["language"].get < string > ().c_str());
-
-    int submission_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0600); if(submission_fd == -1) handle_error(1 , "open() evaluate_request()");
-    int length; if(read_consistent_w_buffer(fd , &length , sizeof(length)) != sizeof(length)) handle_error(1 , "read_consistent() evaluate_request()");
-
-    for(int i = 1 ; i <= length ; i++)
+    try 
     {
-        char byte = get_char_fd(fd);
-        if(write(submission_fd , &byte , sizeof(byte)) != sizeof(byte)) handle_error(1 , "write() send_problem_request()");
-    }
+        char path[PATH_MAX];
+        sprintf(path , "%s/submissions/%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str());
+        if(mkdir(path , 0700) == -1) handle_error(1 , "mkdir() evaluate_request()");
+        sprintf(path , "%s/submissions/%s/main.%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str() , request["language"].get < string > ().c_str());
 
-    close(submission_fd);
+        int submission_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0600); if(submission_fd == -1) handle_error(1 , "open() evaluate_request()");
+        int length; if(read_consistent_w_buffer(fd , &length , sizeof(length)) != sizeof(length)) handle_error(1 , "read_consistent() evaluate_request()");
+
+        for(int i = 1 ; i <= length ; i++)
+        {
+            char byte = get_char_fd(fd);
+            if(write(submission_fd , &byte , sizeof(byte)) != sizeof(byte)) handle_error(1 , "write() send_problem_request()");
+        }
+
+        close(submission_fd);
+    }
+    catch(exception &e)
+    {
+        throw;
+    } 
 }
 
 void IO::send_problem_request(json request , int fd)
 {
-    char path[PATH_MAX];
-    sprintf(path , "%s/tmp/%s.%d" , getenv("SANDBOX_PATH") , request["problemId"].get < string > ().c_str() , request["revId"].get < int > ());
-    
-    int problem_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0600);
-    int length; if(read_consistent_w_buffer(fd , &length , sizeof(length)) == -1) handle_error(1 , "read_consistent() evaluate_request()");
-    //need to finish
-
-    for(int i = 1 ; i <= length ; i++)
+    try
     {
-        char byte = get_char_fd(fd);
-        if(write(problem_fd , &byte , sizeof(byte)) != sizeof(byte)) handle_error(1 , "write() send_problem_request()"); 
-    }
+        char path[PATH_MAX];
+        sprintf(path , "%s/tmp/%s.%d" , getenv("SANDBOX_PATH") , request["problemId"].get < string > ().c_str() , request["revId"].get < int > ());
+        
+        int problem_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0600);
+        int length; if(read_consistent_w_buffer(fd , &length , sizeof(length)) == -1) handle_error(1 , "read_consistent() evaluate_request()");
+        //need to finish
 
-    close(problem_fd);
+        for(int i = 1 ; i <= length ; i++)
+        {
+            char byte = get_char_fd(fd);
+            if(write(problem_fd , &byte , sizeof(byte)) != sizeof(byte)) handle_error(1 , "write() send_problem_request()"); 
+        }
+
+        close(problem_fd);
+    }
+    catch(exception &e)
+    {
+        throw;
+    }
+    
 }

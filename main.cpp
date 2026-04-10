@@ -14,8 +14,6 @@
 using namespace std;
 using json = nlohmann::json;
 
-
-
 char *ip;
 short port;
 short num_of_threads;
@@ -96,30 +94,38 @@ IO helper;
 
 void receive_request(int client_fd)
 {
-    int len_read;
-    int length; if((len_read = helper.read_consistent_w_buffer(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
-    if(len_read == 0) {rem_fd(client_fd); return;}
-
-    string request_string;
-
-    for(int i = 0 ; i < length ; i++)
+    try 
     {
-        char ch = helper.get_char_fd(client_fd);
-        request_string += ch;
+        int len_read;
+        int length; if((len_read = helper.read_consistent_w_buffer(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
+        if(len_read == 0) {rem_fd(client_fd); return;}
+
+        string request_string;
+
+        for(int i = 0 ; i < length ; i++)
+        {
+            char ch = helper.get_char_fd(client_fd);
+            request_string += ch;
+        }
+        
+        json j = json::parse(request_string);
+        cerr << j.dump() << '\n'; fflush(stderr);    
+
+        if(!j.contains("request"))
+        {
+            cerr << "[server] invalid request received\n"; fflush(stderr);
+        }
+        else 
+        {
+            string request_name = j["request"].get < string > ();
+            helper.execute(request_name , j , client_fd);
+        }
     }
-
-    json j = json::parse(request_string);
-    cerr << j.dump() << '\n'; fflush(stderr);    
-
-    if(!j.contains("request"))
+    catch(exception &e)
     {
-        cerr << "[server] invalid request received\n"; fflush(stderr);
-    }
-    else 
-    {
-        string request_name = j["request"].get < string > ();
-        helper.execute(request_name , j , client_fd);
+        fprintf(stderr , "[server] invalid request received: %s\n" , e.what()); fflush(stderr);
     }   
+       
 }
 
 int main(int argc , char *argv[])
