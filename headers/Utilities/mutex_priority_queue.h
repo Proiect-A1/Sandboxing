@@ -12,11 +12,69 @@ class mutex_priority_queue {
   pthread_cond_t not_full = PTHREAD_COND_INITIALIZER;
   pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
   public:
+  bool empty();
+  int size();
   void push(const T& item);
   T pop();
-  T front();
+  T top();
 };
 
+
+template<typename T, typename Compare>
+void mutex_priority_queue<T, Compare>::push(const T& item){
+  pthread_mutex_lock(&m);
+  while (q.size() >= max_size){
+    pthread_cond_wait(&not_full, &m);
+  }
+  q.push(item);
+  if (q.size() == 1)
+    pthread_cond_signal(&not_empt);
+  pthread_mutex_unlock(&m);
+}
+
+
+template<typename T, typename Compare>
+T mutex_priority_queue<T, Compare>::pop(){
+  pthread_mutex_lock(&m);
+  while (q.empty()){
+    pthread_cond_wait(&not_empt, &m);
+  }
+  T item = q.top();
+  q.pop();
+  if (q.size() == max_size - 1)
+    pthread_cond_signal(&not_full);
+  pthread_mutex_unlock(&m);
+  return item;
+}
+
+template<typename T, typename Compare>
+T mutex_priority_queue<T, Compare>::top(){
+  pthread_mutex_lock(&m);
+  while (q.empty()){
+    pthread_cond_wait(&not_empt, &m);
+  }
+  T item = q.top();
+  pthread_mutex_unlock(&m);
+  return item;
+}
+
+
+
+template<typename T, typename Compare>
+bool mutex_priority_queue<T, Compare>::empty(){
+  pthread_mutex_lock(&m);
+  bool is_empty = q.empty();
+  pthread_mutex_unlock(&m);
+  return is_empty;
+}
+
+template<typename T, typename Compare>
+int mutex_priority_queue<T, Compare>::size(){
+  pthread_mutex_lock(&m);
+  int size = q.size();
+  pthread_mutex_unlock(&m);
+  return size;
+}
 
 
 #endif // MUTEX_PRIORITY_QUEUE_H
