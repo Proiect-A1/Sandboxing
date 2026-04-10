@@ -12,14 +12,24 @@ submission_manager& submission_manager::get_instance(){
     }
     return *instance;
   }
+
+submission_data submission_manager::get_submission(std::string submission_id){
+    pthread_mutex_lock(&submission_manager::mtx);
+    submission_data retval;
+    if(submission_table.count(submission_id)){
+        retval=submission_table[submission_id];
+    }
+    pthread_mutex_unlock(&submission_manager::mtx);
+    return retval;
+}
 std::map<std::string, submission_data> submission_manager::get_submission_table(){
     pthread_mutex_lock(&mtx);
     std::map<std::string, submission_data> retval=this->submission_table;
     pthread_mutex_unlock(&mtx);
     return retval;
 }
-void submission_manager::insert(std::string submission_id, std::string problem_id, int rev_id, int socket_fd){
-    submission_data sd(problem_id, rev_id, socket_fd);
+void submission_manager::insert(std::string submission_id, language_enum language, std::string problem_id, int rev_id, int socket_fd){
+    submission_data sd(language, problem_id, rev_id, socket_fd);
     pthread_mutex_lock(&submission_manager::mtx);
     submission_table[submission_id]=sd;
     pthread_mutex_unlock(&submission_manager::mtx);
@@ -43,6 +53,7 @@ bool submission_manager::is_done(std::string submission_id){
 }
 void submission_manager::add_completed_test(std::string submission_id, int test_id, submission_test test_result){
     pthread_mutex_lock(&submission_manager::mtx);
+    std::cout << utilities::enum_to_string(test_result.result) << ' ' << test_result.points << std::endl;
     submission_table[submission_id].add_completed_test(test_id, test_result);
     pthread_mutex_unlock(&submission_manager::mtx);
 }

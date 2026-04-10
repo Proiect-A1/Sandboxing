@@ -13,9 +13,9 @@ problem_manager& problem_manager::get_instance() {
   return *instance;
 }
 
-void problem_manager::add_revision(std::string problem_id, int rev_id, problem_metadata metadata) {
+void problem_manager::add_revision(problem_metadata metadata) {
   pthread_mutex_lock(&mtx);
-  problems[problem_id][rev_id] = metadata;
+  problems[metadata.problem_id][metadata.rev_id] = metadata;
   pthread_mutex_unlock(&mtx);
 }
 
