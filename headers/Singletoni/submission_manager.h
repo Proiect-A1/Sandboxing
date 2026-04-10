@@ -3,6 +3,7 @@
 #include<unordered_map>
 #include <Chestii_cu_data/submission_data.h>
 #include <Chestii_cu_data/submission_test.h>
+#include <Utilities/general_utilities.h>
 #include <pthread.h>
 class submission_manager{ // singleton
     static submission_manager* instance;
@@ -12,7 +13,8 @@ class submission_manager{ // singleton
 public:
     static submission_manager& get_instance();
     std::map<std::string, submission_data> get_submission_table(); // creeaza o copie a submission_table
-    void insert(std::string submission_id, std::string problem_id, int rev_id, int socket_fd); /// aduaga submisia in map; PE VIITOR TREBUIE BAGATA SI IN problem_manager
+    submission_data get_submission(std::string submission_id); /// returneaza o copie a submission_data-ului, sau un submission_data gol daca nu exista
+    void insert(std::string submission_id, language_enum language, std::string problem_id, int rev_id, int socket_fd); /// aduaga submisia in map; PE VIITOR TREBUIE BAGATA SI IN problem_manager
     void erase(std::string submission_id); /// sterge o sursa din map
     bool count(std::string submission_id); /// verifica daca exista sursa in map
     bool is_done(std::string submission_id); /// TEMPORAR E ECHIVALENT CU !COUNT, NU DISTINGE DINTRE SURSE INEXISTENTE SI SURSE TERMINATE

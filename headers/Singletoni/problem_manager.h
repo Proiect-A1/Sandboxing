@@ -16,7 +16,7 @@ class problem_manager {
   problem_manager() = default;
   public:
   static problem_manager& get_instance();
-  void add_revision(std::string problem_id, int rev_id, problem_metadata metadata);
+  void add_revision(problem_metadata metadata);
   void delete_revision(std::string problem_id, int rev_id);
   int delete_old_revisions(std::string problem_id, int keep_count = 1); // keep only the latest keep_count revisions, default is 1, returns number of revisions left
   int get_latest_revision(std::string problem_id);
