@@ -18,6 +18,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   result = compiler->execute(thread_id, user_id);
   if (result != result_enum::OK) {
     print_log(thread_id, user_id, "Compilation failed on submission " + submission_id + " with result " + general_utilities::enum_to_string(result));
+    // trebuie bagat in submission manager
     return result;
   }
 
