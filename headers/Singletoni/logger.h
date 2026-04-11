@@ -19,11 +19,16 @@ private:
     static pthread_mutex_t mtx;
 
     FILE* log_file;
+    std::string current_date;
 
     Logger();
     
-    std::string get_current_timestamp();
+    std::string get_only_date();
+    std::string get_only_timestamp();
     const char* level_to_string(LogLevel level);
+    
+    void open_log_file();
+    void check_rotation();
 
 public:
     static Logger& get_instance();
