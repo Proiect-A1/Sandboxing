@@ -17,7 +17,7 @@ bool stdio_compiler_task::check_permissions()
     return true;
 }
 
-result_enum stdio_compiler_task::execute(int thread_id, int user_id)
+result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
 {
     (void)thread_id;
 
@@ -32,7 +32,7 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
       return result_enum::FAIL;
     }
 
-    const char *sandbox_path = getenv("SANDBOX_PATH");
+    const char *sandbox_path = architecture_utilities::get_sandbox_path().c_str();
     if (sandbox_path == nullptr || sandbox_path[0] == '\0')
     {
       print_error(thread_id, user_id, "Sandbox path is not set in environment variables");
@@ -178,6 +178,12 @@ result_enum stdio_compiler_task::execute(int thread_id, int user_id)
     return result_enum::OK;
 }
 
-void stdio_compiler_task:: print_error(int thread_id, int user_id,const std::string& message){
-  fprintf(stderr, "Compiler task running on thread %d, with user %d: %s\n", thread_id, user_id, message.c_str());
+
+void stdio_compiler_task:: print_log(pthread_t thread_id, int user_id,const std::string& message){
+  fprintf(stdout, "\033[93m[LOG  ]\033[0m Compiler task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
 }
+
+void stdio_compiler_task:: print_error(pthread_t thread_id, int user_id,const std::string& message){
+  fprintf(stderr, "\033[31m[ERROR]\033[0m Compiler task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
+}
+

@@ -32,9 +32,10 @@ class stdio_grader_task : public task{
 
   public :
     stdio_grader_task(std::string submission_id, std::string problem_id, int rev_id, int test) : submission_id(submission_id), problem_id(problem_id), rev_id(rev_id), test(test) {}
-  result_enum execute(int thread_id, int user_id) override;
+  result_enum execute(pthread_t thread_id, int user_id) override;
   bool check_permissions() override {return true;};
-  void print_error(int thread_id, int user_id, const std::string& message) override;
+  void print_error(pthread_t thread_id, int user_id, const std::string& message) override;
+  void print_log(pthread_t thread_id, int user_id, const std::string& message) override;
 };
 
 #endif

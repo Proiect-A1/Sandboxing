@@ -4,6 +4,7 @@
 #include <string>
 #include <Enums/result_enum.h>
 #include <Tasks/task.h>
+#include <Utilities/architecture_utilities.h>
 class checker_task : public task{
   std::string input;
   std::string output;
@@ -17,9 +18,10 @@ class checker_task : public task{
   bool check_permissions() override {
     return true;
   }
-  void print_error(int thread_id, int user_id, const std::string& message) override;
+  void print_error(pthread_t thread_id, int user_id, const std::string& message) override;
+  void print_log(pthread_t thread_id, int user_id, const std::string& message) override;
 
-  result_enum execute(int thread_id, int user_id) override;
+  result_enum execute(pthread_t thread_id, int user_id) override;
   float get_point_percentage() const {
     return point_percentage;
   }

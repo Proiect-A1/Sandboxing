@@ -21,14 +21,6 @@ stdio_runner_task* stdio_runner_factory(
         return nullptr;
     }
 
-    const char *sandbox_path = getenv("SANDBOX_PATH");
-    if (sandbox_path == nullptr || sandbox_path[0] == '\0')
-    {
-        return nullptr;
-    }
-
-
-
     stdio_runner_task* created = new stdio_runner_task(
         exec_path,
         input_path,

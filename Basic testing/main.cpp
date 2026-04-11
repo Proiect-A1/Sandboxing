@@ -7,7 +7,69 @@
 #include <vector>
 #include <Singletoni/user_queue.h>
 #include <Singletoni/task_queue.h>
+#include <pthread.h>
 using namespace std;
+
+#define handle_error(ret_code , ...) { fprintf(stderr , __VA_ARGS__); exit(ret_code); }
+const int num_of_threads = 2;
+
+
+struct worker_thread_struct{
+  pthread_t thread_id;
+  task* current_task;
+};
+
+void * worker_thread(void *arg){
+  struct worker_thread_struct *wts = (struct worker_thread_struct *) arg;
+  pthread_t thread_id = wts->thread_id;
+  task* current_task = wts->current_task;
+
+  int user_id = user_queue::get_instance().pop();
+  current_task->print_log(thread_id, user_id, "Starting task execution");fflush(stdout);
+  current_task->execute(thread_id, user_id);
+  current_task->print_log(thread_id, user_id, "Finished task execution");fflush(stdout);
+  user_queue::get_instance().push(user_id);
+
+  delete current_task;
+  delete wts;
+  return nullptr;
+}
+
+void * main_thread(void *arg)
+{
+    int thread_count = *((int *) arg);
+    //campeaza coada
+    while (true){
+      task* next_task = task_queue::get_instance().pop();
+
+      worker_thread_struct* wts = new worker_thread_struct;
+      wts->current_task = next_task;
+
+      if(pthread_create(&(wts->thread_id), nullptr, worker_thread , (void *) wts) != 0) handle_error(1 , "pthread_create()");
+      if(pthread_detach(wts->thread_id) != 0) handle_error(1 , "pthread_detach()");
+    }
+
+    return nullptr;
+}
+
+
+
+
+
+
+
+void create_threads()
+{
+    pthread_t *thread_ids = (pthread_t *) malloc(num_of_threads * sizeof(pthread_t));
+    int *thread_counts = (int *) malloc(num_of_threads * sizeof(int));
+
+    for(int i = 0 ; i < num_of_threads ; i++)
+    {
+        thread_counts[i] = i;
+        if(pthread_create(&thread_ids[i] , nullptr , main_thread , (void *) &thread_counts[i]) != 0) handle_error(1 , "pthread_create()");
+        if(pthread_detach(thread_ids[i]) != 0) handle_error(1 , "pthread_detach()");
+    }
+}
 
 int main(){
 
@@ -19,8 +81,8 @@ int main(){
   new_problem.rev_id = 0;
   new_problem.group_count = 10;
   new_problem.test_count = 10;
-  new_problem.time_limit = 1000;
-  new_problem.memory_limit = 256 * 1024 * 1024; // 256 MB
+  new_problem.time_limit = 10000;
+  new_problem.memory_limit = 1024ll * 1024 * 1024 * 15; // 15 GB
   new_problem.total_points = 100.0;
   new_problem.problem_status = problem_status_enum::DONE;
   new_problem.groups = std::vector<group_metadata>(10, {10.0, 1, group_type_enum::GROUP_MIN});
@@ -31,30 +93,30 @@ int main(){
 
   pm.add_revision(new_problem);
 
+  create_threads();
+
+  
+  for (int i = 1; i <= 10; i++){
+    architecture_utilities::change_dir_to_user(i);
+    system("rm -f *");
+    user_queue::get_instance().push(i);
+  }
+  
+  // cout << "sa inceapa aventura" << endl;
+  // system ("sleep 5");
 
   sm.insert("ANDREI", language_enum::CPP, "Problem", 0, 1);
 
   submission_data submission = sm.get_submission("ANDREI");
 
 
-  evaluator_task eva("ANDREI", "Problem", 0);
+  evaluator_task* eva = new evaluator_task("ANDREI", "Problem", 0);
 
-  task_queue::get_instance().push(&eva);
-
-  while (!task_queue::get_instance().empty()){
-    auto next_task = task_queue::get_instance().pop();
-
-    if (dynamic_cast<evaluator_task*>(next_task)){
-      cout << "Evaluator task popped from queue" << endl;
-    } else if (dynamic_cast<stdio_grader_task*>(next_task)){
-      cout << "Grader task popped from queue" << endl;
-    } else {
-      cout << "Unknown task type popped from queue" << endl;
-
-    }
-    next_task->execute(0, 1);
+  task_queue::get_instance().push(eva);
+  // sleep(20);
+  while (1){
+    sleep(5);
   }
 
-  cout << "eyooo" << endl;
   return 0;
 }
