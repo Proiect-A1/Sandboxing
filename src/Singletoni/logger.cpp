@@ -51,8 +51,7 @@ void Logger::open_log_file() {
     
     current_date = get_only_date();
     const std::string log_dir = "logs";
-    std::error_code ec;
-    std::filesystem::create_directories(log_dir, ec);
+    std::filesystem::create_directories(log_dir);
     std::string filename = log_dir + "/" + current_date + ".log";
     
     log_file = fopen(filename.c_str(), "a");
