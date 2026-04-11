@@ -9,8 +9,7 @@ enum class LogLevel {
     INFO,
     WARNING,
     ERROR,
-    DEBUG,
-    OTHER
+    DEBUG
 };
 
 class Logger {
@@ -40,6 +39,5 @@ public:
 #define LOG_WARNING(msg) Logger::get_instance().log(LogLevel::WARNING, __FILE__, __LINE__, msg)
 #define LOG_ERROR(msg)   Logger::get_instance().log(LogLevel::ERROR,   __FILE__, __LINE__, msg)
 #define LOG_DEBUG(msg)   Logger::get_instance().log(LogLevel::DEBUG,   __FILE__, __LINE__, msg)
-#define LOG_OTHER(msg)   Logger::get_instance().log(LogLevel::OTHER,   __FILE__, __LINE__, msg)
 
 #endif // LOGGER_H

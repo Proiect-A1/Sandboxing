@@ -2,6 +2,7 @@
 #include <chrono>
 #include <filesystem>
 #include <sys/time.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -74,7 +75,7 @@ const char* Logger::level_to_string(LogLevel level) {
         case LogLevel::WARNING: return "WARNING";
         case LogLevel::ERROR:   return "ERROR";
         case LogLevel::DEBUG:   return "DEBUG";
-        default:                return "OTHER";
+        default:                return "UNKNOWN";
     }
 }
 
@@ -97,7 +98,9 @@ void Logger::log(LogLevel level, const char* file, int line, const std::string& 
     if (log_file != nullptr) {
         std::string timestamp_str = get_only_timestamp();
         const char* level_str = level_to_string(level);
-        unsigned long thread_id = (unsigned long)pthread_self();
+        
+        // aici poate schimbam cu thread_id din context, nu stiu exact cum se comporta gettid
+        unsigned long thread_id = (unsigned long)gettid();
 
         fprintf(log_file, "[%s] [%s] [Th-%lu] [%s:%d] %s\n", 
             timestamp_str.c_str(), level_str, thread_id, file, line, message.c_str());
