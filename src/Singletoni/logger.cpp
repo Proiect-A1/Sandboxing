@@ -1,6 +1,9 @@
 #include <Singletoni/logger.h>
 #include <chrono>
+#include <filesystem>
 #include <sys/time.h>
+
+using namespace std;
 
 Logger* Logger::instance = nullptr;
 pthread_mutex_t Logger::mtx = PTHREAD_MUTEX_INITIALIZER;
@@ -47,9 +50,13 @@ void Logger::open_log_file() {
     }
     
     current_date = get_only_date();
-    std::string filename = "/logs/" + current_date + ".log";
+    const std::string log_dir = "logs";
+    std::error_code ec;
+    std::filesystem::create_directories(log_dir, ec);
+    std::string filename = log_dir + "/" + current_date + ".log";
     
     log_file = fopen(filename.c_str(), "a");
+
     if (log_file != nullptr) {
         setvbuf(log_file, NULL, _IONBF, 0);
     }
