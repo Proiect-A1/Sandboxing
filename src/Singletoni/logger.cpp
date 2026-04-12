@@ -49,12 +49,10 @@ void Logger::open_log_file() {
     if (log_file != nullptr) {
         fclose(log_file);
     }
-    
     current_date = get_only_date();
     const std::string log_dir = "logs";
     std::filesystem::create_directories(log_dir);
     std::string filename = log_dir + "/" + current_date + ".log";
-    
     log_file = fopen(filename.c_str(), "a");
 
     if (log_file != nullptr) {
@@ -79,6 +77,16 @@ const char* Logger::level_to_string(LogLevel level) {
     }
 }
 
+const char *level_to_color(LogLevel level) {
+    switch (level) {
+        case LogLevel::INFO:    return "\033[32m";
+        case LogLevel::WARNING: return "\033[33m";
+        case LogLevel::ERROR:   return "\033[38;2;255;0;0m";
+        case LogLevel::DEBUG:   return "\033[36m";
+        default:                return "\033[0m";
+    }
+}
+
 Logger& Logger::get_instance() {
     if (instance == nullptr) {
         pthread_mutex_lock(&mtx);
@@ -92,20 +100,33 @@ Logger& Logger::get_instance() {
 
 void Logger::log(LogLevel level, const char* file, int line, const std::string& message) {
     pthread_mutex_lock(&mtx);
-    
+
     check_rotation();
 
-    if (log_file != nullptr) {
-        std::string timestamp_str = get_only_timestamp();
-        const char* level_str = level_to_string(level);
-        
-        // aici poate schimbam cu thread_id din context, nu stiu exact cum se comporta gettid
-        unsigned long thread_id = (unsigned long)gettid();
+    std::string timestamp_str = get_only_timestamp();
+    const char *level_str = level_to_string(level);
+    const char *color = level_to_color(level);
+    const char *reset = "\033[0m";
+    char level_with_brackets[32];
+    snprintf(level_with_brackets, sizeof(level_with_brackets), "[%s]", level_str);
 
-        fprintf(log_file, "[%s] [%s] [Th-%lu] [%s:%d] %s\n", 
-            timestamp_str.c_str(), level_str, thread_id, file, line, message.c_str());
+    // aici poate schimbam cu thread_id din context, nu stiu exact cum se comporta gettid
+    unsigned long thread_id = (unsigned long)gettid();
+
+    if (log_file != nullptr) {
+        fprintf(log_file, "[%s] %-9s [TID:%6d] [%s:%d] %s\n", timestamp_str.c_str(), level_with_brackets, thread_id, file, line, message.c_str());
         fflush(log_file);
     }
-    
+
+    fprintf(stdout, "[%s] %s%-9s%s [TID:%6d] [%s:%d] %s\n", timestamp_str.c_str(), color, level_with_brackets, reset, thread_id, file, line, message.c_str());
+    fflush(stdout);
+
     pthread_mutex_unlock(&mtx);
+}
+
+void Logger::log(LogLevel level, const char* file, int line, long long user_id, const std::string& message) {
+    char uid_with_padding[32];
+    snprintf(uid_with_padding, sizeof(uid_with_padding), "[UID:%2d]", user_id);
+    const std::string message_with_user = std::string(uid_with_padding) + " " + message;
+    log(level, file, line, message_with_user);
 }
