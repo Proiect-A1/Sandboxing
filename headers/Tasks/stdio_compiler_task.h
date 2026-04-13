@@ -4,8 +4,8 @@
 #include <string>
 
 #include <Tasks/task.h>
-#include <Utilities/utilities.h>
-#include <Utilities/submission_info_utilities.h>
+#include <Utilities/general_utilities.h>
+#include <Utilities/architecture_utilities.h>
 #include <chrono>
 #include <csignal>
 #include <cstdlib>
@@ -48,8 +48,9 @@ public:
     }
 
     bool check_permissions() override;
-    result_enum execute(int thread_id, int user_id) override;
-    void print_error(int thread_id, int user_id, const std::string& message) override;
+    result_enum execute(pthread_t thread_id, int user_id) override;
+    void print_error(pthread_t thread_id, int user_id, const std::string& message) override;
+    void print_log(pthread_t thread_id, int user_id, const std::string& message) override;
 };
 
 #endif
