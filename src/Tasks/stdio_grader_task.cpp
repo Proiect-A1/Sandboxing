@@ -1,0 +1,133 @@
+#include <Tasks/stdio_grader_task.h>
+result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
+  if(!check_permissions()){
+    print_error(thread_id, user_id, "Permission check failed");
+    return result_enum::FAIL;
+  }
+  if(user_id <= 0){
+    print_error(thread_id, user_id, "Invalid user ID");
+    return result_enum::FAIL;
+  }
+  if (system(("rm -rf " + architecture_utilities::get_run_dir(user_id)+ "/*").c_str()) != 0){
+    print_error(thread_id, user_id, "Failed to clean up run directory");
+    return result_enum::FAIL;
+  }
+
+  problem_manager& pm = problem_manager::get_instance();
+  submission_manager& sm = submission_manager::get_instance();
+
+  problem_metadata problem = pm.get_metadata(problem_id, rev_id);
+  if (problem.problem_id.empty())
+  {
+    print_error(thread_id, user_id, "Problem metadata not found");
+    return result_enum::FAIL;
+  }
+  if (!sm.count(submission_id))
+  {
+    print_error(thread_id, user_id, "Submission data not found");
+    return result_enum::FAIL;
+  }
+  submission_data submission = sm.get_submission(submission_id);
+  
+  std::string submission_exec_path = architecture_utilities::get_submission_exec_path(submission_id);
+  std::string problem_input_path = architecture_utilities::get_problem_input_path(problem_id, rev_id, test);
+  std::string problem_correct_output_path = architecture_utilities::get_problem_correct_output_path(problem_id, rev_id, test);
+  
+  std::string input_path = "input";
+  std::string output_path = "output";
+  std::string exec_path = "main_exec";
+  std::string correct_output_path = "correct_output";
+  std::string username = architecture_utilities::get_weak_user(user_id);
+
+  if (!general_utilities::copy_file(submission_exec_path, ::architecture_utilities::get_run_dir(user_id) + "/" + exec_path, 0755)){
+    print_error(thread_id, user_id, "Couldn't copy submission_exec to run directory");
+    return result_enum::FAIL;
+  }
+
+  if (!general_utilities::copy_file(problem_input_path, ::architecture_utilities::get_run_dir(user_id) + "/" + input_path, 0644)){
+    print_error(thread_id, user_id, "Couldn't copy problem input to run directory");
+    return result_enum::FAIL;
+  }
+
+  auto runner_task = stdio_runner_factory(
+    submission.language,
+    submission_id,
+    exec_path,
+    input_path,
+    output_path,
+    problem.time_limit,
+    problem.memory_limit,
+    0);
+  if(runner_task == nullptr){
+    print_error(thread_id, user_id, "Failed to create runner task");
+    return result_enum::FAIL;
+  }
+  
+  submission_test test_result = submission_manager::get_instance().get_submission(submission_id).tests[test];
+  test_result.result = runner_task->execute(thread_id, user_id);
+  test_result.time_used = runner_task->get_time_consumed();
+  test_result.memory_used = runner_task->get_memory_consumed();
+  
+  if (test_result.result == result_enum::FAIL)
+  {
+    print_error(thread_id, user_id, "Runner task execution failed");
+    return result_enum::FAIL;
+  }
+
+  if (test_result.result != result_enum::OK)
+  {
+    test_result.points = 0;
+    test_result.result = test_result.result;
+    sm.add_completed_test(submission_id, test, test_result);
+    return test_result.result;
+  }
+  
+  if (!general_utilities::copy_file(problem_correct_output_path, ::architecture_utilities::get_run_dir(user_id) + "/" + correct_output_path, 0644)){
+    print_error(thread_id, user_id, "Couldn't copy problem correct output to run directory");
+    return result_enum::FAIL;
+  }
+  
+  checker_task checker(input_path, output_path, correct_output_path, "");
+  
+  if (checker.execute(thread_id, user_id) != result_enum::OK){
+    print_error(thread_id, user_id, "Checker task execution failed");
+    return result_enum::FAIL;
+  }
+  
+  if (checker.get_point_percentage() == 1){
+    test_result.points = 1;
+    test_result.result = result_enum::OK;
+  } else if (checker.get_point_percentage() > 0){
+    test_result.points = 0.5;
+    test_result.result = result_enum::PA;
+  } else {
+    test_result.points = 0;
+    test_result.result = result_enum::WA;
+  }
+  
+  test_result.message = checker.get_message();
+  
+  // system("pwd");
+  // system(("cat " + output_path).c_str());
+  // system(("cat " + correct_output_path).c_str());
+  if (system(("rm -rf " + architecture_utilities::get_run_dir(user_id)+ "/*").c_str()) != 0){
+    print_error(thread_id, user_id, "Failed to clean up run directory");
+    return result_enum::FAIL;
+  }
+
+
+  // print_error(thread_id, user_id, "Test " + std::to_string(test) + " completed with result " + checker.get_message() + ", points: " + std::to_string(test_result.points) + ", time used: " + std::to_string(test_result.time_used) + " ms, memory used: " + std::to_string(test_result.memory_used) + " B");
+
+  sm.add_completed_test(submission_id, test, test_result);
+  
+  return test_result.result;
+}
+
+
+void stdio_grader_task:: print_log(pthread_t thread_id, int user_id,const std::string& message){
+  fprintf(stdout, "\033[93m[LOG  ]\033[0m STDIO_Grader task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
+}
+
+void stdio_grader_task:: print_error(pthread_t thread_id, int user_id,const std::string& message){
+  fprintf(stderr, "\033[31m[ERROR]\033[0m STDIO_Grader task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
+}
