@@ -2,10 +2,21 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
-#include "headers/json.hpp"
-#include "headers/IO.hpp"
+#include <Server/json.hpp>
+#include <Server/IO.hpp>
 #include <fcntl.h>
-#include "headers/tests.hpp"
+#include <Server/tests.hpp>
+
+#include <Tasks/evaluator_task.h>
+#include <Tasks/stdio_grader_task.h>
+#include <iostream>
+#include <Utilities/general_utilities.h>
+#include <Singletoni/problem_manager.h>
+#include <Singletoni/submission_manager.h>
+#include <vector>
+#include <Singletoni/user_queue.h>
+#include <Singletoni/task_queue.h>
+#include <pthread.h>
 
 #define EVENTS_BUFF_SIZE 4096
 
@@ -70,10 +81,41 @@ int accept_new_connection()
     return fd;
 }
 
-void * main_thread(void *arg)
+struct worker_thread_struct{
+  pthread_t thread_id;
+  task* current_task;
+};
+
+void *worker_thread(void *arg){
+  struct worker_thread_struct *wts = (struct worker_thread_struct *) arg;
+  pthread_t thread_id = wts->thread_id;
+  task* current_task = wts->current_task;
+
+  int user_id = user_queue::get_instance().pop();
+  current_task->print_log(thread_id, user_id, "Starting task execution");fflush(stdout);
+  current_task->execute(thread_id, user_id);
+  current_task->print_log(thread_id, user_id, "Finished task execution");fflush(stdout);
+  user_queue::get_instance().push(user_id);
+
+  delete current_task;
+  delete wts;
+  return nullptr;
+}
+
+void *main_thread(void *arg)
 {
     int thread_count = *((int *) arg);
     //campeaza coada
+    while (true){
+      task* next_task = task_queue::get_instance().pop();
+
+      worker_thread_struct* wts = new worker_thread_struct;
+      wts->current_task = next_task;
+
+      if(pthread_create(&(wts->thread_id), nullptr, worker_thread , (void *) wts) != 0) handle_error(1 , "pthread_create()");
+      if(pthread_detach(wts->thread_id) != 0) handle_error(1 , "pthread_detach()");
+    }
+
     return nullptr;
 }
 
@@ -138,6 +180,8 @@ int main(int argc , char *argv[])
     add_fd(sockfd , EPOLLIN);
     create_threads();
 
+    tests::test_problem_evaluation_protocol();
+   
     cerr << "[server] epoll set\n"; fflush(stderr);
     epoll_event ev[EVENTS_BUFF_SIZE];
     int num_events;

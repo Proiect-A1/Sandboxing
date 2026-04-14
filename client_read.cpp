@@ -2,7 +2,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
-#include "headers/json.hpp"
+#include <Server/json.hpp>
 #include <fcntl.h>
 
 #define handle_error(ret_code , ...) { fprintf(stderr , __VA_ARGS__); exit(ret_code); }
@@ -36,61 +36,13 @@ void send(int fd , string data)
     write(fd , data.c_str() , length);
 }
 
-void *read_thread(void *argv)
+string find_extension(string filename)
 {
-    char *ip;
-    short port;
-    read_args((char **) argv , ip , port);
-    sockaddr_in socket_address = prepare_ip(ip , port);
-    int sockfd = socket(AF_INET , SOCK_STREAM , 0); if(sockfd == -1) handle_error(1 , "socket()");
-    if(connect(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "connect()");
+    for(int i = filename.size() - 1 ; i >= 0 ; i--)
+        if(filename[i] == '.')
+            return filename.substr(i , string::npos);
 
-    // int length = 1e6; write(sockfd , &length , sizeof(length));
-
-    // for(int i = 1 ; i <= 1e6 ; i++)
-    // {
-    //     write(sockfd , "a" , 1);
-    //     if(i == 1e4)
-    //         return 0;
-    // }
-
-    // while(1)
-    // {
-    //     char ch;
-    //     string filename;
-    //     cin >> filename;
-
-    //     cerr << "[client] received path:" << filename << '\n'; fflush(stderr);
-
-    //     if(filename.find_last_of(".zip") == filename.size() - 1)
-    //     {
-    //         int fd = open(filename.c_str() , O_RDONLY);
-    //         int length = lseek(fd , 0 , SEEK_END);
-    //         lseek(fd , 0 , SEEK_SET);
-    //         write(sockfd , &length , sizeof(length));
-
-    //         for(int i = 0 ; i < length ; i++)
-    //         {
-    //             char ch; read(fd , &ch , sizeof(ch));
-    //             write(sockfd , &ch , sizeof(ch));
-    //         }
-
-    //         cerr << "[client] sent zip\n"; fflush(stderr);
-    //     }
-    //     else 
-    //     {
-    //         json j;
-    //         ifstream f(filename);
-    //         f >> j;
-
-    //         send(sockfd , j.dump());
-    //         cerr << "[client] sent file: " << j.dump() << '\n'; fflush(stderr);
-
-    //         f.close();
-    //     }
-    // }
-
-    return nullptr;
+    return string("");
 }
 
 int main(int argc , char *argv[])
@@ -112,7 +64,7 @@ int main(int argc , char *argv[])
 
         cerr << "[client] received path:" << filename << '\n'; fflush(stderr);
 
-        if(filename.find_last_of(".zip") == filename.size() - 1)
+        if(find_extension(filename) != ".json")
         {
             int fd = open(filename.c_str() , O_RDONLY);
             int length = lseek(fd , 0 , SEEK_END);

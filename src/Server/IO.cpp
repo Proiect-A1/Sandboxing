@@ -1,9 +1,13 @@
-#include "../headers/IO.hpp"
+#include <Server/IO.hpp>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include "../headers/exceptions.hpp"
+#include <Server/exceptions.hpp>
+#include <Singletoni/submission_manager.h>
+#include <Singletoni/task_queue.h>
+#include <Singletoni/user_queue.h>
+#include <Tasks/evaluator_task.h>
 
 using namespace std;
 
@@ -213,10 +217,10 @@ void IO::evaluate_request(json request , int fd)
     {
         char path[PATH_MAX];
         sprintf(path , "%s/submissions/%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str());
-        if(mkdir(path , 0700) == -1) handle_error(1 , "mkdir() evaluate_request()");
+        if(mkdir(path , 0770) == -1) handle_error(1 , "mkdir() evaluate_request()");
         sprintf(path , "%s/submissions/%s/main.%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str() , request["language"].get < string > ().c_str());
 
-        int submission_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0600); if(submission_fd == -1) handle_error(1 , "open() evaluate_request()");
+        int submission_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0660); if(submission_fd == -1) handle_error(1 , "open() evaluate_request()");
         int length; if(read_consistent_w_buffer(fd , &length , sizeof(length)) != sizeof(length)) handle_error(1 , "read_consistent() evaluate_request()");
 
         for(int i = 1 ; i <= length ; i++)
@@ -226,6 +230,24 @@ void IO::evaluate_request(json request , int fd)
         }
 
         close(submission_fd);
+
+        //insert in coada
+        //unsafe
+        //problema trebuie sa exista in memorie in momentul asta
+
+        submission_manager& sm = submission_manager::get_instance();
+
+        string submission_id = request["submissionId"].get < string > ();
+        int rev_id = request["revId"].get < int > ();
+        string problem_id = request["problemId"].get < string > ();
+
+        sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , 1);
+
+        submission_data submission = sm.get_submission(submission_id);
+
+        evaluator_task* eva = new evaluator_task(submission_id , problem_id , rev_id);
+
+        task_queue::get_instance().push(eva);
     }
     catch(exception &e)
     {

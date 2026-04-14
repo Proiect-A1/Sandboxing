@@ -11,4 +11,5 @@ namespace tests
     void test_throws();
     void run_tests();
     void test_send_problem_request();
+    void test_problem_evaluation_protocol();
 }

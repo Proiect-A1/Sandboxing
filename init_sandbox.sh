@@ -24,6 +24,7 @@ echo Creating folders...
 
 setfacl -m d:o::r-x .
 setfacl -m d:g:sudo:rwx .
+setfacl -m d:g:root:rwx .
 
 for i in ${folders[@]}
 do 
@@ -104,6 +105,8 @@ do
     echo "$name_amarat & $name_marat"
 done
 
+env_path="/etc/environment"
+
 if [ $(grep -c SANDBOX_WORKERS $2) -ne 0 ]
 then 
     sed -i -r "s/SANDBOX_WORKERS=[0-9]*/SANDBOX_WORKERS=$num/" $2 
@@ -111,6 +114,13 @@ else
     echo "export SANDBOX_WORKERS=$num" >> $2
 fi
 
+
+if [ $(grep -c SANDBOX_WORKERS $env_path) -ne 0 ]
+then 
+    sed -i -r "s/SANDBOX_WORKERS=[0-9]*/SANDBOX_WORKERS=$num/" $env_path 
+else 
+    echo "export SANDBOX_WORKERS=$num" >> $env_path
+fi
 
 if [ $(grep -c SANDBOX_PATH $2) -ne 0 ]
 then
@@ -125,6 +135,20 @@ then
     source $2
 fi 
 
+if [ $(grep -c SANDBOX_PATH $env_path) -ne 0 ]
+then
+    path=$(pwd | sed -E 's/\//\\\//g')
+    sed -i -r "s/SANDBOX_PATH=(\/.*)+/SANDBOX_PATH=$path/" $env_path 
+else 
+    echo "export SANDBOX_PATH=$(pwd)" >> $env_path
+fi
+
+if [ $(echo $2 | grep -c /.bashrc) -eq 1 ]
+then 
+    source $2
+fi 
+
 cat $2 | grep SANDBOX
+cat $env_path | grep SANDBOX
 echo Done
 

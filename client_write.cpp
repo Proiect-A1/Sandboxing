@@ -2,9 +2,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
-#include "headers/json.hpp"
+#include <json.hpp>
 #include <fcntl.h>
-#include "headers/IO.hpp"
+#include <IO.hpp>
 
 #define handle_error(ret_code , ...) { fprintf(stderr , __VA_ARGS__); exit(ret_code); }
 using namespace std;
