@@ -77,7 +77,7 @@ int main(int argc , char *argv[])
                 write(sockfd , &ch , sizeof(ch));
             }
 
-            cerr << "[client] sent zip\n"; fflush(stderr);
+            cerr << "[client] sent file\n"; fflush(stderr);
         }
         else 
         {
