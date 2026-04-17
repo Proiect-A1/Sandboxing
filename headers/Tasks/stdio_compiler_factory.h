@@ -10,7 +10,7 @@
 
 #include <Utilities/compilation_limits.h>
 
-std::unique_ptr<task> stdio_compiler_factory(
+stdio_compiler_task* stdio_compiler_factory(
     language_enum language,
     std::string submission_id,
     uint8_t priority = 0);
