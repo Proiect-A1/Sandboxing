@@ -35,8 +35,8 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     const char *sandbox_path = architecture_utilities::get_sandbox_path().c_str();
     if (sandbox_path == nullptr || sandbox_path[0] == '\0')
     {
-      print_error(thread_id, user_id, "Sandbox path is not set in environment variables");
-      return result_enum::FAIL;
+        print_error(thread_id, user_id, "Sandbox path is not set in environment variables");
+        return result_enum::FAIL;
     }
 
     const std::string run_username = architecture_utilities::get_weak_user(user_id);

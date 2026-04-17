@@ -157,10 +157,12 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
 
+
     const std::string jailed_exec_path = "./" + exec_file_name;
     char *const argv[] = {const_cast<char *>(jailed_exec_path.c_str()), nullptr};
     execv(jailed_exec_path.c_str(), argv);
     print_error(thread_id, user_id, "Failed to execute the program inside sandbox");
+
     _exit(127);
   }
 
