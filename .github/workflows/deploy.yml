@@ -49,8 +49,16 @@ jobs:
       - name: 🚀 Execute Remote Script
         run: |
           # Connect via SSH using the key and run the script
-          ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "bash /path/to/your/script.sh"
+          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          echo "Starting deployment..."
 
+          screen -D -R sandbox 
+            
+          cd ~/sandbox
+          sudo bash run_server.sh
+            
+           echo "Deployment successful!"
+            # ---------------------------------------
       - name: 🧹 Cleanup VPN
         if: always() 
         run: sudo killall openvpn
