@@ -18,7 +18,8 @@ public:
     void erase(std::string submission_id); /// sterge o sursa din map
     bool count(std::string submission_id); /// verifica daca exista sursa in map
     bool is_done(std::string submission_id); /// TEMPORAR E ECHIVALENT CU !COUNT, NU DISTINGE DINTRE SURSE INEXISTENTE SI SURSE TERMINATE
-    void add_completed_test(std::string submission_id, int test_id, submission_test test_result); /// marcheaza ca s-a terminat de evaluat un test
+    bool add_completed_test(std::string submission_id, int test_id, submission_test test_result); /// marcheaza ca s-a terminat de evaluat un test
+    bool set_verdict(std::string submission_id, result_enum result, float points, float time_used, long long memory_used);
 };
 
 #endif

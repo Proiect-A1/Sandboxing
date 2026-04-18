@@ -1,5 +1,7 @@
 
 #include <Utilities/general_utilities.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 std::string general_utilities::left_zero_pad (int number, int width) {
   std::string num_str = std::to_string(number);
@@ -37,4 +39,20 @@ std::string general_utilities::enum_to_string(result_enum result){
       case result_enum::OTHER: return "OTHER";
     }
     return "TROLLEZI";
+}
+
+bool general_utilities::is_file(const std::string& path){
+    struct stat buff;
+    if(stat(path.c_str(),&buff)==-1) return false;
+    return (buff.st_mode & S_IFMT) == S_IFREG;
+}
+
+bool general_utilities::is_folder(const std::string& path){
+    struct stat buff;
+    if(stat(path.c_str(),&buff)==-1) return false;
+    return (buff.st_mode & S_IFMT) == S_IFDIR;
+}
+
+bool general_utilities::is_executable(const std::string& path){
+    return access(path.c_str(),X_OK)==0; // 0 if successful, -1 otherwise
 }

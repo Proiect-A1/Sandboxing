@@ -27,5 +27,10 @@ namespace architecture_utilities {
   std::string get_submission_exec_path(std::string submission_id, language_enum language = language_enum::CPP);
   std::string get_problem_input_path(std::string submission_id, int rev_id, int test);
   std::string get_problem_correct_output_path(std::string submission_id, int rev_id, int test);
+  std::string architecture_utilities::get_problem_data_folder(const std::string& problem_id, int rev_id);
+  std::string architecture_utilities::get_problem_script_folder(const std::string& problem_id, int rev_id);
+  std::string architecture_utilities::get_problem_validator_exec_path(const std::string& problem_id, int rev_id, const std::string& val_exec_name);
+  std::string architecture_utilities::get_problem_generator_exec_path(const std::string& problem_id, int rev_id, const std::string& gen_exec_name);
+  std::string architecture_utilities::get_problem_source_exec_path(const std::string& problem_id, int rev_id, const std::string& src_exec_name);
 }
 #endif // ARCHITECTURE_UTILITIES_H

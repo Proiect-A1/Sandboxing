@@ -3,9 +3,9 @@
 #include <vector>
 #include <string>
 struct test_metadata{
-    std::string interactor_exec_path;
-    std::string checker_exec_path;
-    std::string validator_exec_path;
+    std::vector<std::string> interactor_args; /// primul argument din vector e path-ul
+    std::vector<std::string> generator_args;
+    std::vector<std::string> validator_args;
     std::vector<int> groups;
 };
 #endif

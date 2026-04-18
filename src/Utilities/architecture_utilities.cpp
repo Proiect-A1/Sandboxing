@@ -83,3 +83,23 @@ std::string architecture_utilities::get_problem_input_path(std::string problem_i
 std::string architecture_utilities::get_problem_correct_output_path(std::string problem_id, int rev_id, int test) {
   return get_sandbox_path() + "/correct_outputs/" + problem_id + "." + std::to_string(rev_id) + "/" + general_utilities::left_zero_pad(test, 3) + ".ok";
 }
+
+std::string architecture_utilities::get_problem_data_folder(const std::string& problem_id, int rev_id){
+  return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id);
+}
+
+std::string architecture_utilities::get_problem_script_folder(const std::string& problem_id, int rev_id){
+  return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id)+"/metadata/tests.gen";
+}
+
+std::string architecture_utilities::get_problem_validator_exec_path(const std::string& problem_id, int rev_id, const std::string& val_exec_name){
+  return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id)+"/files/validators/"+val_exec_name;
+}
+
+std::string architecture_utilities::get_problem_generator_exec_path(const std::string& problem_id, int rev_id, const std::string& gen_exec_name){
+  return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id)+"/files/generators/"+gen_exec_name;
+}
+
+std::string architecture_utilities::get_problem_source_exec_path(const std::string& problem_id, int rev_id, const std::string& src_exec_name){
+  return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id)+"/files/sources/"+src_exec_name;
+}

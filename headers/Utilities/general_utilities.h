@@ -12,6 +12,9 @@
 namespace general_utilities{
   std::string left_zero_pad (int number, int width);
   bool copy_file(const std::string& from, const std::string& to, mode_t mode);
+  bool is_folder(const std::string& path);
+  bool is_file(const std::string& path);
+  bool is_executable(const std::string& path);
   std::string enum_to_string(result_enum result);
   template <typename T>
   struct pointer_compare {
