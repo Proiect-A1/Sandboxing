@@ -1,0 +1,56 @@
+name: VPN Deploy and Run Script
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Install OpenVPN
+        run: sudo apt-get update && sudo apt-get install -y openvpn
+
+      - name: 🌐 Connect to VPN
+        run: |
+          # 1. Write the VPN config to a file from GitHub Secrets
+          echo "${{ secrets.VPN_CONFIG }}" > vpn_config.ovpn
+          
+          # 2. Start OpenVPN in the background (--daemon)
+          # Note: No --auth-user-pass flag is used here
+          sudo openvpn --config vpn_config.ovpn --daemon
+          
+          # 3. Wait for the connection to establish
+          echo "Waiting for VPN connection..."
+          sleep 15
+          
+          # 4. Verify the connection (Optional, for debugging in GitHub Actions logs)
+          ip a
+
+      - name: 🔑 Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh/
+          
+          # Write the SSH private key to a file
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          
+          # Strict permissions are REQUIRED for SSH keys
+          chmod 600 ~/.ssh/deploy_key
+          
+          # Pre-trust the server's fingerprint to prevent the prompt from hanging
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: 🚀 Execute Remote Script
+        run: |
+          # Connect via SSH using the key and run the script
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "bash /path/to/your/script.sh"
+
+      - name: 🧹 Cleanup VPN
+        if: always() 
+        run: sudo killall openvpn
