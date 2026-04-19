@@ -19,31 +19,17 @@ jobs:
 
       - name: 🌐 Connect to VPN
         run: |
-          # 1. Write the VPN config to a file from GitHub Secrets
           echo "${{ secrets.VPN_CONFIG }}" > vpn_config.ovpn
-          
-          # 2. Start OpenVPN in the background (--daemon)
-          # Note: No --auth-user-pass flag is used here
           sudo openvpn --config vpn_config.ovpn --daemon
-          
-          # 3. Wait for the connection to establish
           echo "Waiting for VPN connection..."
           sleep 15
-          
-          # 4. Verify the connection (Optional, for debugging in GitHub Actions logs)
           ip a
 
       - name: 🔑 Configure SSH Key
         run: |
           mkdir -p ~/.ssh/
-          
-          # Write the SSH private key to a file
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          
-          # Strict permissions are REQUIRED for SSH keys
           chmod 600 ~/.ssh/deploy_key
-          
-          # Pre-trust the server's fingerprint to prevent the prompt from hanging
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
       - name: 🚀 Prep
@@ -57,7 +43,7 @@ jobs:
           git reset --hard sandbox/dev
           git clean -fd
           echo 1
-          screen -S sandbox -X quit 2>/dev/null || true 
+          screen -S sandbox -X quit 2>/dev/null || true
           echo 2
           screen -S sandbox -d -m
           echo 3
@@ -78,9 +64,5 @@ jobs:
           EOF
 
       - name: 🧹 Cleanup VPN
-        if: always() 
-        run: sudo killall openvpn
-           
-      - name: 🧹 Cleanup VPN
-        if: always() 
+        if: always()
         run: sudo killall openvpn
