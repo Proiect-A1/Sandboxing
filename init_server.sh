@@ -7,5 +7,3 @@ then
 fi
 
 bash init.sh 11 ~/.bashrc
-
-#try again

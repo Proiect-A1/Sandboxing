@@ -43,7 +43,7 @@ jobs:
           git reset --hard sandbox/dev
           git clean -fd
           echo 1
-          screen -S sandbox -X quit 2>/dev/null || true
+          screen -S sandbox -X quit 2>/dev/null
           echo 2
           screen -S sandbox -d -m
           echo 3
@@ -58,7 +58,7 @@ jobs:
           echo "Starting exec..."
           set -e
           echo 5
-          screen -S sandbox -X quit 2>/dev/null || true
+          screen -S sandbox -X quit 2>/dev/null
           echo 6
           screen -S sandbox -d -m
           echo 7
