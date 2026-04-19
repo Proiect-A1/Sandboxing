@@ -51,41 +51,43 @@ jobs:
           # Connect via SSH using the key and run the script
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           echo "Starting deployment..."
-
+          
           set -e
-
+          
           cd ~/sandbox
           git fetch --all
           git checkout dev
           git reset --hard sandbox/dev
           git clean -fd
-
+          
           echo 1
-          screen -S sandbox -X quit 2>&1 > /dev/null
+          # || true prevents a crash if the screen doesn't exist
+          screen -S sandbox -X quit 2>/dev/null || true 
+          
           echo 2
           screen -S sandbox -d -m
+          
           echo 3
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init.sh 9 ~/.bashrc \n'
-          echo 4
           
-          echo "Deployment successful!"
+          echo 4
+          echo "Prep successful!"
           EOF
-            
+
       - name: 🚀 Exec
         run: |
           # Connect via SSH using the key and run the script
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          echo "Starting deployment..."
-
+          echo "Starting exec..."
+          
           set -e
-
+          
           echo 5
-          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           echo 6
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash run_server.sh \n'
           
-           echo "Deployment successful!"
-           EOF
+          echo "Deployment successful!"
+          EOF
            
       - name: 🧹 Cleanup VPN
         if: always() 
