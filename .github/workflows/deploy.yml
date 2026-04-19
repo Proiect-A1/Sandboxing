@@ -62,7 +62,7 @@ jobs:
           echo 6
           screen -S sandbox -d -m
           echo 7
-          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash run_server.sh \n'
+          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo -E bash run_server.sh \n'
           echo 8
           echo "Deployment successful!"
           EOF
