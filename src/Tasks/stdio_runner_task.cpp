@@ -56,14 +56,16 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     return result_enum::FAIL;
   }
 
-
-  struct passwd *pwp = getpwnam(run_username.c_str());
-  if (pwp == nullptr)
+  struct passwd pw_struct;
+  struct passwd *pwp;
+  char pw_buf[8192];
+  int pw_res = getpwnam_r(run_username.c_str(), &pw_struct, pw_buf, sizeof(pw_buf), &pwp);
+  if (pw_res != 0 || pwp == nullptr)
   {
     print_error(thread_id, user_id, "Failed to get user information for sandbox user");
     return result_enum::FAIL;
   }
-  struct passwd pw = *pwp;
+  struct passwd pw = pw_struct;
 
   print_log(thread_id, user_id, "Waiting for memory allocation of " + std::to_string(memory_limit) + " bytes");
   memory_manager &memory = memory_manager::get_instance();

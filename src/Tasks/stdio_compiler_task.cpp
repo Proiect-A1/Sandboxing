@@ -47,8 +47,11 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     const std::string source_run_path = run_dir + "/" + source_file_name;
     const std::string output_run_path = run_dir + "/" + output_file_name;
 
-    struct passwd *pw = getpwnam(run_username.c_str());
-    if (pw == nullptr)
+    struct passwd pw_struct;
+    struct passwd *pw;
+    char pw_buf[8192];
+    int pw_res = getpwnam_r(run_username.c_str(), &pw_struct, pw_buf, sizeof(pw_buf), &pw);
+    if (pw_res != 0 || pw == nullptr)
     {
       print_error(thread_id, user_id, "Failed to get user information for sandbox user");
       return result_enum::FAIL;
