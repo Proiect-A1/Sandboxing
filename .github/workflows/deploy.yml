@@ -67,7 +67,7 @@ jobs:
           echo 3
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init.sh 9 ~/.bashrc \n'
           echo 4
-          exit
+          exit 0
           echo 5
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           echo 6
