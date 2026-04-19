@@ -19,11 +19,6 @@ jobs:
 
       - name: 🌐 Connect to VPN
         run: |
-          screen -S vpn -X quit 2>&1 > /dev/null
-          screen -S vpn -d -m
-          screen -S vpn -X stuff 'sudo openvpn /home/sochu/Documents/openvpn/raspy.ovpn\n'
-          
-          
           # 1. Write the VPN config to a file from GitHub Secrets
           echo "${{ secrets.VPN_CONFIG }}" > vpn_config.ovpn
           
@@ -64,7 +59,13 @@ jobs:
           git checkout dev
           git reset --hard sandbox/dev
           git clean -fd
-          sudo bash run_server.sh
+
+          screen -S sandbox -X quit 2>&1 > /dev/null
+          screen -S sandbox -d -m
+          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init.sh 9 ~/.bashrc \n'
+          exit
+          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash run_server.sh \n'
           
         
            echo "Deployment successful!"
