@@ -14,22 +14,23 @@ jobs:
       - name: 🛒 Checkout code
         uses: actions/checkout@v4
 
+      - name: 🔐 Install OpenVPN
+        run: sudo apt-get update && sudo apt-get install -y openvpn
+
+      - name: 🌐 Connect to VPN
+        run: |
+          echo "${{ secrets.VPN_CONFIG }}" > vpn_config.ovpn
+          sudo openvpn --config vpn_config.ovpn --daemon
+          echo "Waiting for VPN connection..."
+          sleep 15
+          ip a
+
       - name: 🔑 Configure SSH Key
         run: |
           mkdir -p ~/.ssh/
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-
-      - name: 🚀 VPN
-        run: |
-          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          echo "Starting deployment..."
-          set -e
-          screen -S vpn -X quit 2>/dev/null 
-          screen -S vpn -d -m 
-          screen -S vpn -X stuff 'sudo openvpn ~/Documents/openvpn/raspy.ovpn'
-          EOF
 
       - name: 🚀 Prep
         run: |
@@ -42,7 +43,7 @@ jobs:
           git reset --hard sandbox/dev
           git clean -fd
           echo 1
-          screen -S sandbox -X quit 2>/dev/null 
+          screen -S sandbox -X quit 2>/dev/null || true
           echo 2
           screen -S sandbox -d -m
           echo 3
