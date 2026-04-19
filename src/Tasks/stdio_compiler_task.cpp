@@ -32,8 +32,8 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
       return result_enum::FAIL;
     }
 
-    const char *sandbox_path = architecture_utilities::get_sandbox_path().c_str();
-    if (sandbox_path == nullptr || sandbox_path[0] == '\0')
+    const std::string sandbox_path = architecture_utilities::get_sandbox_path();
+    if (sandbox_path.empty())
     {
         print_error(thread_id, user_id, "Sandbox path is not set in environment variables");
         return result_enum::FAIL;
