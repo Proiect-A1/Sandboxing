@@ -70,8 +70,8 @@ jobs:
           
         
            echo "Deployment successful!"
-            # ---------------------------------------
-            EOF
+           EOF
+            
       - name: 🚀 Exec
         run: |
           # Connect via SSH using the key and run the script
@@ -85,10 +85,8 @@ jobs:
           echo 6
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash run_server.sh \n'
           
-        
            echo "Deployment successful!"
-            # ---------------------------------------
-          EOF
+           EOF
       - name: 🧹 Cleanup VPN
         if: always() 
         run: sudo killall openvpn
