@@ -95,7 +95,7 @@ int IO::create_socket()
     sockaddr_in bd_address = prepare_ip(bd_ip , bd_port);
     int sockfd = socket(AF_INET , SOCK_STREAM  , 0); if(sockfd == -1) handle_error(1 , "socket() create_socket()")
     if(connect(sockfd , (sockaddr *) &bd_address , sizeof(bd_address)) == -1) handle_error(1 , "connect() create_socket()");
-    fprintf(stderr , "[thread] connected to %s:%hd\n" , inet_ntoa(bd_address.sin_addr) , ntohs(bd_address.sin_port)); fflush(stderr);
+    LOG_INFO(std::string("[thread] connected to ") + inet_ntoa(bd_address.sin_addr) + ":" + std::to_string(ntohs(bd_address.sin_port)));
     return sockfd;
 }
 

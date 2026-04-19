@@ -1,6 +1,5 @@
 #include <Tasks/stdio_runner_task.h>
 
-
 bool stdio_runner_task::check_permissions()
 {
   //trebuie facut ceva calumea aici
@@ -26,20 +25,20 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
 
   if (!check_permissions())
   {
-    print_error(thread_id, user_id, "Permission check failed");
+    LOG_ERROR_USER(user_id, "Permission check failed");
     return result_enum::FAIL;
   }
 
   if (user_id <= 0)
   {
-    print_error(thread_id, user_id, "Invalid user ID");
+    LOG_ERROR_USER(user_id, "Invalid user ID");
     return result_enum::FAIL;
   }
 
-  const char *sandbox_path = architecture_utilities::get_sandbox_path().c_str();
-  if (sandbox_path == nullptr || sandbox_path[0] == '\0')
+  const std::string sandbox_path = architecture_utilities::get_sandbox_path();
+  if (sandbox_path.empty())
   {
-    print_error(thread_id, user_id, "Sandbox path is not set in environment variables");
+    LOG_ERROR_USER(user_id, "Sandbox path is not set in environment variables");
     return result_enum::FAIL;
   }
 
@@ -52,7 +51,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
 
   if (exec_file_name.empty() || input_file_name.empty() || output_file_name.empty())
   {
-    print_error(thread_id, user_id, "Invalid file paths");
+    LOG_ERROR_USER(user_id, "Invalid file paths");
     return result_enum::FAIL;
   }
 
@@ -60,16 +59,16 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   struct passwd *pwp = getpwnam(run_username.c_str());
   if (pwp == nullptr)
   {
-    print_error(thread_id, user_id, "Failed to get user information for sandbox user");
+    LOG_ERROR_USER(user_id, "Failed to get user information for sandbox user");
     return result_enum::FAIL;
   }
   struct passwd pw = *pwp;
 
-  print_log(thread_id, user_id, "Waiting for memory allocation of " + std::to_string(memory_limit) + " bytes");
+  LOG_INFO_USER(user_id, "Waiting for memory allocation of " + std::to_string(memory_limit) + " B");
   memory_manager &memory = memory_manager::get_instance();
   const unsigned long long requested_memory = memory_limit;
   memory.blocking_request_memory(requested_memory);
-  print_log(thread_id, user_id, "Memory allocated " + std::to_string(memory_limit) + " bytes");
+  LOG_INFO_USER(user_id, "Memory allocated " + std::to_string(memory_limit) + " B");
 
   const auto started_at = std::chrono::steady_clock::now();
 
@@ -78,7 +77,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   if (pid < 0)
   {
     memory.release_memory(requested_memory);
-    print_error(thread_id, user_id, "Failed to fork process for execution");
+    LOG_ERROR_USER(user_id, "Failed to fork process for execution");
     return result_enum::FAIL;
   }
 
@@ -91,31 +90,31 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
     if (chdir(run_dir.c_str()) != 0)
     {
-      print_error(thread_id, user_id, "Failed to change directory to run directory");
+      LOG_ERROR_USER(user_id, "Failed to change directory to run directory");
         _exit(127);
     }
     
     if (!(architecture_utilities::change_root_to_sandbox()))
     {
-      print_error(thread_id, user_id, "Failed to change root to sandbox");
+      LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
       _exit(127);
     }
 
     if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
     {
-      print_error(thread_id, user_id, "Failed to initialize group access inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
       _exit(127);
     }
 
     if (setgid(pw.pw_gid) != 0)
     {
-      print_error(thread_id, user_id, "Failed to set group ID inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
       _exit(127);
     }
 
     if (setuid(pw.pw_uid) != 0)
     {
-      print_error(thread_id, user_id, "Failed to set user ID inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
       _exit(127);
     }
 
@@ -125,7 +124,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     int in_fd = open(jailed_input_path.c_str(), O_RDONLY);
     if (in_fd < 0)
     {
-      print_error(thread_id, user_id, "Failed to open input file inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox");
       _exit(127);
     }
     
@@ -133,7 +132,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     if (out_fd < 0)
     {
       close(in_fd);
-      print_error(thread_id, user_id, "Failed to open output file inside sandbox " + run_username);
+      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username);
       _exit(127);
     }
 
@@ -141,7 +140,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     {
       close(in_fd);
       close(out_fd);
-      print_error(thread_id, user_id, "Failed to redirect input/output inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to redirect input/output inside sandbox");
       _exit(127);
     }
 
@@ -153,7 +152,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     memory_rl.rlim_max = (rlim_t)memory_limit;
     if (setrlimit(RLIMIT_AS, &memory_rl) != 0)
     {
-      print_error(thread_id, user_id, "Failed to set memory limit");
+      LOG_ERROR_USER(user_id, "Failed to set memory limit");
       _exit(127);
     }
 
@@ -161,7 +160,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     const std::string jailed_exec_path = "./" + exec_file_name;
     char *const argv[] = {const_cast<char *>(jailed_exec_path.c_str()), nullptr};
     execv(jailed_exec_path.c_str(), argv);
-    print_error(thread_id, user_id, "Failed to execute the program inside sandbox");
+    LOG_ERROR_USER(user_id, "Failed to execute the program inside sandbox");
 
     _exit(127);
   }
@@ -185,7 +184,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       killpg(pid, SIGKILL);
       wait4(pid, &status, 0, &usage);
       memory.release_memory(requested_memory);
-      print_error(thread_id, user_id, "Error while waiting for child process");
+      LOG_ERROR_USER(user_id, "Error while waiting for child process");
       return result_enum::FAIL;
     }
 
@@ -227,7 +226,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     }
     if (code == 127)
     {
-      print_error(thread_id, user_id, "Execution failed inside sandbox");
+      LOG_ERROR_USER(user_id, std::string("Execution failed inside sandbox"));
       return result_enum::FAIL;
     }
     return result_enum::RTE;
@@ -244,12 +243,4 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   }
 
   return result_enum::OK;
-}
-
-void stdio_runner_task:: print_log(pthread_t thread_id, int user_id,const std::string& message){
-  fprintf(stdout, "\033[93m[LOG  ]\033[0m STDIO_Runner task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
-}
-
-void stdio_runner_task:: print_error(pthread_t thread_id, int user_id,const std::string& message){
-  fprintf(stderr, "\033[31m[ERROR]\033[0m STDIO_Runner task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
 }

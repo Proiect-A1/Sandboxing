@@ -86,15 +86,14 @@ namespace tests
             catch(exception &e)
             {
                 exception &f = e;
-                cerr << endl << "here" << f.what() << endl;
+                LOG_DEBUG(std::string("here") + f.what());
                 throw;
             }
             
         }
         catch(std::exception &e)
         {
-            cerr << e.what();
-            fflush(stderr);
+            LOG_ERROR(e.what());
         }
     }
 
