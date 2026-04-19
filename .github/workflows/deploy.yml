@@ -68,9 +68,8 @@ jobs:
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init.sh 9 ~/.bashrc \n'
           echo 4
           
-        
-           echo "Deployment successful!"
-           EOF
+          echo "Deployment successful!"
+          EOF
             
       - name: 🚀 Exec
         run: |
@@ -87,6 +86,7 @@ jobs:
           
            echo "Deployment successful!"
            EOF
+           
       - name: 🧹 Cleanup VPN
         if: always() 
         run: sudo killall openvpn
