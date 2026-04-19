@@ -15,7 +15,7 @@ fi
 mkdir sandbox 2> /dev/null
 cp init_sandbox.sh ./sandbox
 cp get_dependencies.sh ./sandbox
-g++ main.cpp src/* -o main;
-g++ client.cpp src/* -o client;
+#g++ main.cpp src/* -o main;
+#g++ client.cpp src/* -o client;
 
 cd sandbox && bash init_sandbox.sh $1 $2
