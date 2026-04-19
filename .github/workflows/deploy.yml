@@ -52,9 +52,13 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           echo "Starting deployment..."
 
-          screen -D -R sandbox 
+          
             
           cd ~/sandbox
+          git fetch --all
+          git checkout dev
+          git reset --hard sandbox/dev
+          git clean -fd
           sudo bash run_server.sh
             
            echo "Deployment successful!"
