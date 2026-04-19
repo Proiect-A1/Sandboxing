@@ -1,1 +1,6 @@
 logs/
+/client
+/sandbox/
+/main
+/request.json
+/Basic testing

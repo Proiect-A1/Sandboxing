@@ -1,0 +1,72 @@
+name: VPN Deploy and Run Script
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Install OpenVPN
+        run: sudo apt-get install -y openvpn
+
+      - name: 🌐 Connect to VPN
+        run: |
+          echo "${{ secrets.VPN_CONFIG }}" > vpn_config.ovpn
+          sudo openvpn --config vpn_config.ovpn --daemon
+          echo "Waiting for VPN connection..."
+          sleep 15
+          ip a
+
+      - name: 🔑 Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: 🚀 Prep
+        run: |
+          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          echo "Starting deployment..."
+          set -e
+          cd ~/sandbox
+          git fetch --all
+          git checkout dev
+          git reset --hard sandbox/dev
+          git clean -fd
+          echo 1
+          screen -S sandbox -X quit 2>/dev/null
+          echo 2
+          screen -S sandbox -d -m
+          echo 3
+          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init_server.sh \n'
+          echo 4
+          echo "Prep successful!"
+          EOF
+
+      - name: 🚀 Exec
+        run: |
+          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          echo "Starting exec..."
+          set -e
+          echo 5
+          screen -S sandbox -X quit 2>/dev/null
+          echo 6
+          screen -S sandbox -d -m
+          echo 7
+          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo -E bash run_server.sh \n'
+          echo 8
+          echo "Deployment successful!"
+          EOF
+
+      - name: 🧹 Cleanup VPN
+        if: always()
+        run: sudo killall openvpn
