@@ -57,11 +57,13 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           echo "Starting exec..."
           set -e
-          screen -S sandbox -X quit 2>/dev/null || true
           echo 5
-          screen -S sandbox -d -m
+          screen -S sandbox -X quit 2>/dev/null || true
           echo 6
+          screen -S sandbox -d -m
+          echo 7
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash run_server.sh \n'
+          echo 8
           echo "Deployment successful!"
           EOF
 
