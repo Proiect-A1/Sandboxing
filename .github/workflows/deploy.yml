@@ -71,6 +71,7 @@ jobs:
         
            echo "Deployment successful!"
             # ---------------------------------------
+            EOF
       - name: 🚀 Exec
         run: |
           # Connect via SSH using the key and run the script
@@ -87,7 +88,7 @@ jobs:
         
            echo "Deployment successful!"
             # ---------------------------------------
-      
+          EOF
       - name: 🧹 Cleanup VPN
         if: always() 
         run: sudo killall openvpn
