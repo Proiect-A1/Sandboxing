@@ -52,15 +52,20 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           echo "Starting deployment..."
 
-          
-            
+          set -e
+
           cd ~/sandbox
           git fetch --all
           git checkout dev
           git reset --hard sandbox/dev
           git clean -fd
           sudo bash run_server.sh
-            
+          
+          screen -S vpn -X quit 2>&1 > /dev/null
+          screen -S vpn -d -m
+          screen -S vpn -X stuff 'sudo openvpn /home/sochu/Documents/openvpn/raspy.ovpn\n'
+          
+          
            echo "Deployment successful!"
             # ---------------------------------------
       - name: 🧹 Cleanup VPN
