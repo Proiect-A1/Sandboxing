@@ -5,10 +5,8 @@
 #include <json.hpp>
 #include <fcntl.h>
 #include <IO.hpp>
-
-#define handle_error(ret_code , ...) { fprintf(stderr , __VA_ARGS__); exit(ret_code); }
+#include <Server/header_helper.hpp>
 using namespace std;
-using json = nlohmann::json;
 
 
 void read_args(char **argv , char *&ip , short &port)

@@ -9,7 +9,8 @@ enum class LogLevel {
     INFO,
     WARNING,
     ERROR,
-    DEBUG
+    DEBUG,
+    FATAL
 };
 
 class Logger {
@@ -40,10 +41,12 @@ public:
 #define LOG_WARNING(msg) Logger::get_instance().log(LogLevel::WARNING, __FILE__, __LINE__, msg)
 #define LOG_ERROR(msg)   Logger::get_instance().log(LogLevel::ERROR,   __FILE__, __LINE__, msg)
 #define LOG_DEBUG(msg)   Logger::get_instance().log(LogLevel::DEBUG,   __FILE__, __LINE__, msg)
+#define LOG_FATAL(msg)   Logger::get_instance().log(LogLevel::FATAL,   __FILE__, __LINE__, msg)
 
 #define LOG_INFO_USER(user_id, msg)    Logger::get_instance().log(LogLevel::INFO,    __FILE__, __LINE__, user_id, msg)
 #define LOG_WARNING_USER(user_id, msg) Logger::get_instance().log(LogLevel::WARNING, __FILE__, __LINE__, user_id, msg)
 #define LOG_ERROR_USER(user_id, msg)   Logger::get_instance().log(LogLevel::ERROR,   __FILE__, __LINE__, user_id, msg)
 #define LOG_DEBUG_USER(user_id, msg)   Logger::get_instance().log(LogLevel::DEBUG,   __FILE__, __LINE__, user_id, msg)
+#define LOG_FATAL_USER(user_id, msg)   Logger::get_instance().log(LogLevel::FATAL,   __FILE__, __LINE__, user_id, msg)
 
 #endif // LOGGER_H

@@ -3,11 +3,9 @@
 #include <arpa/inet.h>
 #include <sys/epoll.h>
 #include <Server/json.hpp>
+#include <Server/header_helper.hpp>
 #include <fcntl.h>
-
-#define handle_error(ret_code , ...) { fprintf(stderr , __VA_ARGS__); exit(ret_code); }
 using namespace std;
-using json = nlohmann::json;
 
 
 void read_args(char **argv , char *&ip , short &port)
@@ -62,7 +60,7 @@ int main(int argc , char *argv[])
         string filename;
         cin >> filename;
 
-        cerr << "[client] received path:" << filename << '\n'; fflush(stderr);
+        LOG_INFO(std::string("received path: ") + filename);
 
         if(find_extension(filename) != ".json")
         {
@@ -77,7 +75,7 @@ int main(int argc , char *argv[])
                 write(sockfd , &ch , sizeof(ch));
             }
 
-            cerr << "[client] sent file\n"; fflush(stderr);
+            LOG_INFO("sent file");
         }
         else 
         {
@@ -86,7 +84,7 @@ int main(int argc , char *argv[])
             f >> j;
 
             send(sockfd , j.dump());
-            cerr << "[client] sent file: " << j.dump() << '\n'; fflush(stderr);
+            LOG_INFO(std::string("sent file: ") + j.dump());
 
             f.close();
         }

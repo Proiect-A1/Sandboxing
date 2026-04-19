@@ -73,6 +73,7 @@ const char* Logger::level_to_string(LogLevel level) {
         case LogLevel::WARNING: return "WARNING";
         case LogLevel::ERROR:   return "ERROR";
         case LogLevel::DEBUG:   return "DEBUG";
+        case LogLevel::FATAL:   return "FATAL";
         default:                return "UNKNOWN";
     }
 }
@@ -83,6 +84,7 @@ const char *level_to_color(LogLevel level) {
         case LogLevel::WARNING: return "\033[33m";
         case LogLevel::ERROR:   return "\033[38;2;255;0;0m";
         case LogLevel::DEBUG:   return "\033[36m";
+        case LogLevel::FATAL:   return "\033[35m";
         default:                return "\033[0m";
     }
 }

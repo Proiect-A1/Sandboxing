@@ -16,14 +16,12 @@
 #include <vector>
 #include <Singletoni/user_queue.h>
 #include <Singletoni/task_queue.h>
+#include <Server/header_helper.hpp>
 #include <pthread.h>
 
 #define EVENTS_BUFF_SIZE 4096
 
-#define handle_error(ret_code , ...) { fprintf(stderr , __VA_ARGS__); exit(ret_code); }
-
 using namespace std;
-using json = nlohmann::json;
 
 char *ip;
 short port;
@@ -53,7 +51,7 @@ void rem_fd(int fd)
     sockaddr_in client_address;
     socklen_t len_client_address = sizeof(client_address);
     if(getpeername(fd , (sockaddr *) &client_address , &len_client_address) == -1) handle_error(1 , "getperrname()");
-    fprintf(stderr , "[server] connection closed by %s:%hu\n" , inet_ntoa(client_address.sin_addr) , ntohs(client_address.sin_port)); fflush(stderr);
+    LOG_INFO(std::string("Connection closed by ") + inet_ntoa(client_address.sin_addr) + ":" + std::to_string(ntohs(client_address.sin_port)));
 }
 
 void set_socket()
@@ -63,7 +61,7 @@ void set_socket()
     int on = 1; if(setsockopt(sockfd , SOL_SOCKET , SO_REUSEPORT , (const char *) &on , sizeof(on)) == -1) handle_error(1 , "setsockopt()")
     if(bind(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "bind()");
     if(listen(sockfd , 5) == -1) handle_error(1 , "listen()")
-    fprintf(stderr , "[server] listening socket on %s:%hd\n" , inet_ntoa(socket_address.sin_addr) , ntohs(socket_address.sin_port)); fflush(stderr);
+    LOG_INFO(std::string("Listening socket on ") + inet_ntoa(socket_address.sin_addr) + ":" + std::to_string(ntohs(socket_address.sin_port)));
 }
 
 void create_epoll()
@@ -77,7 +75,7 @@ int accept_new_connection()
     socklen_t len_client_address = sizeof(client_address);
     int fd;
     if((fd = accept(sockfd , (sockaddr *) &client_address , &len_client_address)) == -1) handle_error(1 , "accept()");
-    fprintf(stderr , "[server] connection received from %s:%hu\n" , inet_ntoa(client_address.sin_addr) , ntohs(client_address.sin_port)); fflush(stderr);
+    LOG_INFO(std::string("Connection received from ") + inet_ntoa(client_address.sin_addr) + ":" + std::to_string(ntohs(client_address.sin_port)));
     return fd;
 }
 
@@ -92,9 +90,9 @@ void *worker_thread(void *arg){
   task* current_task = wts->current_task;
 
   int user_id = user_queue::get_instance().pop();
-  current_task->print_log(thread_id, user_id, "Starting task execution");fflush(stdout);
-  current_task->execute(thread_id, user_id);
-  current_task->print_log(thread_id, user_id, "Finished task execution");fflush(stdout);
+  LOG_INFO_USER(user_id, "Starting task execution");
+  const result_enum task_result = current_task->execute(thread_id, user_id);
+  LOG_INFO_USER(user_id, "Finished task execution with result " + general_utilities::enum_to_string(task_result));
   user_queue::get_instance().push(user_id);
 
   delete current_task;
@@ -151,11 +149,11 @@ void receive_request(int client_fd)
         }
         
         json j = json::parse(request_string);
-        cerr << j.dump() << '\n'; fflush(stderr);    
+        LOG_DEBUG(std::string("Request string: ") + j.dump());
 
         if(!j.contains("request"))
         {
-            cerr << "[server] invalid request received\n"; fflush(stderr);
+            LOG_ERROR("Invalid request received");
         }
         else 
         {
@@ -165,7 +163,7 @@ void receive_request(int client_fd)
     }
     catch(exception &e)
     {
-        fprintf(stderr , "[server] invalid request received: %s\n" , e.what()); fflush(stderr);
+        LOG_ERROR(std::string("Invalid request received: ") + e.what());
     }   
        
 }
@@ -182,7 +180,7 @@ int main(int argc , char *argv[])
 
     tests::test_problem_evaluation_protocol();
    
-    cerr << "[server] epoll set\n"; fflush(stderr);
+    LOG_INFO("Epoll set");
     epoll_event ev[EVENTS_BUFF_SIZE];
     int num_events;
 
@@ -202,7 +200,7 @@ int main(int argc , char *argv[])
                 }   
                 else 
                 {
-                    cerr << "[server] request received\n"; fflush(stderr);
+                    LOG_INFO("Request received");
                     receive_request(fd);
                 }
             }
