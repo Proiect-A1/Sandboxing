@@ -47,7 +47,7 @@ jobs:
           echo 2
           screen -S sandbox -d -m
           echo 3
-          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init.sh 9 ~/.bashrc \n'
+          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init_server.sh \n'
           echo 4
           echo "Prep successful!"
           EOF
