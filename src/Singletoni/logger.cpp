@@ -114,11 +114,11 @@ void Logger::log(LogLevel level, const char* file, int line, const std::string& 
     unsigned long thread_id = (unsigned long)gettid();
 
     if (log_file != nullptr) {
-        fprintf(log_file, "[%s] %-9s [TID:%6d] [%s:%d] %s\n", timestamp_str.c_str(), level_with_brackets, thread_id, file, line, message.c_str());
+        fprintf(log_file, "[%s] %-9s [TID:%6ld] [%s:%d] %s\n", timestamp_str.c_str(), level_with_brackets, thread_id, file, line, message.c_str());
         fflush(log_file);
     }
 
-    fprintf(stdout, "[%s] %s%-9s%s [TID:%6d] [%s:%d] %s\n", timestamp_str.c_str(), color, level_with_brackets, reset, thread_id, file, line, message.c_str());
+    fprintf(stdout, "[%s] %s%-9s%s [TID:%6ld] [%s:%d] %s\n", timestamp_str.c_str(), color, level_with_brackets, reset, thread_id, file, line, message.c_str());
     fflush(stdout);
 
     pthread_mutex_unlock(&mtx);
@@ -126,7 +126,7 @@ void Logger::log(LogLevel level, const char* file, int line, const std::string& 
 
 void Logger::log(LogLevel level, const char* file, int line, long long user_id, const std::string& message) {
     char uid_with_padding[32];
-    snprintf(uid_with_padding, sizeof(uid_with_padding), "[UID:%2d]", user_id);
+    snprintf(uid_with_padding, sizeof(uid_with_padding), "[UID:%2lld]", user_id);
     const std::string message_with_user = std::string(uid_with_padding) + " " + message;
     log(level, file, line, message_with_user);
 }
