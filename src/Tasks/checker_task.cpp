@@ -11,14 +11,7 @@ result_enum checker_task::execute(pthread_t thread_id, int user_id) {
 
   point_percentage = 1;
   message = "OK!";
+  LOG_INFO_USER(user_id, "Checker task finished");
   return result_enum::OK;
 
-}
-
-void checker_task:: print_log(pthread_t thread_id, int user_id,const std::string& message){
-  fprintf(stdout, "\033[93m[LOG  ]\033[0m Checker task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
-}
-  
-void checker_task:: print_error(pthread_t thread_id, int user_id,const std::string& message){
-  fprintf(stderr, "\033[31m[ERROR]\033[0m Checker task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
 }
