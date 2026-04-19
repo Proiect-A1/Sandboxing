@@ -71,8 +71,7 @@ jobs:
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init.sh 9 ~/.bashrc \n'
           
           echo 4
-          echo "Prep successful!"
-          EOF
+          echo "Prep successful!"=
 
       - name: 🚀 Exec
         run: |
@@ -87,7 +86,6 @@ jobs:
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash run_server.sh \n'
           
           echo "Deployment successful!"
-          EOF
            
       - name: 🧹 Cleanup VPN
         if: always() 
