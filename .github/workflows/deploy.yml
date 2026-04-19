@@ -60,11 +60,17 @@ jobs:
           git reset --hard sandbox/dev
           git clean -fd
 
+          echo 1
           screen -S sandbox -X quit 2>&1 > /dev/null
+          echo 2
           screen -S sandbox -d -m
+          echo 3
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init.sh 9 ~/.bashrc \n'
+          echo 4
           exit
+          echo 5
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          echo 6
           screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash run_server.sh \n'
           
         
