@@ -1,18 +1,12 @@
 #include <Singletoni/submission_manager.h>
 #include <Singletoni/logger.h>
 
-submission_manager* submission_manager::instance = nullptr;
 pthread_mutex_t submission_manager::mtx = PTHREAD_MUTEX_INITIALIZER;
 
 submission_manager& submission_manager::get_instance(){
-    if (instance == nullptr) {
-        pthread_mutex_lock(&submission_manager::mtx);
-        if (instance == nullptr)
-          instance = new submission_manager();
-        pthread_mutex_unlock(&submission_manager::mtx);
-    }
-    return *instance;
-  }
+  static submission_manager instance;
+  return instance;
+}
 
 submission_data submission_manager::get_submission(std::string submission_id){
     pthread_mutex_lock(&submission_manager::mtx);
