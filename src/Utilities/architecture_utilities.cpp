@@ -61,7 +61,11 @@ std::string architecture_utilities::get_submission_dir(std::string submission_id
 }
 
 std::string architecture_utilities::get_sandbox_path(){
-  return std::string(getenv("SANDBOX_PATH"));
+  const char *sandbox_path = getenv("SANDBOX_PATH");
+  if (sandbox_path == nullptr){
+    return "";
+  }
+  return std::string(sandbox_path);
 }
 
 std::string architecture_utilities::get_submission_source_path(std::string submission_id, language_enum language) {

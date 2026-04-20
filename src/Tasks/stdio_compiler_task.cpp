@@ -23,19 +23,19 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
 
     if (!check_permissions())
     {
-      print_error(thread_id, user_id, "Permission check failed");
+      LOG_ERROR_USER(user_id, "Permission check failed");
       return result_enum::FAIL;
     }
     if (user_id <= 0)
     {
-      print_error(thread_id, user_id, "Invalid user ID");
+      LOG_ERROR_USER(user_id, "Invalid user ID");
       return result_enum::FAIL;
     }
 
-    const char *sandbox_path = architecture_utilities::get_sandbox_path().c_str();
-    if (sandbox_path == nullptr || sandbox_path[0] == '\0')
+    const std::string sandbox_path = architecture_utilities::get_sandbox_path();
+    if (sandbox_path.empty())
     {
-        print_error(thread_id, user_id, "Sandbox path is not set in environment variables");
+        LOG_ERROR_USER(user_id, "Sandbox path is not set in environment variables");
         return result_enum::FAIL;
     }
 
@@ -53,13 +53,13 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     int pw_res = getpwnam_r(run_username.c_str(), &pw_struct, pw_buf, sizeof(pw_buf), &pw);
     if (pw_res != 0 || pw == nullptr)
     {
-      print_error(thread_id, user_id, "Failed to get user information for sandbox user");
+      LOG_ERROR_USER(user_id, "Failed to get user information for sandbox user");
       return result_enum::FAIL;
     }
 
     if (!general_utilities::copy_file(source_host_path, source_run_path, 0644))
     {
-      print_error(thread_id, user_id, "Couldn't copy source file to run directory");
+      LOG_ERROR_USER(user_id, "Couldn't copy source file to run directory");
       return result_enum::FAIL;
     }
 
@@ -69,6 +69,7 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     pid_t pid = fork();
     if (pid < 0)
     {
+        LOG_ERROR_USER(user_id, "Couldn't fork");
         return result_enum::FAIL;
     }
 
@@ -86,7 +87,7 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
 
         if (!architecture_utilities::change_dir_to_user(user_id))
         {
-           print_error(thread_id, user_id, "Failed to change directory to user's run directory");
+            LOG_ERROR_USER(user_id, "Failed to change directory to user's run directory");
             _exit(127);
         }
 
@@ -130,7 +131,7 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
         {
             killpg(pid, SIGKILL);
             waitpid(pid, &status, 0);
-            print_error(thread_id, user_id, "Error while waiting for compiler process");
+            LOG_ERROR_USER(user_id, "Error while waiting for compiler process");
             return result_enum::FAIL;
         }
 
@@ -179,14 +180,5 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
 
     chmod(output_host_path.c_str(), 0755);
     return result_enum::OK;
-}
-
-
-void stdio_compiler_task:: print_log(pthread_t thread_id, int user_id,const std::string& message){
-  fprintf(stdout, "\033[93m[LOG  ]\033[0m Compiler task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
-}
-
-void stdio_compiler_task:: print_error(pthread_t thread_id, int user_id,const std::string& message){
-  fprintf(stderr, "\033[31m[ERROR]\033[0m Compiler task running on thread %lu, with user %d: %s\n", thread_id, user_id, message.c_str());
 }
 
