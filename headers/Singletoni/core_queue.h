@@ -1,15 +1,15 @@
-#ifndef USER_QUEUE_H
-#define USER_QUEUE_H
+#ifndef CORE_QUEUE_H
+#define CORE_QUEUE_H
 
 #include <Utilities/mutex_queue.h>
 #include <string>
 #include <pthread.h>
-class user_queue{
+class core_queue{
   static pthread_mutex_t mtx;
   mutex_queue<int> queue;
-  user_queue(){}
+  core_queue(){}
   public:
-  static user_queue& get_instance();
+  static core_queue& get_instance();
   bool empty();
   int size();
   void push(const int& item);
@@ -18,4 +18,4 @@ class user_queue{
 };
 
 
-#endif // USER_QUEUE_H
+#endif // CORE_QUEUE_H

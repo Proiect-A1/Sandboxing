@@ -1,17 +1,11 @@
 #include <Singletoni/memory_manager.h>
 
 
-memory_manager* memory_manager::instance = nullptr;
 pthread_mutex_t memory_manager::mtx = PTHREAD_MUTEX_INITIALIZER;
 
 memory_manager& memory_manager::get_instance() {
-  if (instance == nullptr) {
-    pthread_mutex_lock(&mtx);
-    if (instance == nullptr)
-    instance = new memory_manager();
-    pthread_mutex_unlock(&mtx);
-  }
-	return *instance;
+  static memory_manager instance;
+	return instance;
 }
 
 bool memory_manager::request_memory(unsigned long long size) {

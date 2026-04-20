@@ -1,16 +1,10 @@
 #include <Singletoni/problem_manager.h>
 
-problem_manager* problem_manager::instance = nullptr;
 pthread_mutex_t problem_manager::mtx = PTHREAD_MUTEX_INITIALIZER;
 
 problem_manager& problem_manager::get_instance() {
-  if (instance == nullptr) {
-    pthread_mutex_lock(&mtx);
-    if (instance == nullptr)
-    instance = new problem_manager();
-    pthread_mutex_unlock(&mtx);
-  }
-  return *instance;
+  static problem_manager instance;
+  return instance;
 }
 
 void problem_manager::add_revision(problem_metadata metadata) {
