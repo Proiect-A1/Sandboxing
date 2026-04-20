@@ -10,7 +10,9 @@ bool architecture_utilities::change_root_to_user(const int& user_id){
 }
 
 bool architecture_utilities::change_root_to_sandbox(){
-  const char *sandbox_path = get_sandbox_path().c_str();
+  std::string path = architecture_utilities::get_sandbox_path();
+  const char *sandbox_path = path.c_str(); //v1
+
   if (sandbox_path == nullptr || sandbox_path[0] == '\0'){
     return false;
   }
@@ -30,7 +32,9 @@ bool architecture_utilities::change_dir_to_user(const int& user_id){
 }
 
 bool architecture_utilities::change_dir_to_sandbox(){
-  const char *sandbox_path = get_sandbox_path().c_str();
+  std::string path = architecture_utilities::get_sandbox_path();
+  const char *sandbox_path = path.c_str(); //v1
+
   if (sandbox_path == nullptr || sandbox_path[0] == '\0'){
     return false;
   }
