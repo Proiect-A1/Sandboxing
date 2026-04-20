@@ -10,7 +10,6 @@
 
 class problem_manager {
   //Singleton
-  static problem_manager* instance;
   static pthread_mutex_t mtx;
   std::map<std::string, std::map<int, problem_metadata>> problems; // problem_id -> revizion_id -> metadata
   problem_manager() = default;

@@ -7,7 +7,6 @@
 #include <string>
 #include <pthread.h>
 class task_queue{
-  static task_queue* instance;
   static pthread_mutex_t mtx;
   task_queue(){}
   mutex_priority_queue<task*, general_utilities::pointer_compare<task>> queue;
