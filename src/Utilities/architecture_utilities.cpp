@@ -60,12 +60,14 @@ std::string architecture_utilities::get_submission_dir(std::string submission_id
   return get_sandbox_path() + "/submissions/" + submission_id;
 }
 
+
 std::string architecture_utilities::get_sandbox_path(){
-  const char *sandbox_path = getenv("SANDBOX_PATH");
-  if (sandbox_path == nullptr){
+  static const char* sandbox_ptr = getenv("SANDBOX_PATH");
+  if (sandbox_ptr == nullptr){
     return "";
   }
-  return std::string(sandbox_path);
+  static const std::string sandbox_path(sandbox_ptr);
+  return sandbox_path;
 }
 
 std::string architecture_utilities::get_submission_source_path(std::string submission_id, language_enum language) {
