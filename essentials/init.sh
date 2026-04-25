@@ -19,3 +19,10 @@ cp essentials/init_sandbox.sh ./sandbox
 cp essentials/get_dependencies.sh ./sandbox
 
 cd sandbox && bash init_sandbox.sh $1 
+echo "
+#include <bits/stdc++.h>
+int main(){return 0;}
+" > main.cpp 
+
+g++ main.cpp -o main && bash get_dependencies.sh main
+rm main.cpp main
