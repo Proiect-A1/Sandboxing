@@ -1,0 +1,21 @@
+#!/bin/bash 
+
+if [ $(whoami) != "root" ]
+then 
+    echo "Needs root privileges"
+    exit 2
+fi
+
+if [ $# -ne 1 ]
+then 
+    echo "Provide number of amarati"
+    exit 1
+fi
+
+rm -r sandbox 2> /dev/null
+mkdir sandbox 2> /dev/null
+
+cp essentials/init_sandbox.sh ./sandbox
+cp essentials/get_dependencies.sh ./sandbox
+
+cd sandbox && bash init_sandbox.sh $1 

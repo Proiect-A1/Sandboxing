@@ -6,4 +6,4 @@ then
     exit 2
 fi
 
-bash init.sh 11 ~/.bashrc
+bash ./essentials/init.sh 20
