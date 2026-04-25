@@ -31,6 +31,17 @@ int main() {
         std::ifstream fin(path);
         if (fin.is_open()) {
             std::cerr << "== IM " + fs::current_path().string() << " " << path << std::endl;
+            
+            if(path == "/correct_outputs/expresie.1/005.ok")
+            {
+                char x;
+                while(fin >> x)
+                {
+                    std::cerr << x << ' ';
+                }
+
+                std::cerr << std::endl;
+            }
         }
     }
 }
