@@ -41,6 +41,8 @@ echo Creating Users...
 groupadd amarati 2> /dev/null
 groupadd marati 2> /dev/null
 
+setfacl -m g:amarati:--x .
+setfacl -m g:marati:--x .
 
 #./runs
 setfacl -m g:amarati:--x ./runs

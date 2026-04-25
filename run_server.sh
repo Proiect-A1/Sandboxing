@@ -12,4 +12,6 @@ cd $SANDBOX_PATH
 #mkdir -p $SANDBOX_PATH/usr/bin ; sudo cp /usr/bin/ls $SANDBOX_PATH/usr/bin/ ; sudo bash $SANDBOX_PATH/get_dependencies.sh $SANDBOX_PATH/usr/bin/ls
 
 cd ../runners
-g++ -I ../headers main.cpp ../src/*/* -o main && ./main 127.0.0.1 6000 15
+g++ -I ../headers main.cpp ../src/*/* -o main 
+cd ..
+./runners/main 127.0.0.1 6000 15

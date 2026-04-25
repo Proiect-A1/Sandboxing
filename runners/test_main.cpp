@@ -173,40 +173,10 @@ int main(int argc , char *argv[])
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
 
     read_args(argc , argv);
-    set_socket();
-    create_epoll();
-    add_fd(sockfd , EPOLLIN);
     create_threads();
-   
-    LOG_INFO("Epoll set");
-    epoll_event ev[EVENTS_BUFF_SIZE];
-    int num_events;
 
-    while((num_events = epoll_wait(epollfd , ev , EVENTS_BUFF_SIZE , -1)) > 0)
-    {
-        for(int i = 0 ; i < num_events ; i++)
-        {
-            int events_mask = ev[i].events;
-            int fd = ev[i].data.fd;
-
-            if(events_mask & EPOLLIN)
-            {
-                if(fd == sockfd)
-                {
-                    int fd_client = accept_new_connection();
-                    add_fd(fd_client , EPOLLIN | EPOLLET);
-                }   
-                else 
-                {
-                    LOG_INFO("Request received");
-                    receive_request(fd);
-                }
-            }
-        }
-    }
+    tests::run_tests();
     
-    handle_error(1 , "epoll_wait()");  
-    close(epollfd);
-
+    while(1);
     return 0;
 }
