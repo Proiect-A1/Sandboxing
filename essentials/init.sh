@@ -26,3 +26,8 @@ int main(){return 0;}
 
 g++ main.cpp -o main && bash get_dependencies.sh main
 rm main.cpp main
+rm get_dependencies.sh init_sandbox.sh
+
+mkdir etc
+cp /etc/passwd etc
+cp /etc/group etc
