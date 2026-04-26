@@ -3,4 +3,5 @@ logs/
 /sandbox/
 /main
 /request.json
-/Basic testing
+/runners/client
+/runners/main

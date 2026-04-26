@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🛒 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔐 Install OpenVPN
+      - name: Install OpenVPN
         run: sudo apt-get install -y openvpn
 
-      - name: 🌐 Connect to VPN
+      - name: Connect to VPN
         run: |
           echo "${{ secrets.VPN_CONFIG }}" > vpn_config.ovpn
           sudo openvpn --config vpn_config.ovpn --daemon
@@ -25,14 +25,14 @@ jobs:
           sleep 15
           ip a
 
-      - name: 🔑 Configure SSH Key
+      - name: Configure SSH Key
         run: |
           mkdir -p ~/.ssh/
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
-      - name: 🚀 Prep
+      - name: Prep
         run: |
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           echo "Starting deployment..."
@@ -52,7 +52,7 @@ jobs:
           echo "Prep successful!"
           EOF
 
-      - name: 🚀 Exec
+      - name: Exec
         run: |
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           echo "Starting exec..."
@@ -67,6 +67,6 @@ jobs:
           echo "Deployment successful!"
           EOF
 
-      - name: 🧹 Cleanup VPN
+      - name: Cleanup VPN
         if: always()
         run: sudo killall openvpn

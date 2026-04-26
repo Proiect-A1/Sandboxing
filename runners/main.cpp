@@ -177,8 +177,6 @@ int main(int argc , char *argv[])
     create_epoll();
     add_fd(sockfd , EPOLLIN);
     create_threads();
-
-    tests::test_problem_evaluation_protocol();
    
     LOG_INFO("Epoll set");
     epoll_event ev[EVENTS_BUFF_SIZE];

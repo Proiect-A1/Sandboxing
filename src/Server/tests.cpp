@@ -47,11 +47,14 @@ namespace tests
 
     void run_tests()
     {
-        test_done_submission_request();
-        test_done_subtask_request();
-        test_done_test_request();
-        test_upload_tests_request();
-        test_pull_problem_request();
+        // test_done_submission_request();
+        // test_done_subtask_request();
+        // test_done_test_request();
+        // test_upload_tests_request();
+        // test_pull_problem_request();
+        register_problem_expresie();
+        register_problem_abcde();
+        test_problem_evaluation_protocol();
     }
 
     void test_create_folder()
@@ -107,19 +110,37 @@ namespace tests
     }
 
     void test_problem_evaluation_protocol()
-    {        
-        system("mkdir $SANDBOX_PATH/submissions/12345 2> /dev/null");
-        system("touch $SANDBOX_PATH/submissions/12345/main.cpp 2> /dev/null");
-        system("echo '#include <iostream> \n int main(){int x; std::cin >> x; std::cout << x << std::endl;return 0;}' > $SANDBOX_PATH/submissions/12345/main.cpp");
+    {
+       test_submission("12345_1", "abcde", 12);
+        test_submission("12345_2", "abcde", 12);
+        test_submission("12345_3", "abcde", 12);
 
-        string submission_id = "12345";
+        test_submission("1000", "expresie", 1);
+        test_submission("1001", "expresie", 1);
+        test_submission("1002", "expresie", 1);
+        test_submission("1003", "expresie", 1);
+        test_submission("1004", "expresie", 1);
+        test_submission("1005", "expresie", 1);
+         test_submission("1009", "expresie", 1);
+        test_submission("1010", "expresie", 1);
+         test_submission("1011", "expresie", 1);
+        test_submission("1012", "expresie", 1);
+        test_submission("500", "expresie", 1);
+        test_submission("501", "abcde", 12);
+        test_submission("502", "abcde", 12);
+        test_submission("503", "abcde", 12);
+        test_submission("200", "abcde", 12);
+    }
 
-        system("mkdir $SANDBOX_PATH/inputs/abcde.12 2> /dev/null");
-        system("mkdir $SANDBOX_PATH/correct_outputs/abcde.12 2> /dev/null");
-
+    void register_problem_abcde()
+    {
         string problem_id = "abcde";
         string problem_ver_id = "abcde.12";
         int rev_id = 12;
+
+        // generez teste
+        system("mkdir $SANDBOX_PATH/inputs/abcde.12 2> /dev/null");
+        system("mkdir $SANDBOX_PATH/correct_outputs/abcde.12 2> /dev/null");
 
         for(int i = 0 ; i < 10 ; i++)
         {
@@ -130,16 +151,13 @@ namespace tests
             system(comm);   
         }
 
-        problem_manager& pm = problem_manager::get_instance();
-        submission_manager& sm = submission_manager::get_instance();
-
         problem_metadata new_problem;
         new_problem.problem_id = problem_id;
         new_problem.rev_id = rev_id;
         new_problem.group_count = 10;
         new_problem.test_count = 10;
         new_problem.time_limit = 30000;
-        new_problem.memory_limit = 1024ll * 1024 * 1024 * 3; // 15 GB
+        new_problem.memory_limit = 1024ll * 1024 * 64; // 64 MB
         new_problem.total_points = 100.0;
         new_problem.problem_status = problem_status_enum::DONE;
         new_problem.groups = std::vector<group_metadata>(10, {10.0, 1, group_type_enum::GROUP_MIN});
@@ -148,22 +166,74 @@ namespace tests
             new_problem.tests[i].groups.push_back(i);
         }
 
+        problem_manager& pm = problem_manager::get_instance();
         pm.add_revision(new_problem);
+    }
 
+    void register_problem_expresie()
+    {
+        string problem_id = "expresie";
+        string problem_ver_id = "expresie.1";
+        int rev_id = 1;
+
+        system("cp -r testing_data/expresie/inputs/expresie.1 sandbox/inputs");
+        system("cp -r testing_data/expresie/correct_outputs/expresie.1 sandbox/correct_outputs");
+        
+        problem_metadata new_problem;
+        new_problem.problem_id = problem_id;
+        new_problem.rev_id = rev_id;
+        new_problem.group_count = 6;
+        new_problem.test_count = 6;
+        new_problem.time_limit = 9000; // 9 secunde
+        new_problem.memory_limit = 1024ll * 1024 * 64; // 64 MB
+        new_problem.total_points = 100.0;
+        new_problem.problem_status = problem_status_enum::DONE;
+        new_problem.groups = std::vector<group_metadata>{
+            { 0, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN}
+        };
+        new_problem.tests = std::vector<test_metadata>(6, {"", "", "", {}});
+        for (int i = 0; i < 6; i++){
+            new_problem.tests[i].groups.push_back(i);
+        }
+
+        problem_manager& pm = problem_manager::get_instance();
+        pm.add_revision(new_problem);
+    }
+
+    // reads the cpp file from $SANDBOX_PATH/../testing_data/submissions
+    void test_submission(string submission_id, string problem_id, int rev_id)
+    {
+        cout << "======= TEST SUBMISSION: id=" << submission_id << " problem=" << problem_id << '.' << rev_id << "=======\n";
+        fflush(stdout);
+        fflush(stderr);
+
+        system(("rm -rf $SANDBOX_PATH/submissions/" + submission_id + " 2> /dev/null").c_str());
+        system(("mkdir $SANDBOX_PATH/submissions/" + submission_id).c_str());
+        system((
+            "cp $SANDBOX_PATH/../testing_data/submissions/" + submission_id + "_*.cpp " +
+            "$SANDBOX_PATH/submissions/" + submission_id + "/main.cpp"
+        ).c_str());
+        
         for (int i = 1; i <= 10; i++){
             architecture_utilities::change_dir_to_user(i);
             system("rm -f *");
             user_queue::get_instance().push(i);
         }
 
+        submission_manager& sm = submission_manager::get_instance();
         sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , 1);
 
         submission_data submission = sm.get_submission(submission_id);
 
-
         evaluator_task* eva = new evaluator_task(submission_id , problem_id , rev_id);
 
         task_queue::get_instance().push(eva);
-        // sleep(20);
+
+        //while (sm.is_done(submission_id) == 0);
     }
 }

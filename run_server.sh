@@ -6,12 +6,17 @@ then
     exit 2
 fi
 
+echo "SANDBOX FOUND IN: $SANDBOX_PATH"
 cd $SANDBOX_PATH
-echo $SANDBOX_PATH
-#sudo mkdir -p $SANDBOX_PATH/bin ; sudo cp /bin/bash $SANDBOX_PATH/bin ; sudo bash $SANDBOX_PATH/get_dependencies.sh $SANDBOX_PATH/bin/bash
-#sudo mkdir -p $SANDBOX_PATH/usr/bin ; sudo cp /usr/bin/ls $SANDBOX_PATH/usr/bin/ ; sudo bash $SANDBOX_PATH/get_dependencies.sh $SANDBOX_PATH/usr/bin/ls
-#sudo bash get_dependencies.sh runs/amarat1/main_exec 
 
-cd ../
+#cp ../essentials/get_dependencies.sh .
+#mkdir -p $SANDBOX_PATH/bin ;  cp /bin/bash $SANDBOX_PATH/bin ;  bash $SANDBOX_PATH/get_dependencies.sh $SANDBOX_PATH/bin/bash
+#mkdir -p $SANDBOX_PATH/usr/bin ;  cp /usr/bin/ls $SANDBOX_PATH/usr/bin/ ;  bash $SANDBOX_PATH/get_dependencies.sh $SANDBOX_PATH/usr/bin/ls
+#mkdir -p $SANDBOX_PATH/usr/bin ;  cp /usr/bin/getfacl $SANDBOX_PATH/usr/bin/ ;  bash $SANDBOX_PATH/get_dependencies.sh $SANDBOX_PATH/usr/bin/getfacl
+#/usr/bin/getfacl
+#rm get_dependencies.sh
 
-g++ -I headers main.cpp src/*/* -o main && ./main 10.8.0.3 6000 15
+cd ../runners
+g++ -I ../headers main.cpp ../src/*/* -o main 
+cd ..
+./runners/main 127.0.0.1 6000 15
