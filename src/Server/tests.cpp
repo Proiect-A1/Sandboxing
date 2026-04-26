@@ -111,25 +111,25 @@ namespace tests
 
     void test_problem_evaluation_protocol()
     {
-       // test_submission("12345_1", "abcde", 12);
-        //test_submission("12345_2", "abcde", 12);
-        //test_submission("12345_3", "abcde", 12);
+       test_submission("12345_1", "abcde", 12);
+        test_submission("12345_2", "abcde", 12);
+        test_submission("12345_3", "abcde", 12);
 
-        //test_submission("1000", "expresie", 1);
-        //test_submission("1001", "expresie", 1);
-        //test_submission("1002", "expresie", 1);
-        //test_submission("1003", "expresie", 1);
-        // test_submission("1004", "expresie", 1);
-        // test_submission("1005", "expresie", 1);
-         //test_submission("1009", "expresie", 1);
-        //test_submission("1010", "expresie", 1);
-         //test_submission("1011", "expresie", 1);
-        //test_submission("1012", "expresie", 1);
-        // test_submission("500", "expresie", 1);
-        // test_submission("501", "abcde", 12);
-        // test_submission("502", "abcde", 12);
-        // test_submission("503", "abcde", 12);
-        // test_submission("200", "abcde", 12);
+        test_submission("1000", "expresie", 1);
+        test_submission("1001", "expresie", 1);
+        test_submission("1002", "expresie", 1);
+        test_submission("1003", "expresie", 1);
+        test_submission("1004", "expresie", 1);
+        test_submission("1005", "expresie", 1);
+         test_submission("1009", "expresie", 1);
+        test_submission("1010", "expresie", 1);
+         test_submission("1011", "expresie", 1);
+        test_submission("1012", "expresie", 1);
+        test_submission("500", "expresie", 1);
+        test_submission("501", "abcde", 12);
+        test_submission("502", "abcde", 12);
+        test_submission("503", "abcde", 12);
+        test_submission("200", "abcde", 12);
     }
 
     void register_problem_abcde()
