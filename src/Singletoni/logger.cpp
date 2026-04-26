@@ -6,7 +6,6 @@
 
 using namespace std;
 
-Logger* Logger::instance = nullptr;
 pthread_mutex_t Logger::mtx = PTHREAD_MUTEX_INITIALIZER;
 
 Logger::Logger() : log_file(nullptr) {
@@ -90,14 +89,8 @@ const char *level_to_color(LogLevel level) {
 }
 
 Logger& Logger::get_instance() {
-    if (instance == nullptr) {
-        pthread_mutex_lock(&mtx);
-        if (instance == nullptr) {
-            instance = new Logger();
-        }
-        pthread_mutex_unlock(&mtx);
-    }
-    return *instance;
+    static Logger instance;
+    return instance;
 }
 
 void Logger::log(LogLevel level, const char* file, int line, const std::string& message) {

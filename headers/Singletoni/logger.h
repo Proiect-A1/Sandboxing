@@ -15,7 +15,6 @@ enum class LogLevel {
 
 class Logger {
 private:
-    static Logger* instance;
     static pthread_mutex_t mtx;
 
     FILE* log_file;
