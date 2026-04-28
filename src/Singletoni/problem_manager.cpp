@@ -91,3 +91,32 @@ problem_metadata problem_manager::get_metadata(std::string problem_id, int rev_i
   pthread_mutex_unlock(&mtx);
   return problem_metadata(); // return default metadata if problem or revision does not exist
 }
+
+void problem_manager::update_problem_status(std::string problem_id , int rev_id , problem_status_enum problem_status)
+{
+    pthread_mutex_lock(&mtx);
+    
+    if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+      problems[problem_id][rev_id].problem_status = problem_status;
+      pthread_mutex_unlock(&mtx);
+      return;
+    }
+
+    LOG_WARNING(std::string("Metadata not found for problem ") + problem_id + " rev " + std::to_string(rev_id));
+    pthread_mutex_unlock(&mtx);
+}
+
+problem_status_enum problem_manager::get_problem_status(std::string problem_id , int rev_id)
+{
+    pthread_mutex_lock(&mtx);
+    
+    if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+      problem_status_enum result = problems[problem_id][rev_id].problem_status; 
+      pthread_mutex_unlock(&mtx);
+      return result;
+    }
+
+    LOG_WARNING(std::string("Metadata not found for problem ") + problem_id + " rev " + std::to_string(rev_id));
+    pthread_mutex_unlock(&mtx);
+    return problem_status_enum::NOT_EXISTS;
+}

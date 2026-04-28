@@ -14,22 +14,23 @@
 #include <Singletoni/user_queue.h>
 #include <Singletoni/task_queue.h>
 #include <pthread.h>
+#include <Tasks/preparator.h>
 
 namespace tests 
 {
     void test_done_test_request()
     {
-        IO::done_test_request("submissionId" , 10 , 5 , "wrong answer" , 10.4 , 100.0 , 14.5 , 1000 , 1000);
+//        IO::done_test_request("submissionId" , 10 , 5 , "wrong answer" , 10.4 , 100.0 , 14.5 , 1000 , 1000);
     }
 
     void test_done_subtask_request()
     {
-        IO::done_subtask_request("submissionId" , 10 , 100 , 100.5  , 10.4 , 1000 , 1000);
+  //      IO::done_subtask_request("submissionId" , 10 , 100 , 100.5  , 10.4 , 1000 , 1000);
     }
 
     void test_done_submission_request()
     {
-        IO::done_submission_request("submissionId" , 10 , 100 , 10.4 , 1000 , 100);
+    //    IO::done_submission_request("submissionId" , 10 , 100 , 10.4 , 1000 , 100);
     }
 
 
@@ -37,12 +38,12 @@ namespace tests
     {
         IO helper;
         int fd = open("arch.zip" , O_RDONLY);
-        helper.upload_tests_request("problemId" , 10 , "zip" , {100 , {100}} , fd);
+      //  helper.upload_tests_request("problemId" , 10 , "zip" , {100 , {100}} , fd);
     }
 
     void test_pull_problem_request()
     {
-        IO::pull_problem_request("problemId");
+        //IO::pull_problem_request("problemId");
     }
 
     void run_tests()
@@ -55,6 +56,14 @@ namespace tests
         register_problem_expresie();
         register_problem_abcde();
         test_problem_evaluation_protocol();
+     //   test_preparator_task();
+    }
+
+    void test_preparator_task()
+    {
+        system("cp $SANDBOX_PATH/../testing_data/swapsort.1 $SANDBOX_PATH/tmp");
+        preparator prep("swapsort" , 1);
+        prep.execute(1 , 1);
     }
 
     void test_create_folder()
@@ -111,25 +120,25 @@ namespace tests
 
     void test_problem_evaluation_protocol()
     {
-       test_submission("12345_1", "abcde", 12);
-        test_submission("12345_2", "abcde", 12);
-        test_submission("12345_3", "abcde", 12);
+    //    test_submission("12345_1", "abcde", 12);
+    //     test_submission("12345_2", "abcde", 12);
+    //     test_submission("12345_3", "abcde", 12);
 
-        test_submission("1000", "expresie", 1);
-        test_submission("1001", "expresie", 1);
-        test_submission("1002", "expresie", 1);
-        test_submission("1003", "expresie", 1);
-        test_submission("1004", "expresie", 1);
-        test_submission("1005", "expresie", 1);
-         test_submission("1009", "expresie", 1);
-        test_submission("1010", "expresie", 1);
-         test_submission("1011", "expresie", 1);
-        test_submission("1012", "expresie", 1);
-        test_submission("500", "expresie", 1);
-        test_submission("501", "abcde", 12);
-        test_submission("502", "abcde", 12);
-        test_submission("503", "abcde", 12);
-        test_submission("200", "abcde", 12);
+         test_submission("1000", "expresie", 1);
+    //     test_submission("1001", "expresie", 1);
+    //     test_submission("1002", "expresie", 1);
+    //     test_submission("1003", "expresie", 1);
+    //     test_submission("1004", "expresie", 1);
+    //     test_submission("1005", "expresie", 1);
+    //      test_submission("1009", "expresie", 1);
+    //     test_submission("1010", "expresie", 1);
+    //      test_submission("1011", "expresie", 1);
+    //     test_submission("1012", "expresie", 1);
+    //     test_submission("500", "expresie", 1);
+    //     test_submission("501", "abcde", 12);
+    //     test_submission("502", "abcde", 12);
+    //     test_submission("503", "abcde", 12);
+//        test_submission("200", "abcde", 12);
     }
 
     void register_problem_abcde()

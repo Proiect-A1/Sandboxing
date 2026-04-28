@@ -27,5 +27,7 @@ namespace architecture_utilities {
   std::string get_submission_exec_path(std::string submission_id, language_enum language = language_enum::CPP);
   std::string get_problem_input_path(std::string submission_id, int rev_id, int test);
   std::string get_problem_correct_output_path(std::string submission_id, int rev_id, int test);
+  std::string get_problem_data_path(std::string problem_id, int rev_id);
+  int get_sandbox_workers();
 }
 #endif // ARCHITECTURE_UTILITIES_H

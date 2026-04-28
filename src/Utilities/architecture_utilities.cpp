@@ -89,3 +89,13 @@ std::string architecture_utilities::get_problem_input_path(std::string problem_i
 std::string architecture_utilities::get_problem_correct_output_path(std::string problem_id, int rev_id, int test) {
   return get_sandbox_path() + "/correct_outputs/" + problem_id + "." + std::to_string(rev_id) + "/" + general_utilities::left_zero_pad(test, 3) + ".ok";
 }
+
+std::string architecture_utilities::get_problem_data_path(std::string problem_id, int rev_id) {
+  return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id);
+}
+
+int architecture_utilities::get_sandbox_workers()
+{
+  static const char* workers = getenv("SANDBOX_WORKERS");
+  return atoi(workers);
+}

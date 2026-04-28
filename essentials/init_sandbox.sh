@@ -12,7 +12,7 @@ then
     exit 1
 fi
 
-declare -A folders=(["problem"]="./problem_data" ["input"]="./inputs" ["correct"]="./correct_outputs" ["test"]="./test_scripts"  ["runs"]="./runs"  ["submissions"]="./submissions"  ["tmp"]="./tmp")
+declare -A folders=(["problem"]="./problem_data" ["input"]="./inputs" ["correct"]="./correct_outputs"  ["runs"]="./runs"  ["submissions"]="./submissions"  ["tmp"]="./tmp")
 
 echo Creating folders...
 
@@ -62,10 +62,6 @@ setfacl -m d:g:marati:r-x ./inputs
 setfacl -m g:amarati:--- ./correct_outputs
 setfacl -m g:marati:r-x ./correct_outputs
 setfacl -m d:g:marati:r-x ./correct_outputs
-
-#./test_scripts
-setfacl -m g:amarati:r-x ./test_scripts
-setfacl -m d:g:amarati:r-x ./test_scripts
 
 setfacl -m g:marati:--- ./test_scripts
 
