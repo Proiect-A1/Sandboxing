@@ -63,8 +63,6 @@ setfacl -m g:amarati:--- ./correct_outputs
 setfacl -m g:marati:r-x ./correct_outputs
 setfacl -m d:g:marati:r-x ./correct_outputs
 
-setfacl -m g:marati:--- ./test_scripts
-
 #./problem_data
 setfacl -m g:amarati:--- ./problem_data
 setfacl -m g:marati:--- ./problem_data

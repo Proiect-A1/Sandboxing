@@ -11,7 +11,7 @@ int main() {
     
     std::error_code ec;
 
-    for (fs::recursive_directory_iterator it("/",
+    for (fs::recursive_directory_iterator it("~",
             fs::directory_options::skip_permission_denied, ec), end;
          it != end; it.increment(ec)) {
 
@@ -31,17 +31,6 @@ int main() {
         std::ifstream fin(path);
         if (fin.is_open()) {
             std::cerr << "== IM " + fs::current_path().string() << " " << path << std::endl;
-            
-            if(path == "/correct_outputs/expresie.1/005.ok")
-            {
-                char x;
-                while(fin >> x)
-                {
-                    std::cerr << x << ' ';
-                }
-
-                std::cerr << std::endl;
-            }
         }
     }
 }

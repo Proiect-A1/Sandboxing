@@ -120,11 +120,11 @@ namespace tests
 
     void test_problem_evaluation_protocol()
     {
-    //    test_submission("12345_1", "abcde", 12);
+       //    test_submission("12345_1", "abcde", 12);
     //     test_submission("12345_2", "abcde", 12);
     //     test_submission("12345_3", "abcde", 12);
 
-         test_submission("1000", "expresie", 1);
+    //     test_submission("1000", "expresie", 1);
     //     test_submission("1001", "expresie", 1);
     //     test_submission("1002", "expresie", 1);
     //     test_submission("1003", "expresie", 1);
@@ -138,7 +138,19 @@ namespace tests
     //     test_submission("501", "abcde", 12);
     //     test_submission("502", "abcde", 12);
     //     test_submission("503", "abcde", 12);
-//        test_submission("200", "abcde", 12);
+    //     test_submission("200", "abcde", 12);
+
+        // test_submission("z1009", "abcde", 12);
+        // test_submission("z1010", "abcde", 12);
+        // test_submission("z400", "abcde", 12);
+        // test_submission("z401", "abcde", 12);
+        // test_submission("z402", "abcde", 12);
+
+        // for (int i = 0; i < 30; ++i)    test_submission("x100", "abcde", 12);
+        // test_submission("x101", "abcde", 12);
+         for (int i = 0; i < 20; ++i)    test_submission("x102", "abcde", 12);
+        // test_submission("x103", "abcde", 12);
+
     }
 
     void register_problem_abcde()
@@ -215,34 +227,36 @@ namespace tests
     }
 
     // reads the cpp file from $SANDBOX_PATH/../testing_data/submissions
-    void test_submission(string submission_id, string problem_id, int rev_id)
+   void test_submission(string submission_id, string problem_id, int rev_id)
     {
-        cout << "======= TEST SUBMISSION: id=" << submission_id << " problem=" << problem_id << '.' << rev_id << "=======\n";
-        fflush(stdout);
-        fflush(stderr);
+        string submission_id_real = submission_id + "_" + to_string(rand());
 
-        system(("rm -rf $SANDBOX_PATH/submissions/" + submission_id + " 2> /dev/null").c_str());
-        system(("mkdir $SANDBOX_PATH/submissions/" + submission_id).c_str());
+        cout << "======= TEST SUBMISSION: id=" << submission_id_real << " problem=" << problem_id << '.' << rev_id << "=======\n";
+        fflush(stdout);
+
+        system(("rm -rf $SANDBOX_PATH/submissions/" + submission_id_real + " 2> /dev/null").c_str());
+        system(("mkdir $SANDBOX_PATH/submissions/" + submission_id_real).c_str());
         system((
             "cp $SANDBOX_PATH/../testing_data/submissions/" + submission_id + "_*.cpp " +
-            "$SANDBOX_PATH/submissions/" + submission_id + "/main.cpp"
+            "$SANDBOX_PATH/submissions/" + submission_id_real + "/main.cpp"
         ).c_str());
         
-        for (int i = 1; i <= 10; i++){
-            architecture_utilities::change_dir_to_user(i);
-            system("rm -f *");
-            user_queue::get_instance().push(i);
-        }
+        // for (int i = 1; i <= 10; i++){
+        //     architecture_utilities::change_dir_to_user(i);
+        //     system("rm -f *");
+        //     user_queue::get_instance().push(i);
+        // }
 
         submission_manager& sm = submission_manager::get_instance();
-        sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , 1);
+        sm.insert(submission_id_real, language_enum::CPP, problem_id , rev_id , 1);
 
-        submission_data submission = sm.get_submission(submission_id);
+        submission_data submission = sm.get_submission(submission_id_real);
 
-        evaluator_task* eva = new evaluator_task(submission_id , problem_id , rev_id);
+        evaluator_task* eva = new evaluator_task(submission_id_real , problem_id , rev_id);
 
         task_queue::get_instance().push(eva);
 
-        //while (sm.is_done(submission_id) == 0);
+        //while (sm.is_done(submission_id_real) == 0);
+        // sleep(5);
     }
 }

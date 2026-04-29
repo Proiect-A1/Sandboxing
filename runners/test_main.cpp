@@ -168,12 +168,23 @@ void receive_request(int client_fd)
        
 }
 
+void init_users()
+{
+    int workers = architecture_utilities::get_sandbox_workers();
+
+    for(int i = 1 ; i <= workers ; i++)
+    {
+        user_queue::get_instance().push(i);
+    }
+}
+
 int main(int argc , char *argv[])
 {
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
 
     read_args(argc , argv);
     create_threads();
+    init_users();
 
     tests::run_tests();
     
