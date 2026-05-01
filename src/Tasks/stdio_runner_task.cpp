@@ -87,6 +87,13 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   {
     setpgid(0, 0);
 
+    int err_fd = open("/dev/null", O_WRONLY);
+    if (err_fd < 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to open /dev/null before sandbox restrictions");
+      _exit(127);
+    }
+
     // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
     // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
     if (chdir(run_dir.c_str()) != 0)
@@ -137,20 +144,24 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
 
-    if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0)
+    if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0)
     {
       close(in_fd);
       close(out_fd);
-      LOG_ERROR_USER(user_id, "Failed to redirect input/output inside sandbox");
+      close(err_fd);
+      LOG_ERROR_USER(user_id, "Failed to redirect input/output/error inside sandbox");
       _exit(127);
     }
 
     close(in_fd);
     close(out_fd);
+    close(err_fd);
 
     struct rlimit memory_rl;
-    memory_rl.rlim_cur = (rlim_t)memory_limit;
-    memory_rl.rlim_max = (rlim_t)memory_limit;
+    // Allow address space to gracefully exceed the strict physical memory limit to catch MLE cleanly
+    rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
+    memory_rl.rlim_cur = mem_limit_padded;
+    memory_rl.rlim_max = mem_limit_padded;
     if (setrlimit(RLIMIT_AS, &memory_rl) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to set memory limit");
@@ -161,7 +172,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     if (sec <= 0) sec = 1;
     struct rlimit cpu_rl;
     cpu_rl.rlim_cur = (rlim_t)sec;
-    cpu_rl.rlim_max = (rlim_t)sec;
+    cpu_rl.rlim_max = (rlim_t)sec + 1;
     if (setrlimit(RLIMIT_CPU, &cpu_rl) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
@@ -182,8 +193,21 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   int status = 0;
   struct rusage usage;
 
+  auto start_time = std::chrono::steady_clock::now();
+  bool time_limit_exceeded = false;
+
   while (true)
   {
+    auto current_time = std::chrono::steady_clock::now();
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
+    
+    // Hard wall-clock limit (+ 1 second grace period to allow SIGXCPU)
+    if (elapsed_ms > time_limit + 1000)
+    {
+      time_limit_exceeded = true;
+      killpg(pid, SIGKILL);
+    }
+
     pid_t waited = wait4(pid, &status, WNOHANG, &usage);
     if (waited == pid)
     {
@@ -208,25 +232,43 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
 
   memory.release_memory(requested_memory);
 
+  if (time_limit_exceeded)
+  {
+    return result_enum::TLE;
+  }
+
   if (memory_consumed > memory_limit)
   {
     return result_enum::MLE;
   }
 
+  if (time_consumed > time_limit)
+  {
+    return result_enum::TLE;
+  }
+
   if (WIFSIGNALED(status))
   {
     const int sig = WTERMSIG(status);
+      
     if (sig == SIGXCPU)
     {
       return result_enum::TLE;
     }
-    if (sig == SIGKILL && memory_consumed > memory_limit)
+      
+    if ((sig == SIGABRT || sig == SIGSEGV || sig == SIGKILL) && memory_consumed > memory_limit)
     {
       return result_enum::MLE;
     }
+
+    if (sig == SIGKILL && time_consumed > time_limit)
+    {
+      return result_enum::TLE;
+    }
+    
     return result_enum::RTE;
   }
-
+      
   if (WIFEXITED(status))
   {
     const int code = WEXITSTATUS(status);
@@ -242,15 +284,5 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     return result_enum::RTE;
   }
 
-  if (WIFSIGNALED(status))
-  {
-    const int sig = WTERMSIG(status);
-    if (sig == SIGKILL && memory_consumed > memory_limit)
-    {
-      return result_enum::MLE;
-    }
-    return result_enum::RTE;
-  }
-
-  return result_enum::OK;
+  return result_enum::RTE;
 }
