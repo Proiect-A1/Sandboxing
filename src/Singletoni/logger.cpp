@@ -3,6 +3,9 @@
 #include <filesystem>
 #include <sys/time.h>
 #include <unistd.h>
+#include <vector>
+#include <cctype>
+#include <string>
 
 using namespace std;
 
@@ -93,6 +96,48 @@ Logger& Logger::get_instance() {
     return instance;
 }
 
+static std::string colorize_verdicts_in_message(const std::string& message) {
+    const char *reset = "\033[0m";
+    std::string res = message;
+
+    const std::vector<std::pair<std::string, const char*>> map = {
+        {"OK", "\033[32m"},
+        {"PA", "\033[33m"},
+        {"SKIP", "\033[36m"},
+        {"CPE", "\033[35m"},
+        {"WA", "\033[38;2;255;0;0m"},
+        {"TLE", "\033[33m"},
+        {"MLE", "\033[33m"},
+        {"RTE", "\033[38;2;255;0;0m"},
+        {"FAIL", "\033[38;2;255;0;0m"},
+        {"ILE", "\033[33m"},
+        {"NONE", "\033[38;5;123m"},
+        {"OTHER", "\033[36m"}
+    };
+
+    for (const auto &p : map) {
+        const std::string &token = p.first;
+        const std::string color = p.second;
+        const std::string colored_token = color + token + reset;
+
+        size_t pos = 0;
+        while ((pos = res.find(token, pos)) != std::string::npos) {
+            bool boundary_before = (pos == 0) || !std::isalnum((unsigned char)res[pos - 1]);
+            size_t after_pos = pos + token.size();
+            bool boundary_after = (after_pos >= res.size()) || !std::isalnum((unsigned char)res[after_pos]);
+
+            if (boundary_before && boundary_after) {
+                res.replace(pos, token.size(), colored_token);
+                pos += colored_token.size();
+            } else {
+                pos += token.size();
+            }
+        }
+    }
+
+    return res;
+}
+
 void Logger::log(LogLevel level, const char* file, int line, const std::string& message) {
     pthread_mutex_lock(&mtx);
 
@@ -112,8 +157,8 @@ void Logger::log(LogLevel level, const char* file, int line, const std::string& 
         fprintf(log_file, "[%s] %-9s [TID:%6ld] [%s:%d] %s\n", timestamp_str.c_str(), level_with_brackets, thread_id, file, line, message.c_str());
         fflush(log_file);
     }
-
-    fprintf(stdout, "[%s] %s%-9s%s [TID:%6ld] [%s:%d] %s\n", timestamp_str.c_str(), color, level_with_brackets, reset, thread_id, file, line, message.c_str());
+    std::string stdout_message = colorize_verdicts_in_message(message);
+    fprintf(stdout, "[%s] %s%-9s%s [TID:%6ld] [%s:%d] %s\n", timestamp_str.c_str(), color, level_with_brackets, reset, thread_id, file, line, stdout_message.c_str());
     fflush(stdout);
 
     pthread_mutex_unlock(&mtx);
