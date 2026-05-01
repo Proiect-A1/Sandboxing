@@ -1,4 +1,7 @@
 #include <Tasks/stdio_compiler_task.h>
+#include <sys/resource.h>
+#include <cstring>
+#include <cerrno>
 
 bool stdio_compiler_task::check_permissions()
 {
@@ -120,32 +123,53 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     int status = 0;
     bool timed_out = false;
 
+    // get rusage for this specific child using wait4
+    long long compile_time_ms = -1;
+    struct rusage ru;
     while (true)
     {
-        pid_t waited = waitpid(pid, &status, WNOHANG);
+        pid_t waited = wait4(pid, &status, WNOHANG, &ru);
         if (waited == pid)
         {
+            long long us = (long long)ru.ru_utime.tv_sec * 1000000LL + ru.ru_utime.tv_usec
+                + (long long)ru.ru_stime.tv_sec * 1000000LL + ru.ru_stime.tv_usec;
+            compile_time_ms = us / 1000;
             break;
         }
-        if (waited < 0)
+        else if (waited == 0)
         {
-            killpg(pid, SIGKILL);
-            waitpid(pid, &status, 0);
+            const auto now = std::chrono::steady_clock::now();
+            const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - started_at).count();
+            if (elapsed_ms > (long long)time_limit)
+            {
+                timed_out = true;
+                killpg(pid, SIGKILL);
+                // reap and collect rusage for the killed child
+                pid_t w = wait4(pid, &status, 0, &ru);
+                if (w == pid) {
+                    long long us = (long long)ru.ru_utime.tv_sec * 1000000LL + ru.ru_utime.tv_usec
+                        + (long long)ru.ru_stime.tv_sec * 1000000LL + ru.ru_stime.tv_usec;
+                    compile_time_ms = us / 1000;
+                } else {
+                    compile_time_ms = elapsed_ms;
+                }
+                break;
+            }
+            usleep(1000);
+            continue;
+        }
+        else
+        {
+            if (errno == EINTR) continue;
+            // error while waiting; try to reap and collect rusage
+            if (wait4(pid, &status, 0, &ru) == pid) {
+                long long us = (long long)ru.ru_utime.tv_sec * 1000000LL + ru.ru_utime.tv_usec
+                    + (long long)ru.ru_stime.tv_sec * 1000000LL + ru.ru_stime.tv_usec;
+                compile_time_ms = us / 1000;
+            }
             LOG_ERROR_USER(user_id, "Error while waiting for compiler process");
             return result_enum::FAIL;
         }
-
-        const auto now = std::chrono::steady_clock::now();
-        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - started_at).count();
-        if (elapsed_ms > (long long)time_limit)
-        {
-            timed_out = true;
-            killpg(pid, SIGKILL);
-            waitpid(pid, &status, 0);
-            break;
-        }
-
-        usleep(1000);
     }
 
     if (timed_out)
@@ -179,6 +203,7 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     }
 
     chmod(output_host_path.c_str(), 0755);
+    LOG_INFO_USER(user_id, "Compilation completed for submission " + submission_id + " with result " + general_utilities::enum_to_string(result_enum::OK) + " in " + std::to_string(compile_time_ms) + "ms, time_limit: " + std::to_string((long long)time_limit) + "ms");
     return result_enum::OK;
 }
 
