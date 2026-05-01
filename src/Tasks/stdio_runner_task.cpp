@@ -295,6 +295,12 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     {
       return result_enum::TLE;
     }
+
+    if (sig == SIGSYS)
+    {
+      LOG_ERROR_USER(user_id, std::string("Seccomp violation: child pid=") + std::to_string(pid) + std::string(" exec=") + exec_file_name);
+      return result_enum::WA;
+    }
       
     if ((sig == SIGABRT || sig == SIGSEGV || sig == SIGKILL) && memory_consumed > memory_limit)
     {
