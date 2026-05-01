@@ -1,4 +1,5 @@
 #include <Tasks/stdio_runner_task.h>
+#include <cmath>
 
 bool stdio_runner_task::check_permissions()
 {
@@ -71,8 +72,6 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   const unsigned long long requested_memory = memory_limit;
   memory.blocking_request_memory(requested_memory);
   LOG_INFO_USER(user_id, "Memory allocated " + std::to_string(memory_limit) + " B");
-
-  const auto started_at = std::chrono::steady_clock::now();
 
   pid_t pid = fork();
 
@@ -158,6 +157,17 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
 
+    long sec = (long)std::ceil(time_limit / 1000.0f);
+    if (sec <= 0) sec = 1;
+    struct rlimit cpu_rl;
+    cpu_rl.rlim_cur = (rlim_t)sec;
+    cpu_rl.rlim_max = (rlim_t)sec;
+    if (setrlimit(RLIMIT_CPU, &cpu_rl) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
+      _exit(127);
+    }
+
 
     const std::string jailed_exec_path = "./" + exec_file_name;
     char *const argv[] = {const_cast<char *>(jailed_exec_path.c_str()), nullptr};
@@ -170,7 +180,6 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   setpgid(pid, pid);
 
   int status = 0;
-  bool timed_out = false;
   struct rusage usage;
 
   while (true)
@@ -190,33 +199,32 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       return result_enum::FAIL;
     }
 
-    const auto now = std::chrono::steady_clock::now();
-    const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - started_at).count();
-    if (elapsed_ms > (long long)time_limit)
-    {
-      timed_out = true;
-      killpg(pid, SIGKILL);
-      wait4(pid, &status, 0, &usage);
-      break;
-    }
-
     usleep(1000);
   }
 
-  const auto ended_at = std::chrono::steady_clock::now();
-  time_consumed = (float)std::chrono::duration_cast<std::chrono::milliseconds>(ended_at - started_at).count();
+  long long used_us = (long long)usage.ru_utime.tv_sec * 1000000LL + (long long)usage.ru_utime.tv_usec;
+  time_consumed = (float)(used_us / 1000.0f);
   memory_consumed = (long)(usage.ru_maxrss * 1024L);
 
   memory.release_memory(requested_memory);
 
-  if (timed_out)
-  {
-    return result_enum::TLE;
-  }
-
   if (memory_consumed > memory_limit)
   {
     return result_enum::MLE;
+  }
+
+  if (WIFSIGNALED(status))
+  {
+    const int sig = WTERMSIG(status);
+    if (sig == SIGXCPU)
+    {
+      return result_enum::TLE;
+    }
+    if (sig == SIGKILL && memory_consumed > memory_limit)
+    {
+      return result_enum::MLE;
+    }
+    return result_enum::RTE;
   }
 
   if (WIFEXITED(status))

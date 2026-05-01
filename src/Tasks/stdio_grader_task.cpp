@@ -95,7 +95,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     sm.add_completed_test(submission_id, test_id, helper.test);
     return helper.test.result;
   }
-  
+
   if (!general_utilities::copy_file(problem_correct_output_path, ::architecture_utilities::get_run_dir(user_id) + "/" + correct_output_path, 0644)){
     LOG_ERROR_USER(user_id, "Couldn't copy problem correct output to run directory");
     return result_enum::FAIL;
@@ -123,7 +123,6 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   
 
 
-  LOG_INFO_USER(user_id, "Test " + std::to_string(test_id) + " completed with result " + checker.get_message() + ", points: " + std::to_string(helper.test.points) + ", time used: " + std::to_string(helper.test.time_used) + " ms, memory used: " + std::to_string(helper.test.memory_used) + " B");
-
+  LOG_DEBUG_USER(user_id, "Test " + std::to_string(test_id) + " completed with result " + checker.get_message() + ", points: " + std::to_string(helper.test.points) + ", time used: " + std::to_string(helper.test.time_used) + " ms, memory used: " + std::to_string(helper.test.memory_used) + " B");
   return helper.test.result;
 }
