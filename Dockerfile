@@ -6,9 +6,7 @@ RUN apt-get update && apt full-upgrade -y && apt-get install -y git iptables vim
 WORKDIR /sandbox
 
 # Schimbam -b pe dev
-RUN git clone https://github.com/Proiect-A1/Sandboxing.git -b sochu 
-
-WORKDIR /sandbox/Sandboxing  
+COPY . .
 
 EXPOSE 6000
 
