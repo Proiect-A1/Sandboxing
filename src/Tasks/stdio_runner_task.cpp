@@ -1,5 +1,40 @@
 #include <Tasks/stdio_runner_task.h>
 #include <cmath>
+#include <seccomp.h>
+#include <errno.h>
+
+static int install_seccomp_whitelist()
+{
+  scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_TRAP);
+  if (!ctx) return -1;
+
+  auto add = [&](int sys) {
+    if (seccomp_rule_add(ctx, SCMP_ACT_ALLOW, sys, 0) < 0) return false;
+    return true;
+  };
+
+  int syscalls[] = {
+    SCMP_SYS(brk), SCMP_SYS(open), SCMP_SYS(openat), SCMP_SYS(close), SCMP_SYS(lseek),
+    SCMP_SYS(execve), SCMP_SYS(exit_group), SCMP_SYS(rt_sigreturn)
+  };
+
+  for (int s : syscalls)
+  {
+    if (!add(s))
+    {
+      seccomp_release(ctx);
+      return -1;
+    }
+  }
+
+  if (seccomp_load(ctx) < 0)
+  {
+    seccomp_release(ctx);
+    return -1;
+  }
+  seccomp_release(ctx);
+  return 0;
+}
 
 bool stdio_runner_task::check_permissions()
 {
@@ -168,6 +203,11 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
 
+    if (install_seccomp_whitelist() != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to install seccomp filter");
+      _exit(127);
+    }
 
     const std::string jailed_exec_path = "./" + exec_file_name;
     char *const argv[] = {const_cast<char *>(jailed_exec_path.c_str()), nullptr};
@@ -220,6 +260,11 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     {
       return result_enum::TLE;
     }
+    if (sig == SIGSYS)
+    {
+      LOG_ERROR_USER(user_id, std::string("Seccomp violation: child pid=") + std::to_string(pid) + std::string(" exec=") + exec_file_name);
+      return result_enum::WA;
+    }
     if (sig == SIGKILL && memory_consumed > memory_limit)
     {
       return result_enum::MLE;
@@ -238,16 +283,6 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     {
       LOG_ERROR_USER(user_id, std::string("Execution failed inside sandbox"));
       return result_enum::FAIL;
-    }
-    return result_enum::RTE;
-  }
-
-  if (WIFSIGNALED(status))
-  {
-    const int sig = WTERMSIG(status);
-    if (sig == SIGKILL && memory_consumed > memory_limit)
-    {
-      return result_enum::MLE;
     }
     return result_enum::RTE;
   }
