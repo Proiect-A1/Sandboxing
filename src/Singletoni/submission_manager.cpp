@@ -59,7 +59,7 @@ bool submission_manager::add_completed_test(std::string submission_id, int test_
     if (!submission_table.count(submission_id)) {
         LOG_ERROR(std::string("Cannot add completed test for missing submission ") + submission_id);
         pthread_mutex_unlock(&submission_manager::mtx);
-        return;
+        return false;
     }
     // std::cout << general_utilities::enum_to_string(test_result.result) << ' ' << test_result.points << std::endl;
     submission_table[submission_id].add_completed_test(test_id, test_result);
@@ -67,6 +67,7 @@ bool submission_manager::add_completed_test(std::string submission_id, int test_
     pthread_mutex_unlock(&submission_manager::mtx);
     return true;
 }
+
 bool submission_manager::set_verdict(std::string submission_id, result_enum result, float points, float time_used, long long memory_used){
     pthread_mutex_lock(&submission_manager::mtx);
     std::cout << general_utilities::enum_to_string(result) << ' ' << points << std::endl;

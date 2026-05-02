@@ -47,6 +47,9 @@ void submission_data::add_completed_test(int test_id, result_enum result, float 
     }
         
 }
+void submission_data::add_completed_test(int test_id, submission_test res){
+    add_completed_test(test_id, res.result, res.points, res.time_used, res.memory_used);
+}
 void submission_data::add_completed_subtask(int group_id, const submission_group& completed_group){
     points+=completed_group.points;
     time_used=std::max(time_used, completed_group.time_used);

@@ -33,6 +33,7 @@ struct submission_data{
     submission_data(){}
     submission_data(language_enum language, std::string problem_id, int rev_id, int socket_fd=1);
     void add_completed_test(int test_id, result_enum result, float points, float time_used, long long memory_used);
+    void add_completed_test(int test_id, submission_test res);
     void add_completed_subtask(int group_id, const submission_group& completed_group);
     void set_verdict(result_enum result, float points, float time_used, long long memory_used);
     // trimite un packet spre db pentru fiecare test cu verdictul SKIP, 0 timp si 0 memorie
