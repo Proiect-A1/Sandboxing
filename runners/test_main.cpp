@@ -18,6 +18,7 @@
 #include <Singletoni/task_queue.h>
 #include <Server/header_helper.hpp>
 #include <pthread.h>
+#include <Tasks/generator_task.hpp>
 
 #define EVENTS_BUFF_SIZE 4096
 
