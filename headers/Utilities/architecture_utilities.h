@@ -36,5 +36,7 @@ namespace architecture_utilities {
   std::string get_problem_generator_exec_path(const std::string& problem_id, int rev_id, const std::string& gen_exec_name);
   std::string get_problem_interactor_exec_path(const std::string& problem_id, int rev_id, const std::string& interactor_exec_name);
   std::string get_problem_source_exec_path(const std::string& problem_id, int rev_id, const std::string& src_exec_name);
+  std::string get_problem_data_path(std::string problem_id, int rev_id);
+  int get_sandbox_workers();
 }
 #endif // ARCHITECTURE_UTILITIES_H

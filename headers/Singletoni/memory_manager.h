@@ -5,8 +5,6 @@
 #include <string.h>
 class memory_manager {
   //Singleton
-  static memory_manager* instance;
-
   static pthread_mutex_t mtx;
   
   unsigned long long memory_used = 0; // in bytes

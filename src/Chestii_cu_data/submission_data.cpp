@@ -1,4 +1,5 @@
 #include <Chestii_cu_data/submission_data.h>
+#include <Singletoni/logger.h>
 
 submission_data::submission_data(language_enum language, std::string problem_id, int rev_id, int socket_fd){
     problem_metadata pmd=problem_manager::get_instance().get_metadata(problem_id,rev_id);
@@ -37,6 +38,11 @@ void submission_data::add_completed_test(int test_id, result_enum result, float 
     }
     send_completed_test_packet(test_id, tests[test_id]);
     if(tests_completed==test_count){
+        // de trimis packet cu submisia terminata
+        LOG_INFO(std::string("Submission ") + problem_id + " rev " + std::to_string(rev_id) +
+                 " completed with " + std::to_string(points) + " points, time used: " +
+                 std::to_string(time_used) + " ms, memory used: " +
+                 std::to_string(memory_used) + " B");
         send_completed_submission_packet();
     }
         

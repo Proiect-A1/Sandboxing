@@ -1,16 +1,10 @@
 #include <Singletoni/task_queue.h>
 
-task_queue* task_queue::instance = nullptr;
 pthread_mutex_t task_queue::mtx = PTHREAD_MUTEX_INITIALIZER;
 
 task_queue& task_queue::get_instance(){
-  if (instance == nullptr) {
-      pthread_mutex_lock(&task_queue::mtx);
-      if (instance == nullptr)
-        instance = new task_queue();
-      pthread_mutex_unlock(&task_queue::mtx);
-  }
-  return *instance;
+  static task_queue instance;
+  return instance;
 }
 
 bool task_queue::empty(){

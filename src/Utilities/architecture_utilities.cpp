@@ -59,8 +59,14 @@ std::string architecture_utilities::get_submission_dir(std::string submission_id
   return get_sandbox_path() + "/submissions/" + submission_id;
 }
 
+
 std::string architecture_utilities::get_sandbox_path(){
-  return std::string(getenv("SANDBOX_PATH"));
+  static const char* sandbox_ptr = getenv("SANDBOX_PATH");
+  if (sandbox_ptr == nullptr){
+    return "";
+  }
+  static const std::string sandbox_path(sandbox_ptr);
+  return sandbox_path;
 }
 
 std::string architecture_utilities::get_submission_source_path(std::string submission_id, language_enum language) {
@@ -114,4 +120,14 @@ std::string architecture_utilities::get_problem_generator_exec_path(const std::s
 
 std::string architecture_utilities::get_problem_source_exec_path(const std::string& problem_id, int rev_id, const std::string& src_exec_name){
   return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id)+"/files/sources/"+src_exec_name;
+}
+
+std::string architecture_utilities::get_problem_data_path(std::string problem_id, int rev_id) {
+  return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id);
+}
+
+int architecture_utilities::get_sandbox_workers()
+{
+  static const char* workers = getenv("SANDBOX_WORKERS");
+  return atoi(workers);
 }

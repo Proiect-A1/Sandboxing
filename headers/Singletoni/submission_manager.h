@@ -6,7 +6,6 @@
 #include <Utilities/general_utilities.h>
 #include <pthread.h>
 class submission_manager{ // singleton
-    static submission_manager* instance;
     static pthread_mutex_t mtx;
     std::map<std::string, submission_data> submission_table; /// submission_id -> submission_data
     submission_manager() = default;

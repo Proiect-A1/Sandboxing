@@ -10,7 +10,6 @@
 
 class problem_manager {
   //Singleton
-  static problem_manager* instance;
   static pthread_mutex_t mtx;
   std::map<std::string, std::map<int, problem_metadata>> problems; // problem_id -> revizion_id -> metadata
   problem_manager() = default;
@@ -23,7 +22,8 @@ class problem_manager {
   bool exists_revision(std::string problem_id, int rev_id);
   int count_revisions(std::string problem_id);
   problem_metadata get_metadata(std::string problem_id, int rev_id);
-
+  void update_problem_status(std::string problem_id , int rev_id , problem_status_enum problem_status);
+  problem_status_enum get_problem_status(std::string problem_id , int rev_id);
 };
 
 
