@@ -3,7 +3,10 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 #include <Enums/result_enum.h>
+#include <Singletoni/logger.h>
+#include <Utilities/architecture_utilities.h>
 #include <Singletoni/logger.h>
 
 struct task
