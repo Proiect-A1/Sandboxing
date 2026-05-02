@@ -191,7 +191,7 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     }
 
     chmod(output_host_path.c_str(), 0755);
-    LOG_DEBUG_USER(user_id, "Compilation completed for submission " + submission_id + " with result " + general_utilities::enum_to_string(result_enum::OK) + " in " + std::to_string(compile_time_ms) + "ms, time_limit: " + std::to_string((long long)time_limit) + "ms");
+    LOG_INFO_USER(user_id, "Compilation completed for submission " + submission_id + " with result " + general_utilities::enum_to_string(result_enum::OK) + " in " + std::to_string(compile_time_ms) + "ms, time_limit: " + std::to_string((long long)time_limit) + "ms");
     return result_enum::OK;
 }
 

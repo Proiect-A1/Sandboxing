@@ -139,21 +139,23 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
 
     // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
     // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
-    if (chdir(run_dir.c_str()) != 0)
-    {
-      LOG_ERROR_USER(user_id, "Failed to change directory to run directory");
-        _exit(127);
-    }
     
+    if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
+      _exit(127);
+    }
+
     if (!(architecture_utilities::change_root_to_sandbox()))
     {
       LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
       _exit(127);
     }
 
-    if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
+    std::string inner_run_dir = "/runs/" + run_username;
+    if (chdir(inner_run_dir.c_str()) != 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
       _exit(127);
     }
 
@@ -304,8 +306,8 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
 
     if (sig == SIGSYS)
     {
-      LOG_ERROR_USER(user_id, std::string("Seccomp violation: child pid=") + std::to_string(pid) + std::string(" exec=") + exec_file_name);
-      return result_enum::WA;
+      LOG_OTHER_USER(user_id, std::string("Seccomp violation: child pid=") + std::to_string(pid) + std::string(" exec=") + exec_file_name);
+      return result_enum::RTE;
     }
       
     if ((sig == SIGABRT || sig == SIGSEGV || sig == SIGKILL) && memory_consumed > memory_limit)
