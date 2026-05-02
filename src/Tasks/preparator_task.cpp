@@ -17,4 +17,5 @@ result_enum preparator_task::execute(){
     if(!check_if_problem_exists())
         pull_problem();
     compile_problem_sources();
+    generate_tests();
 }

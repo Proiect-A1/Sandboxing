@@ -8,7 +8,7 @@ class preparator_task : public task{
     std::string problem_id;
     int rev_id;
 public:
-    preparator(const std::string& problem_id, int rev_id);
+    preparator_task(const std::string& problem_id, int rev_id);
 private:
     bool check_if_problem_exists();
     void pull_problem();
