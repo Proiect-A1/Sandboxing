@@ -130,12 +130,15 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   {
     setpgid(0, 0);
 
+    // DECOMENTATI TOT CE TINE DE err_fd CA SA DATI REDIRECT STDERR-ului LA /dev/null 
+    /*
     int err_fd = open("/dev/null", O_WRONLY);
     if (err_fd < 0)
     {
       LOG_ERROR_USER(user_id, "Failed to open /dev/null before sandbox restrictions");
       _exit(127);
     }
+    */
 
     // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
     // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
@@ -189,18 +192,18 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
 
-    if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0)
+    if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0 /*|| dup2(err_fd, STDERR_FILENO) < 0*/)
     {
       close(in_fd);
       close(out_fd);
-      close(err_fd);
+      //close(err_fd);
       LOG_ERROR_USER(user_id, "Failed to redirect input/output/error inside sandbox");
       _exit(127);
     }
 
     close(in_fd);
     close(out_fd);
-    close(err_fd);
+    //close(err_fd);
 
     struct rlimit memory_rl;
     rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
