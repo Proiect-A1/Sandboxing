@@ -14,8 +14,16 @@ static int install_seccomp_whitelist()
   };
 
   int syscalls[] = {
-    SCMP_SYS(brk), SCMP_SYS(open), SCMP_SYS(openat), SCMP_SYS(close), SCMP_SYS(lseek),
-    SCMP_SYS(execve), SCMP_SYS(exit_group), SCMP_SYS(rt_sigreturn)
+    SCMP_SYS(read), SCMP_SYS(write), SCMP_SYS(readv), SCMP_SYS(writev),
+    SCMP_SYS(open), SCMP_SYS(openat), SCMP_SYS(close), SCMP_SYS(lseek),
+    SCMP_SYS(fstat), SCMP_SYS(newfstatat), SCMP_SYS(stat), SCMP_SYS(pread64),
+    SCMP_SYS(access), SCMP_SYS(readlink),
+    SCMP_SYS(mmap), SCMP_SYS(munmap), SCMP_SYS(mprotect), SCMP_SYS(brk), SCMP_SYS(madvise),
+    SCMP_SYS(arch_prctl), SCMP_SYS(set_tid_address), SCMP_SYS(set_robust_list),
+    SCMP_SYS(prlimit64), SCMP_SYS(getrandom), SCMP_SYS(rseq),
+    SCMP_SYS(futex), SCMP_SYS(ioctl), SCMP_SYS(fcntl), SCMP_SYS(uname), SCMP_SYS(sysinfo),
+    SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask), SCMP_SYS(rt_sigreturn),
+    SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group)
   };
 
   for (int s : syscalls)
@@ -193,7 +201,6 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     close(err_fd);
 
     struct rlimit memory_rl;
-    // Allow address space to gracefully exceed the strict physical memory limit to catch MLE cleanly
     rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
     memory_rl.rlim_cur = mem_limit_padded;
     memory_rl.rlim_max = mem_limit_padded;
@@ -241,7 +248,6 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     auto current_time = std::chrono::steady_clock::now();
     auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
     
-    // Hard wall-clock limit (+ 1 second grace period to allow SIGXCPU)
     if (elapsed_ms > time_limit + 1000)
     {
       time_limit_exceeded = true;
