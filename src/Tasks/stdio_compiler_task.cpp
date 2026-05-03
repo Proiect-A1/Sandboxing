@@ -2,6 +2,7 @@
 #include <sys/resource.h>
 #include <cstring>
 #include <cerrno>
+#include <cmath>
 
 bool stdio_compiler_task::check_permissions()
 {
@@ -67,8 +68,6 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     }
 
     unlink(output_run_path.c_str());
-
-    const auto started_at = std::chrono::steady_clock::now();
     pid_t pid = fork();
     if (pid < 0)
     {
@@ -114,6 +113,17 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
             const_cast<char *>(source_in_jail.c_str()),
             nullptr};
 
+        long sec = (long)std::ceil(time_limit / 1000.0f);
+        if (sec <= 0) sec = 1;
+        struct rlimit cpu_rl;
+        cpu_rl.rlim_cur = (rlim_t)sec;
+        cpu_rl.rlim_max = (rlim_t)sec;
+        if (setrlimit(RLIMIT_CPU, &cpu_rl) != 0)
+        {
+            LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
+            _exit(127);
+        }
+
         execv(compile_command.c_str(), argv);
         _exit(127);
     }
@@ -121,9 +131,7 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     setpgid(pid, pid);
 
     int status = 0;
-    bool timed_out = false;
 
-    // get rusage for this specific child using wait4
     long long compile_time_ms = -1;
     struct rusage ru;
     while (true)
@@ -131,40 +139,20 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
         pid_t waited = wait4(pid, &status, WNOHANG, &ru);
         if (waited == pid)
         {
-            long long us = (long long)ru.ru_utime.tv_sec * 1000000LL + ru.ru_utime.tv_usec
-                + (long long)ru.ru_stime.tv_sec * 1000000LL + ru.ru_stime.tv_usec;
+            long long us = (long long)ru.ru_utime.tv_sec * 1000000LL + ru.ru_utime.tv_usec;
             compile_time_ms = us / 1000;
             break;
         }
         else if (waited == 0)
         {
-            const auto now = std::chrono::steady_clock::now();
-            const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - started_at).count();
-            if (elapsed_ms > (long long)time_limit)
-            {
-                timed_out = true;
-                killpg(pid, SIGKILL);
-                // reap and collect rusage for the killed child
-                pid_t w = wait4(pid, &status, 0, &ru);
-                if (w == pid) {
-                    long long us = (long long)ru.ru_utime.tv_sec * 1000000LL + ru.ru_utime.tv_usec
-                        + (long long)ru.ru_stime.tv_sec * 1000000LL + ru.ru_stime.tv_usec;
-                    compile_time_ms = us / 1000;
-                } else {
-                    compile_time_ms = elapsed_ms;
-                }
-                break;
-            }
             usleep(1000);
             continue;
         }
         else
         {
             if (errno == EINTR) continue;
-            // error while waiting; try to reap and collect rusage
             if (wait4(pid, &status, 0, &ru) == pid) {
-                long long us = (long long)ru.ru_utime.tv_sec * 1000000LL + ru.ru_utime.tv_usec
-                    + (long long)ru.ru_stime.tv_sec * 1000000LL + ru.ru_stime.tv_usec;
+                long long us = (long long)ru.ru_utime.tv_sec * 1000000LL + ru.ru_utime.tv_usec;
                 compile_time_ms = us / 1000;
             }
             LOG_ERROR_USER(user_id, "Error while waiting for compiler process");
@@ -172,9 +160,9 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
         }
     }
 
-    if (timed_out)
+    if (WIFSIGNALED(status))
     {
-        return result_enum::TLE;
+        return result_enum::CPE;
     }
 
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)

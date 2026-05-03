@@ -6,7 +6,6 @@ stdio_grader_task::stdio_grader_helper::~stdio_grader_helper() {
   if (system(("rm -rf " + architecture_utilities::get_run_dir(user_id)+ "/*").c_str()) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory");
     test_result = result_enum::FAIL;
-    return;
   }
   sm.add_completed_test(submission_id, test_id, test);
 }
@@ -92,10 +91,11 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
 
   if (helper.test_result != result_enum::OK){
     helper.test.points = 0;
+    helper.test.result = helper.test_result;
     sm.add_completed_test(submission_id, test_id, helper.test);
     return helper.test.result;
   }
-  
+
   if (!general_utilities::copy_file(problem_correct_output_path, ::architecture_utilities::get_run_dir(user_id) + "/" + correct_output_path, 0644)){
     LOG_ERROR_USER(user_id, "Couldn't copy problem correct output to run directory");
     return result_enum::FAIL;
@@ -124,6 +124,5 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
 
 
   LOG_INFO_USER(user_id, "Test " + std::to_string(test_id) + " completed with result " + checker.get_message() + ", points: " + std::to_string(helper.test.points) + ", time used: " + std::to_string(helper.test.time_used) + " ms, memory used: " + std::to_string(helper.test.memory_used) + " B");
-
   return helper.test.result;
 }
