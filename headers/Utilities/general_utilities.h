@@ -19,7 +19,8 @@ namespace general_utilities{
       return *a < *b; // Assuming T has operator< defined
     }
   };
-}
+  std::string syscall_to_string(std::string syscall);
+};
 
 
 

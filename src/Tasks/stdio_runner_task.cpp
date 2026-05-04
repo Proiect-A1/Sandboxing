@@ -180,7 +180,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     int in_fd = open(jailed_input_path.c_str(), O_RDONLY);
     if (in_fd < 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + jailed_input_path + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
     
@@ -188,7 +188,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     if (out_fd < 0)
     {
       close(in_fd);
-      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username);
+      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + jailed_output_path + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
 

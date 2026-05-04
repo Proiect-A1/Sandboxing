@@ -5,7 +5,6 @@
 #include <string>
 #include <pthread.h>
 class user_queue{
-  static pthread_mutex_t mtx;
   mutex_queue<int> queue;
   user_queue(){}
   public:
