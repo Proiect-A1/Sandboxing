@@ -26,8 +26,7 @@ void mutex_queue<T>::push(const T& item){
     pthread_cond_wait(&not_full, &m);
   }
   q.push(item);
-  if (q.size() == 1)
-    pthread_cond_signal(&not_empt);
+  pthread_cond_signal(&not_empt);
   pthread_mutex_unlock(&m);
 }
 
@@ -39,8 +38,7 @@ T mutex_queue<T>::pop(){
   }
   T item = q.front();
   q.pop();
-  if (q.size() == max_size - 1)
-    pthread_cond_signal(&not_full);
+  pthread_cond_signal(&not_full);
   pthread_mutex_unlock(&m);
   return item;
 }
