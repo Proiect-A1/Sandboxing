@@ -26,6 +26,7 @@ using namespace std;
 char *ip;
 short port;
 short num_of_threads;
+std::atomic<short> worker_thread_count = 0;
 int sockfd;
 int epollfd;
 
@@ -85,6 +86,7 @@ struct worker_thread_struct{
 };
 
 void *worker_thread(void *arg){
+  worker_thread_count++;
   struct worker_thread_struct *wts = (struct worker_thread_struct *) arg;
   pthread_t thread_id = wts->thread_id;
   task* current_task = wts->current_task;
@@ -97,6 +99,7 @@ void *worker_thread(void *arg){
 
   delete current_task;
   delete wts;  
+  worker_thread_count--;
   return nullptr;
 }
 
@@ -179,19 +182,46 @@ void init_users()
     }
 }
 
-void debug_workers()
-{
+void debug_workers(){
     string message = "WORKERS = " + to_string(architecture_utilities::get_sandbox_workers());
     LOG_DEBUG(message.c_str());
 }
 
-void debug_path()
-{
+void debug_path(){
     string message = "PATH = " + architecture_utilities::get_sandbox_path();
     LOG_DEBUG(message.c_str());
 }
 
-map < string , void (*)() > debug_command = {{"workers" , debug_workers} , {"path" , debug_path}};
+void debug_main_threads(){
+  string message = "MAIN_THREAD_COUNT = " + std::to_string(num_of_threads);
+  LOG_DEBUG(message.c_str());
+}
+
+void debug_worker_threads(){
+  string message = "WORKER_THREAD_COUNT = " + std::to_string(worker_thread_count);
+  LOG_DEBUG(message.c_str());
+}
+
+void debug_user_queue_size(){
+  string message = "USER_QUEUE_SIZE = " + user_queue::get_instance().size();
+  LOG_DEBUG(message.c_str());
+}
+
+void debug_task_queue_size(){
+  string message = "TASK_QUEUE_SIZE = " + task_queue::get_instance().size();
+  LOG_DEBUG(message.c_str());
+}
+
+
+
+map < string , void (*)() > debug_command = {
+  {"workers" , debug_workers},
+  {"path" , debug_path},
+  {"main_threads", debug_main_threads},
+  {"worker_threads", debug_worker_threads},
+  {"user_queue_size", debug_user_queue_size},
+  {"task_queue_size", debug_task_queue_size},
+  };
 
 void execute_debug()
 {
