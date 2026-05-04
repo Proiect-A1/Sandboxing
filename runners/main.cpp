@@ -179,6 +179,36 @@ void init_users()
     }
 }
 
+void debug_workers()
+{
+    string message = "WORKERS = " + to_string(architecture_utilities::get_sandbox_workers());
+    LOG_DEBUG(message.c_str());
+}
+
+void debug_path()
+{
+    string message = "PATH = " + architecture_utilities::get_sandbox_path();
+    LOG_DEBUG(message.c_str());
+}
+
+map < string , void (*)() > debug_command = {{"workers" , debug_workers} , {"path" , debug_path}};
+
+void execute_debug()
+{
+    char comm[100];
+    int len = read(0 , comm , 100);
+    comm[len - 1] = '\0';
+
+    if(debug_command.count(comm))
+    {
+        debug_command[comm]();
+    }
+    else 
+    {
+        LOG_DEBUG("debug command ignored");
+    }
+}
+
 int main(int argc , char *argv[])
 {
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
@@ -187,6 +217,7 @@ int main(int argc , char *argv[])
     set_socket();
     create_epoll();
     add_fd(sockfd , EPOLLIN);
+    add_fd(0 , EPOLLIN);
     create_threads();
     init_users();
 
@@ -208,10 +239,14 @@ int main(int argc , char *argv[])
                     int fd_client = accept_new_connection();
                     add_fd(fd_client , EPOLLIN | EPOLLET);
                 }   
-                else 
+                else if(fd != 0)
                 {
                     LOG_INFO("Request received");
                     receive_request(fd);
+                }
+                else if(fd == 0)
+                {
+                   execute_debug();
                 }
             }
         }
