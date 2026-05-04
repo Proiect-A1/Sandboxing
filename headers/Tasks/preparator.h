@@ -2,18 +2,20 @@
 #define PREPARATOR_H
 
 #include <string>
-class preparator{
-    int problem_id;
+#include <Tasks/task.h>
+
+class preparator : public task{
+    std::string problem_id;
     int rev_id;
-    std::string problem_folder_root_path;
 public:
-    preparator(int problem_id, int rev_id, std::string problem_folder_root_path);
+    preparator(std::string problem_id, int rev_id);
 private:
     bool check_if_problem_exists();
     void pull_problem();
     void generate_tests();
     void compile_problem_sources();
 public:
-    void execute();
+    result_enum execute(pthread_t thread_id, int user_id) override;
+    bool check_permissions() override;
 };
 #endif
