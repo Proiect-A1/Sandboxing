@@ -19,4 +19,12 @@ cd $SANDBOX_PATH
 cd ../runners
 g++ -I ../headers main.cpp ../src/*/* -o main -lseccomp
 cd ..
-./runners/main 127.0.0.1 6000 15
+
+echo $1 
+
+if [ $# -eq 1 -a $1 == 'server' ]
+then 
+    ./runners/main 10.8.0.3 6000 15
+else
+    ./runners/main 127.0.0.1 6000 15
+fi
