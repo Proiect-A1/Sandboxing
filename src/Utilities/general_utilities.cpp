@@ -56,3 +56,18 @@ bool general_utilities::is_folder(const std::string& path){
 bool general_utilities::is_executable(const std::string& path){
     return access(path.c_str(),X_OK)==0; // 0 if successful, -1 otherwise
 }
+
+std::string general_utilities::syscall_to_string(std::string syscall){
+  FILE* f = popen(syscall.c_str(), "r");
+  std::string result = "\n | (" + syscall + ")\n";
+  if (f){
+    char buffer[256];
+    while (fgets(buffer, sizeof(buffer), f)) {
+      result += buffer;
+    }
+    pclose(f);
+  }
+  else
+    result += "FAIL";
+  return result;
+}

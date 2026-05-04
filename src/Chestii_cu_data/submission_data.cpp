@@ -9,7 +9,7 @@ submission_data::submission_data(language_enum language, std::string problem_id,
     tests_completed=0;
     test_count=pmd.test_count;
     time_limit=pmd.time_limit;
-    memory_limit=pmd.time_limit;
+    memory_limit=pmd.memory_limit;
     this->problem_id=problem_id;
     this->rev_id=rev_id;
     this->socket_fd=socket_fd; /// stdout by default

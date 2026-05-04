@@ -6,9 +6,10 @@ using namespace std;
 int main(){
     cout<<architecture_utilities::get_problem_data_folder("swapsort",1)<<'\n';
     tgsct t("swapsort", 1);
-    cout<<"here\n";
-    cout<<(int)t.execute(0,0)<<'\n';
+    result_enum retval=t.execute(0,0);
+    cout<<(int)retval<<'\n';
     cout<<t.get_compilation_message(30);
+    if(retval!=result_enum::OK) return 0;
     problem_metadata output = t.get_problem_metadata();
     
     cout<<"Total points: "<<output.total_points<<'\n';

@@ -1,4 +1,48 @@
 #include <Tasks/stdio_runner_task.h>
+#include <cmath>
+#include <seccomp.h>
+#include <errno.h>
+
+static int install_seccomp_whitelist()
+{
+  scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_TRAP);
+  if (!ctx) return -1;
+
+  auto add = [&](int sys) {
+    if (seccomp_rule_add(ctx, SCMP_ACT_ALLOW, sys, 0) < 0) return false;
+    return true;
+  };
+
+  int syscalls[] = {
+    SCMP_SYS(read), SCMP_SYS(write), SCMP_SYS(readv), SCMP_SYS(writev),
+    SCMP_SYS(open), SCMP_SYS(openat), SCMP_SYS(close), SCMP_SYS(lseek),
+    SCMP_SYS(fstat), SCMP_SYS(newfstatat), SCMP_SYS(stat), SCMP_SYS(pread64),
+    SCMP_SYS(access), SCMP_SYS(readlink),
+    SCMP_SYS(mmap), SCMP_SYS(munmap), SCMP_SYS(mprotect), SCMP_SYS(brk), SCMP_SYS(madvise),
+    SCMP_SYS(arch_prctl), SCMP_SYS(set_tid_address), SCMP_SYS(set_robust_list),
+    SCMP_SYS(prlimit64), SCMP_SYS(getrandom), SCMP_SYS(rseq),
+    SCMP_SYS(futex), SCMP_SYS(ioctl), SCMP_SYS(fcntl), SCMP_SYS(uname), SCMP_SYS(sysinfo),
+    SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask), SCMP_SYS(rt_sigreturn),
+    SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group)
+  };
+
+  for (int s : syscalls)
+  {
+    if (!add(s))
+    {
+      seccomp_release(ctx);
+      return -1;
+    }
+  }
+
+  if (seccomp_load(ctx) < 0)
+  {
+    seccomp_release(ctx);
+    return -1;
+  }
+  seccomp_release(ctx);
+  return 0;
+}
 
 bool stdio_runner_task::check_permissions()
 {
@@ -72,8 +116,6 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   memory.blocking_request_memory(requested_memory);
   LOG_INFO_USER(user_id, "Memory allocated " + std::to_string(memory_limit) + " B");
 
-  const auto started_at = std::chrono::steady_clock::now();
-
   pid_t pid = fork();
 
   if (pid < 0)
@@ -88,23 +130,35 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   {
     setpgid(0, 0);
 
+    // DECOMENTATI TOT CE TINE DE err_fd CA SA DATI REDIRECT STDERR-ului LA /dev/null 
+    /*
+    int err_fd = open("/dev/null", O_WRONLY);
+    if (err_fd < 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to open /dev/null before sandbox restrictions");
+      _exit(127);
+    }
+    */
+
     // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
     // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
-    if (chdir(run_dir.c_str()) != 0)
-    {
-      LOG_ERROR_USER(user_id, "Failed to change directory to run directory");
-        _exit(127);
-    }
     
+    if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
+      _exit(127);
+    }
+
     if (!(architecture_utilities::change_root_to_sandbox()))
     {
       LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
       _exit(127);
     }
 
-    if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
+    std::string inner_run_dir = "/runs/" + run_username;
+    if (chdir(inner_run_dir.c_str()) != 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
       _exit(127);
     }
 
@@ -126,7 +180,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     int in_fd = open(jailed_input_path.c_str(), O_RDONLY);
     if (in_fd < 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + jailed_input_path + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
     
@@ -134,30 +188,49 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     if (out_fd < 0)
     {
       close(in_fd);
-      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username);
+      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + jailed_output_path + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
 
-    if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0)
+    if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0 /*|| dup2(err_fd, STDERR_FILENO) < 0*/)
     {
       close(in_fd);
       close(out_fd);
-      LOG_ERROR_USER(user_id, "Failed to redirect input/output inside sandbox");
+      //close(err_fd);
+      LOG_ERROR_USER(user_id, "Failed to redirect input/output/error inside sandbox");
       _exit(127);
     }
 
     close(in_fd);
     close(out_fd);
+    //close(err_fd);
 
     struct rlimit memory_rl;
-    memory_rl.rlim_cur = (rlim_t)memory_limit;
-    memory_rl.rlim_max = (rlim_t)memory_limit;
+    rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
+    memory_rl.rlim_cur = mem_limit_padded;
+    memory_rl.rlim_max = mem_limit_padded;
     if (setrlimit(RLIMIT_AS, &memory_rl) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to set memory limit");
       _exit(127);
     }
 
+    long sec = (long)std::ceil(time_limit / 1000.0f);
+    if (sec <= 0) sec = 1;
+    struct rlimit cpu_rl;
+    cpu_rl.rlim_cur = (rlim_t)sec;
+    cpu_rl.rlim_max = (rlim_t)sec + 1;
+    if (setrlimit(RLIMIT_CPU, &cpu_rl) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
+      _exit(127);
+    }
+
+    if (install_seccomp_whitelist() != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to install seccomp filter");
+      _exit(127);
+    }
 
     const std::string jailed_exec_path = "./" + exec_file_name;
     char *const argv[] = {const_cast<char *>(jailed_exec_path.c_str()), nullptr};
@@ -170,11 +243,22 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
   setpgid(pid, pid);
 
   int status = 0;
-  bool timed_out = false;
   struct rusage usage;
+
+  auto start_time = std::chrono::steady_clock::now();
+  bool time_limit_exceeded = false;
 
   while (true)
   {
+    auto current_time = std::chrono::steady_clock::now();
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
+    
+    if (elapsed_ms > time_limit + 1000)
+    {
+      time_limit_exceeded = true;
+      killpg(pid, SIGKILL);
+    }
+
     pid_t waited = wait4(pid, &status, WNOHANG, &usage);
     if (waited == pid)
     {
@@ -190,26 +274,16 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       return result_enum::FAIL;
     }
 
-    const auto now = std::chrono::steady_clock::now();
-    const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - started_at).count();
-    if (elapsed_ms > (long long)time_limit)
-    {
-      timed_out = true;
-      killpg(pid, SIGKILL);
-      wait4(pid, &status, 0, &usage);
-      break;
-    }
-
     usleep(1000);
   }
 
-  const auto ended_at = std::chrono::steady_clock::now();
-  time_consumed = (float)std::chrono::duration_cast<std::chrono::milliseconds>(ended_at - started_at).count();
+  long long used_us = (long long)usage.ru_utime.tv_sec * 1000000LL + (long long)usage.ru_utime.tv_usec;
+  time_consumed = (float)(used_us / 1000.0f);
   memory_consumed = (long)(usage.ru_maxrss * 1024L);
 
   memory.release_memory(requested_memory);
 
-  if (timed_out)
+  if (time_limit_exceeded)
   {
     return result_enum::TLE;
   }
@@ -219,6 +293,39 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     return result_enum::MLE;
   }
 
+  if (time_consumed > time_limit)
+  {
+    return result_enum::TLE;
+  }
+
+  if (WIFSIGNALED(status))
+  {
+    const int sig = WTERMSIG(status);
+      
+    if (sig == SIGXCPU)
+    {
+      return result_enum::TLE;
+    }
+
+    if (sig == SIGSYS)
+    {
+      LOG_OTHER_USER(user_id, std::string("Seccomp violation: child pid=") + std::to_string(pid) + std::string(" exec=") + exec_file_name);
+      return result_enum::RTE;
+    }
+      
+    if ((sig == SIGABRT || sig == SIGSEGV || sig == SIGKILL) && memory_consumed > memory_limit)
+    {
+      return result_enum::MLE;
+    }
+
+    if (sig == SIGKILL && time_consumed > time_limit)
+    {
+      return result_enum::TLE;
+    }
+    
+    return result_enum::RTE;
+  }
+      
   if (WIFEXITED(status))
   {
     const int code = WEXITSTATUS(status);
@@ -234,15 +341,5 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     return result_enum::RTE;
   }
 
-  if (WIFSIGNALED(status))
-  {
-    const int sig = WTERMSIG(status);
-    if (sig == SIGKILL && memory_consumed > memory_limit)
-    {
-      return result_enum::MLE;
-    }
-    return result_enum::RTE;
-  }
-
-  return result_enum::OK;
+  return result_enum::RTE;
 }

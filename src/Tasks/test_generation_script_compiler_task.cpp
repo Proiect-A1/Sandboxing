@@ -284,7 +284,7 @@ result_enum tgsct::execute(pthread_t thread_id, int user_id){
         return true;
     };
     while(getline(fin,line)){
-        std::cout<<line_no<<' '<<line<<'\n';
+        //std::cout<<line_no<<' '<<line<<'\n';
         ++line_no;
         std::stringstream ss(line);
         std::vector<std::string> tokens;
@@ -499,6 +499,7 @@ result_enum tgsct::execute(pthread_t thread_id, int user_id){
         output.group_count++;
         output.total_points+=it.second;
     }
+    output.test_count = output.tests.size();
     return this->failed ? result_enum::FAIL : result_enum::OK;
 }
 
