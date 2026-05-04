@@ -1,7 +1,5 @@
 #include <Singletoni/user_queue.h>
-
-pthread_mutex_t user_queue::mtx = PTHREAD_MUTEX_INITIALIZER;
-
+#include <Singletoni/logger.h>
 user_queue& user_queue::get_instance(){
   static user_queue instance;
   return instance;
@@ -16,6 +14,7 @@ int user_queue::size(){
 }
 
 void user_queue::push(const int& item){
+  LOG_INFO(std::to_string(item) + " added to user queue");
   queue.push(item);
 }
 

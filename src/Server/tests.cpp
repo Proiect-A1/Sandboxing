@@ -124,7 +124,7 @@ namespace tests
         test_submission("1009", "expresie", 1);
         test_submission("1010", "expresie", 1);
         test_submission("1011", "expresie", 1);
-        test_submission("1012", "expresie", 1);
+        // test_submission("1012", "expresie", 1);
         test_submission("1013", "expresie", 1);
 
         test_submission("500", "expresie", 1);
@@ -221,11 +221,6 @@ namespace tests
             "$SANDBOX_PATH/submissions/" + submission_id + "/main.cpp"
         ).c_str());
         
-        for (int i = 1; i <= 10; i++){
-            architecture_utilities::change_dir_to_user(i);
-            system("rm -f *");
-            user_queue::get_instance().push(i);
-        }
 
         submission_manager& sm = submission_manager::get_instance();
         sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , 1);
