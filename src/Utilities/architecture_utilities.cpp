@@ -100,6 +100,9 @@ std::string architecture_utilities::get_problem_data_folder(const std::string& p
 std::string architecture_utilities::get_problem_script_path(const std::string& problem_id, int rev_id){
   return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id)+"/metadata/tests.gen";
 }
+std::string architecture_utilities::get_problem_metadata_path(const std::string& problem_id, int rev_id){
+  return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id)+"/metadata/metadata.json";
+}
 
 std::string architecture_utilities::get_problem_raw_test_path(const std::string& problem_id, int rev_id, const std::string& raw_test_name){
   return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id)+"/files/raw_tests/"+raw_test_name;

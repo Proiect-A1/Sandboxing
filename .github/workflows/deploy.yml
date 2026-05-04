@@ -42,28 +42,7 @@ jobs:
           git checkout dev
           git reset --hard sandbox/dev
           git clean -fd
-          echo 1
-          screen -S sandbox -X quit 2>/dev/null
-          echo 2
-          screen -S sandbox -d -m
-          echo 3
-          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo bash init_server.sh \n'
-          echo 4
-          echo "Prep successful!"
-          EOF
-
-      - name: Exec
-        run: |
-          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          echo "Starting exec..."
-          set -e
-          echo 5
-          screen -S sandbox -X quit 2>/dev/null
-          echo 6
-          screen -S sandbox -d -m
-          echo 7
-          screen -S sandbox -X stuff 'cd /home/sochu/sandbox \n sudo -E bash run_server.sh \n'
-          echo 8
+          docker compose down && docker compose up --build
           echo "Deployment successful!"
           EOF
 

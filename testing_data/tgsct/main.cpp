@@ -12,6 +12,8 @@ int main(){
     if(retval!=result_enum::OK) return 0;
     problem_metadata output = t.get_problem_metadata();
     
+    cout<<"Time limit: "<<output.time_limit<<"s\n";
+    cout<<"Memory limit: "<<output.memory_limit<<"B\n";
     cout<<"Total points: "<<output.total_points<<'\n';
     cout<<"Subtask count: "<<output.group_count<<'\n';
     for(int i=0;i<output.groups.size();i++){
