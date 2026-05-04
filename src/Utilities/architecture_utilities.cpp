@@ -19,6 +19,9 @@ bool architecture_utilities::change_root_to_sandbox(){
   if (chroot(sandbox_path) != 0){
     return false;
   }
+  if (chdir("/") != 0){
+    return false;
+  }
   return true;
 }
 
