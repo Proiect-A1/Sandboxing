@@ -96,7 +96,7 @@ void *worker_thread(void *arg){
   user_queue::get_instance().push(user_id);
 
   delete current_task;
-  delete wts;
+  delete wts;  
   return nullptr;
 }
 
@@ -106,6 +106,7 @@ void *main_thread(void *arg)
     //campeaza coada
     while (true){
       task* next_task = task_queue::get_instance().pop();
+        LOG_DEBUG("Task starting to execute");
 
       worker_thread_struct* wts = new worker_thread_struct;
       wts->current_task = next_task;
@@ -168,6 +169,16 @@ void receive_request(int client_fd)
        
 }
 
+void init_users()
+{
+    int workers = architecture_utilities::get_sandbox_workers();
+
+    for(int i = 1 ; i <= workers ; i++)
+    {
+        user_queue::get_instance().push(i);
+    }
+}
+
 int main(int argc , char *argv[])
 {
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
@@ -177,7 +188,8 @@ int main(int argc , char *argv[])
     create_epoll();
     add_fd(sockfd , EPOLLIN);
     create_threads();
-   
+    init_users();
+
     LOG_INFO("Epoll set");
     epoll_event ev[EVENTS_BUFF_SIZE];
     int num_events;

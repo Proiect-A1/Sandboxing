@@ -8,6 +8,7 @@
 #include <Singletoni/task_queue.h>
 #include <Singletoni/user_queue.h>
 #include <Tasks/evaluator_task.h>
+#include <Tasks/preparator.h>
 
 using namespace std;
 
@@ -125,9 +126,8 @@ string IO::recv(int fd)
     
 }
 
-void IO::done_test_request(string submissionId , int testId , int verdict , string message , float score , float maxScore , float scorePercent , long long memory , long long time)
+void IO::done_test_request(string submissionId , int testId , int verdict , string message , float score , float maxScore , float scorePercent , long long memory , long long time , int sockfd)
 {   
-    int sockfd = create_socket();
     json request;
     request["request"] = "doneTest";
     request["submissionId"] = submissionId;
@@ -140,12 +140,10 @@ void IO::done_test_request(string submissionId , int testId , int verdict , stri
     request["memory"] = memory;
     request["time"] = time;
     IO::send(request.dump().c_str() , sockfd);
-    close(sockfd);
 }
 
-void IO::done_subtask_request(string submissionId , int subtaskId , float score , float maxScore , float scorePercent , long long maxMemory , long long maxTime)
+void IO::done_subtask_request(string submissionId , int subtaskId , float score , float maxScore , float scorePercent , long long maxMemory , long long maxTime , int sockfd)
 {
-    int sockfd = create_socket();
     json request;
     request["request"] = "doneSubtask";
     request["submissionId"] = submissionId;
@@ -156,12 +154,10 @@ void IO::done_subtask_request(string submissionId , int subtaskId , float score 
     request["maxMemory"] = maxMemory;
     request["maxTime"] = maxTime; 
     send(request.dump().c_str() , sockfd);
-    close(sockfd);
 }
 
-void IO::done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long maxMemory , long long maxTime)
+void IO::done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long maxMemory , long long maxTime , int sockfd)
 {
-    int sockfd = create_socket();
     json request;
     request["request"] = "doneSubmission"; 
     request["submissionId"] = submissionId;
@@ -171,12 +167,10 @@ void IO::done_submission_request(string submissionId , float score , float maxSc
     request["maxMemory"] = maxMemory;
     request["maxTime"] = maxTime; 
     send(request.dump().c_str() , sockfd);
-    close(sockfd);
 }
 
-void IO::upload_tests_request(string problemId , int revId , string archiveType , vector < vector < int > > groups , int archive_fd)
+void IO::upload_tests_request(string problemId , int revId , string archiveType , vector < vector < int > > groups , int archive_fd , int sockfd)
 {
-    int sockfd = create_socket();
     json request;
     request["request"] = "uploadTests";
     request["problemId"] = problemId;
@@ -197,18 +191,15 @@ void IO::upload_tests_request(string problemId , int revId , string archiveType 
         if(length_read == -1) handle_error(1 , "read() upload_tests()");
         if(write(sockfd , buff , length_read) != length_read) handle_error(1 , "write() upload_tests");
     }
-
-    close(sockfd);
 }
 
-void IO::pull_problem_request(string problemId)
+void IO::pull_problem_request(string problemId , int revId , int sockfd)
 {
-    int sockfd = create_socket();
     json request;
     request["request"] = "pullProblem";
     request["problemId"] = problemId;
+    request["revId"] = revId;
     send(request.dump().c_str() , sockfd);
-    close(sockfd);
 }
 
 void IO::evaluate_request(json request , int fd)
@@ -241,7 +232,7 @@ void IO::evaluate_request(json request , int fd)
         int rev_id = request["revId"].get < int > ();
         string problem_id = request["problemId"].get < string > ();
 
-        sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , 1);
+        sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , fd);
 
         submission_data submission = sm.get_submission(submission_id);
 
@@ -272,6 +263,12 @@ void IO::send_problem_request(json request , int fd)
             if(write(problem_fd , &byte , sizeof(byte)) != sizeof(byte)) handle_error(1 , "write() send_problem_request()"); 
         }
 
+        string problem_id = request["problemId"].get < string > ();
+        int rev_id = request["revId"].get < int > ();
+
+        preparator *prep = new preparator(problem_id , rev_id);
+        prep -> priority = 1000000;
+        task_queue::get_instance().push(prep);  
         close(problem_fd);
     }
     catch(exception &e)

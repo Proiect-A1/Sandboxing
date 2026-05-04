@@ -15,4 +15,5 @@ namespace tests
     void register_problem_abcde();
     void register_problem_expresie();
     void test_submission(string submission_id, string problem_id, int rev_id);
+    void test_preparator_task();
 }

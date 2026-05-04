@@ -8,7 +8,7 @@
 
 struct task
 {
-  uint8_t priority = 0;
+  int priority = 0;
   virtual ~task() = default;
   virtual bool check_permissions() = 0;
   virtual result_enum execute(pthread_t thread_id, int user_id) = 0;
