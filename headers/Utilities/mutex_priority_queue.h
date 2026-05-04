@@ -27,8 +27,7 @@ void mutex_priority_queue<T, Compare>::push(const T& item){
     pthread_cond_wait(&not_full, &m);
   }
   q.push(item);
-  if (q.size() == 1)
-    pthread_cond_broadcast(&not_empt);
+  pthread_cond_signal(&not_empt);
   pthread_mutex_unlock(&m);
 }
 
@@ -41,8 +40,7 @@ T mutex_priority_queue<T, Compare>::pop(){
   }
   T item = q.top();
   q.pop();
-  if (q.size() == max_size - 1)
-    pthread_cond_signal(&not_full);
+  pthread_cond_signal(&not_full);
   pthread_mutex_unlock(&m);
   return item;
 }
