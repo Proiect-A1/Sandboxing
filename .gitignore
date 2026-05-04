@@ -5,3 +5,4 @@ logs/
 /request.json
 /runners/client
 /runners/main
+/runners/test_main

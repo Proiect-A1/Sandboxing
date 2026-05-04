@@ -17,6 +17,6 @@ cd $SANDBOX_PATH
 #rm get_dependencies.sh
 
 cd ../runners
-g++ -I ../headers main.cpp ../src/*/* -o main 
+g++ -I ../headers main.cpp ../src/*/* -o main -lseccomp
 cd ..
 ./runners/main 127.0.0.1 6000 15
