@@ -182,7 +182,7 @@ namespace tests
         new_problem.total_points = 100.0;
         new_problem.problem_status = problem_status_enum::DONE;
         new_problem.groups = std::vector<group_metadata>(10, {10.0, 1, group_type_enum::GROUP_MIN});
-        new_problem.tests = std::vector<test_metadata>(10, {"", "", "", {}});
+        new_problem.tests = std::vector<test_metadata>(10, test_metadata("", {}, {}, {}, {}, {}));
         for (int i = 0; i < 10; i++){
             new_problem.tests[i].groups.push_back(i);
         }
@@ -217,7 +217,7 @@ namespace tests
             {20, 1, group_type_enum::GROUP_MIN},
             {20, 1, group_type_enum::GROUP_MIN}
         };
-        new_problem.tests = std::vector<test_metadata>(6, {"", "", "", {}});
+        new_problem.tests = std::vector<test_metadata>(6, test_metadata("", {}, {}, {}, {}, {}));
         for (int i = 0; i < 6; i++){
             new_problem.tests[i].groups.push_back(i);
         }
