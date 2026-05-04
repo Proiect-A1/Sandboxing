@@ -29,6 +29,7 @@ namespace architecture_utilities {
   std::string get_problem_correct_output_path(std::string submission_id, int rev_id, int test);
   std::string get_problem_data_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_script_path(const std::string& problem_id, int rev_id);
+  std::string get_problem_metadata_path(const std::string& problem_id, int rev_id);
   std::string get_problem_raw_test_path(const std::string& problem_id, int rev_id, const std::string& raw_test_name);
   std::string get_problem_source_exec_path(const std::string& problem_id, int rev_id, const std::string& src_exec_name);
   std::string get_problem_validator_exec_path(const std::string& problem_id, int rev_id, const std::string& val_exec_name);
@@ -39,4 +40,4 @@ namespace architecture_utilities {
   std::string get_problem_data_path(std::string problem_id, int rev_id);
   int get_sandbox_workers();
 }
-#endif // ARCHITECTURE_UTILITIES_H
+#endif

@@ -9,6 +9,7 @@
 #include<utility>
 #include<set>
 #include<vector>
+#include<Server/header_helper.hpp>
 
 static float parse_float(const std::string& s){
     size_t ptr=0;
@@ -173,16 +174,43 @@ result_enum tgsct::execute(pthread_t thread_id, int user_id){
         add_fatal_error("Problem folder does not exist");
         return result_enum::FAIL;
     }
+    std::string metadata_path=architecture_utilities::get_problem_metadata_path(problem_id, rev_id);
     std::string script_path=architecture_utilities::get_problem_script_path(problem_id, rev_id);  
+    if(!general_utilities::is_file(metadata_path)){
+        add_fatal_error("Metadata file not found");
+        return result_enum::FAIL;
+    }
+
+    std::ifstream fin(metadata_path.c_str());
+    if(!fin.is_open()){
+        add_fatal_error("Could not open metadata file");
+        return result_enum::FAIL;
+    }
+
+    json J;
+    fin>>J;
+    if(!J.contains("timeLimit")){
+        add_fatal_error("Time limit not specified in metadata file");
+        return result_enum::FAIL;
+    }
+    if(!J.contains("memoryLimit")){
+        add_fatal_error("Memory limit not specified in metadata file");
+        return result_enum::FAIL;
+    }
+    float tl=J["timeLimit"].get<float>();
+    long long ml=J["memoryLimit"].get<long long>();
     if(!general_utilities::is_file(script_path)){
         add_fatal_error("Script file not found");
         return result_enum::FAIL;
     }
-    std::ifstream fin(script_path.c_str());
+    fin.close();
+    fin.open(script_path.c_str());
     if(!fin.is_open()){
         add_fatal_error("Could not open script file");
         return result_enum::FAIL;
     }
+    
+    
     int line_no=0;
     int test_no=0;
     int group_directive_gid=-1;
@@ -197,6 +225,8 @@ result_enum tgsct::execute(pthread_t thread_id, int user_id){
     std::vector<std::string> interactor_args;
     std::string line;
     output=problem_metadata();
+    output.time_limit = tl;
+    output.memory_limit = ml;
     output.rev_id=this->rev_id;
     output.problem_id=this->problem_id;
     auto cover_gen = [&](int line_no, const std::vector<std::string>& tokens, std::vector<std::string>& out_args) -> bool {
