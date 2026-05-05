@@ -34,6 +34,7 @@ super_runner_task* runner_factories::stdio_submission_runner_factory_CPP(
     }
 
     super_runner_task* created = new super_runner_task(
+        submission_id,
         exec_path,
         input_path,
         output_path,
@@ -63,6 +64,7 @@ super_runner_task* runner_factories::submission_runner_factory_CPP(
     }
 
     super_runner_task* created = new super_runner_task(
+        submission_id,
         exec_path,
         "/dev/null",
         "/dev/null",
@@ -97,6 +99,7 @@ super_runner_task* runner_factories::checker_runner_factory_CPP(
     std::vector<std::string> checker_arguments = {exec_path, submission_input_path, submission_output_path, correct_output_path, source_path};
     checker_arguments.insert(checker_arguments.end(), arguments.begin() + 1, arguments.end());
     super_runner_task* created = new super_runner_task(
+        submission_id,
         exec_path,
         "/dev/null",
         output_path,
@@ -124,6 +127,7 @@ super_runner_task* runner_factories::generator_runner_factory_CPP(
         return nullptr;
     }
     super_runner_task* created = new super_runner_task(
+        submission_id,
         exec_path,
         "/dev/null",
         output_path,
@@ -152,6 +156,7 @@ super_runner_task* runner_factories::validator_runner_factory_CPP(
         return nullptr;
     }
     super_runner_task* created = new super_runner_task(
+        submission_id,
         exec_path,
         input_path,
         output_path,
