@@ -1,7 +1,7 @@
 #include <Tasks/stdio_runner_factory.h>
 
 
-stdio_runner_task* stdio_runner_factory(
+stdio_super_runner_task* stdio_runner_factory(
     language_enum language,
     std::string submission_id,
     std::string exec_path,
@@ -21,7 +21,7 @@ stdio_runner_task* stdio_runner_factory(
         return nullptr;
     }
 
-    stdio_runner_task* created = new stdio_runner_task(
+    stdio_super_runner_task* created = new stdio_super_runner_task(
         exec_path,
         input_path,
         output_path,

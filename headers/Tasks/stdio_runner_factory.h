@@ -13,9 +13,9 @@
 #include <cstdlib>
 #include <string>
 
-#include <Tasks/stdio_runner_task.h>
+#include <Tasks/stdio_super_runner_task.hpp>
 
-stdio_runner_task* stdio_runner_factory(
+stdio_super_runner_task* stdio_runner_factory(
     language_enum language,
     std::string submission_id,
     std::string exec_path,

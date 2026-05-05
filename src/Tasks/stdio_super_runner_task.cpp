@@ -1,4 +1,4 @@
-#include <Tasks/stdio_runner_task.h>
+#include <Tasks/stdio_super_runner_task.hpp>
 #include <cmath>
 #include <seccomp.h>
 #include <errno.h>
@@ -14,7 +14,7 @@ static int install_seccomp_whitelist()
   };
 
   int syscalls[] = {
-    SCMP_SYS(read), SCMP_SYS(write), SCMP_SYS(readv), SCMP_SYS(writev),
+    SCMP_SYS(read), SCMP_SYS(write), SCMP_SYS(writev),
     SCMP_SYS(open), SCMP_SYS(openat), SCMP_SYS(close), SCMP_SYS(lseek),
     SCMP_SYS(fstat), SCMP_SYS(newfstatat), SCMP_SYS(stat), SCMP_SYS(pread64),
     SCMP_SYS(access), SCMP_SYS(readlink),
@@ -44,7 +44,7 @@ static int install_seccomp_whitelist()
   return 0;
 }
 
-bool stdio_runner_task::check_permissions()
+bool stdio_super_runner_task::check_permissions()
 {
   //trebuie facut ceva calumea aici
   if (exec_path.empty() || input_path.empty() || output_path.empty())
@@ -60,7 +60,7 @@ bool stdio_runner_task::check_permissions()
   return true;
 }
 
-result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
+result_enum stdio_super_runner_task::execute(pthread_t thread_id, int user_id)
 {
   (void)thread_id;
 
@@ -131,14 +131,12 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
     setpgid(0, 0);
 
     // DECOMENTATI TOT CE TINE DE err_fd CA SA DATI REDIRECT STDERR-ului LA /dev/null 
-    /*
     int err_fd = open("/dev/null", O_WRONLY);
     if (err_fd < 0)
     {
       LOG_ERROR_USER(user_id, "Failed to open /dev/null before sandbox restrictions");
       _exit(127);
     }
-    */
 
     // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
     // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
@@ -191,26 +189,25 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + jailed_output_path + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
-
-    if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0 /*|| dup2(err_fd, STDERR_FILENO) < 0*/)
+    
+    if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0)
     {
       close(in_fd);
       close(out_fd);
-      //close(err_fd);
+      close(err_fd);
       LOG_ERROR_USER(user_id, "Failed to redirect input/output/error inside sandbox");
       _exit(127);
     }
 
     close(in_fd);
     close(out_fd);
-    //close(err_fd);
+    close(err_fd);
 
     struct rlimit memory_rl;
     rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
     memory_rl.rlim_cur = mem_limit_padded;
     memory_rl.rlim_max = mem_limit_padded;
-    if (setrlimit(RLIMIT_AS, &memory_rl) != 0)
-    {
+    if (setrlimit(RLIMIT_AS, &memory_rl) != 0){
       LOG_ERROR_USER(user_id, "Failed to set memory limit");
       _exit(127);
     }
@@ -225,6 +222,7 @@ result_enum stdio_runner_task::execute(pthread_t thread_id, int user_id)
       LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
       _exit(127);
     }
+    // LOG_INFO_USER(user_id, "WOHOOO SUNT SMECHER" + general_utilities::syscall_to_string("whoami"));
 
     if (install_seccomp_whitelist() != 0)
     {

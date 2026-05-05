@@ -20,7 +20,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <iostream>
-class stdio_runner_task : public task
+class stdio_super_runner_task : public task
 {
   std::string exec_path;
   std::string input_path;
@@ -31,7 +31,7 @@ class stdio_runner_task : public task
   long memory_consumed; // in bytes
 
 public:
-  stdio_runner_task(std::string exec_path, std::string input_path, std::string output_path, float time_limit, long memory_limit)
+  stdio_super_runner_task(std::string exec_path, std::string input_path, std::string output_path, float time_limit, long memory_limit)
       : exec_path(exec_path), input_path(input_path), output_path(output_path), time_limit(time_limit), memory_limit(memory_limit), time_consumed(0), memory_consumed(0) {}
 
   bool check_permissions() override;
