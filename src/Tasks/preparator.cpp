@@ -31,7 +31,8 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
     return result_enum::OTHER; //n-ar trebui sa returneze nimic
 }
 
-bool preparator::check_permissions() 
+bool preparator::check_permissions(int user_id) 
 {
+    (void)user_id;
     return true; //trebuie implementat ig
 }

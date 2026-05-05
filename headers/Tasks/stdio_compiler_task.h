@@ -47,7 +47,7 @@ public:
     {
     }
 
-    bool check_permissions() override;
+    bool check_permissions(int user_id) override;
     result_enum execute(pthread_t thread_id, int user_id) override;
 };
 

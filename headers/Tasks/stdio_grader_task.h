@@ -5,8 +5,8 @@
 #include <Chestii_cu_data/submission_test.h>
 #include <Singletoni/problem_manager.h>
 #include <Singletoni/submission_manager.h>
-#include <Tasks/stdio_super_runner_task.hpp>
-#include <Tasks/stdio_runner_factory.h>
+#include <Tasks/super_runner_task.hpp>
+#include <Tasks/runner_factories.hpp>
 #include <Tasks/checker_task.h>
 #include <Utilities/architecture_utilities.h>
 #include <Utilities/general_utilities.h>
@@ -44,7 +44,7 @@ class stdio_grader_task : public task{
   public :
     stdio_grader_task(std::string submission_id, std::string problem_id, int rev_id, int test) : submission_id(submission_id), problem_id(problem_id), rev_id(rev_id), test_id(test) {}
   result_enum execute(pthread_t thread_id, int user_id) override;
-  bool check_permissions() override {return true;};
+  bool check_permissions(int user_id) override {(void)user_id; return true;};
 };
 
 #endif

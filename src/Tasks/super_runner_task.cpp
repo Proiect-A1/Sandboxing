@@ -1,7 +1,4 @@
-#include <Tasks/stdio_super_runner_task.hpp>
-#include <cmath>
-#include <seccomp.h>
-#include <errno.h>
+#include <Tasks/super_runner_task.hpp>
 
 static int install_seccomp_whitelist()
 {
@@ -44,32 +41,103 @@ static int install_seccomp_whitelist()
   return 0;
 }
 
-bool stdio_super_runner_task::check_permissions()
+bool super_runner_task::check_permissions(int user_id)
 {
-  //trebuie facut ceva calumea aici
-  if (exec_path.empty() || input_path.empty() || output_path.empty())
+  // internal consistency checks
+  if (time_limit <= 0 || memory_limit <= 0)
   {
+    LOG_ERROR_USER(user_id, "Invalid time or memory limit in super_runner_task");
+    return false;
+  }
+  if (exec_path.empty()){
+    LOG_ERROR_USER(user_id, "Executable path is empty in super_runner_task");
+    return false;
+  }
+  if (stdin_redirection_path.empty()){
+    LOG_ERROR_USER(user_id, "Stdin redirection path is empty in super_runner_task");
+    return false;
+  }
+  if (stdout_redirection_path.empty()){
+    LOG_ERROR_USER(user_id, "Stdout redirection path is empty in super_runner_task");
+    return false;
+  }
+  if (stderr_redirection_path.empty()){
+    LOG_ERROR_USER(user_id, "Stderr redirection path is empty in super_runner_task");
     return false;
   }
 
-  if (time_limit <= 0 || memory_limit <= 0)
-  {
-    return false;
+  for (const std::string& input_file : input_files) {
+    if (input_file.empty()) {
+      LOG_ERROR_USER(user_id, "One of the input files has an empty path in super_runner_task");
+      return false;
+    }
   }
+  // de avut o discutie legata de necesitatea acestei bucati
+  for (const std::string& output_file : output_files) {
+    if (output_file.empty()) {
+      LOG_ERROR_USER(user_id, "One of the output files has an empty path in super_runner_task");
+      return false;
+    }
+  }
+  for (const std::string& arg : arguments) {
+    if (arg.empty()) {
+      LOG_ERROR_USER(user_id, "One of the arguments is an empty string in super_runner_task");
+      return false;
+    }
+  }
+
+  // context checks
+  for (const std::string& input_file : input_files) {
+    if (!std::filesystem::exists(input_file)) {
+      LOG_ERROR_USER(user_id, "Input file does not exist: " + input_file);
+      return false;
+    }
+    if (!std::filesystem::is_regular_file(input_file)) {
+      LOG_ERROR_USER(user_id, "Input file is not a regular file: " + input_file);
+      return false;
+    }
+    if (access(input_file.c_str(), R_OK) != 0) {
+      LOG_ERROR_USER(user_id, "Input file is not readable: " + input_file);
+      return false;
+    }
+  }
+
+  for (const std::string& output_file : output_files) {
+    if (std::filesystem::exists(output_file)) {
+      if (!std::filesystem::is_regular_file(output_file)) {
+        LOG_ERROR_USER(user_id, "Output file exists but is not a regular file: " + output_file);
+        return false;
+      }
+      if (access(output_file.c_str(), W_OK) != 0) {
+        LOG_ERROR_USER(user_id, "Output file exists but is not writable: " + output_file);
+        return false;
+      }
+    } else {
+      // check if we can create the file
+      std::ofstream ofs(output_file);
+      if (!ofs) {
+        LOG_ERROR_USER(user_id, "Output file does not exist and cannot be created: " + output_file);
+        return false;
+      }
+      ofs.close();
+      std::filesystem::remove(output_file);
+    }
+  }
+
 
   return true;
 }
 
-result_enum stdio_super_runner_task::execute(pthread_t thread_id, int user_id)
+result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
 {
   (void)thread_id;
 
   time_consumed = 0;
   memory_consumed = 0;
 
-  if (!check_permissions())
+  if (!check_permissions(user_id))
   {
-    LOG_ERROR_USER(user_id, "Permission check failed");
+    LOG_ERROR_USER(user_id, "Permission check failed BEFORE SANDBOXING");
     return result_enum::FAIL;
   }
 
@@ -88,16 +156,6 @@ result_enum stdio_super_runner_task::execute(pthread_t thread_id, int user_id)
 
   const std::string run_username = architecture_utilities::get_weak_user(user_id);
   const std::string run_dir = architecture_utilities::get_run_dir(user_id);
-
-  const std::string exec_file_name = std::filesystem::path(exec_path).filename().string();
-  const std::string input_file_name = std::filesystem::path(input_path).filename().string();
-  const std::string output_file_name = std::filesystem::path(output_path).filename().string();
-
-  if (exec_file_name.empty() || input_file_name.empty() || output_file_name.empty())
-  {
-    LOG_ERROR_USER(user_id, "Invalid file paths");
-    return result_enum::FAIL;
-  }
 
   struct passwd pw_struct;
   struct passwd *pwp;
@@ -129,15 +187,17 @@ result_enum stdio_super_runner_task::execute(pthread_t thread_id, int user_id)
   if (pid == 0)
   {
     setpgid(0, 0);
-
+    
     // DECOMENTATI TOT CE TINE DE err_fd CA SA DATI REDIRECT STDERR-ului LA /dev/null 
-    int err_fd = open("/dev/null", O_WRONLY);
+    // all file descriptors are set before sandboxing as they are kept open
+    // trebuie inchisi toti fd in afara de stdin stdout stderr inainte de a da exec ca sa nu poata face prostii
+    // robert tine minte sa te joci cu fd-urile sa vezi daca mai trebuie copiate chestiile sau nu
+    int err_fd = open(stderr_redirection_path.c_str(), O_WRONLY);
     if (err_fd < 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to open /dev/null before sandbox restrictions");
+      LOG_ERROR_USER(user_id, "Failed to open stderr_redirection_path before sandbox restrictions: " + stderr_redirection_path);
       _exit(127);
     }
-
     // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
     // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
     
@@ -146,47 +206,45 @@ result_enum stdio_super_runner_task::execute(pthread_t thread_id, int user_id)
       LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
       _exit(127);
     }
-
+    
     if (!(architecture_utilities::change_root_to_sandbox()))
     {
       LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
       _exit(127);
     }
-
+    
     std::string inner_run_dir = "/runs/" + run_username;
     if (chdir(inner_run_dir.c_str()) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
       _exit(127);
     }
-
+    
     if (setgid(pw.pw_gid) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
       _exit(127);
     }
-
+    
     if (setuid(pw.pw_uid) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
       _exit(127);
     }
-
-    const std::string jailed_input_path = input_file_name;
-    const std::string jailed_output_path = output_file_name;
-
-    int in_fd = open(jailed_input_path.c_str(), O_RDONLY);
+    
+    
+    int in_fd = open(stdin_redirection_path.c_str(), O_RDONLY);
     if (in_fd < 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + jailed_input_path + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
+      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + " " + stdin_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
     
-    int out_fd = open(jailed_output_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int out_fd = open(stdout_redirection_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (out_fd < 0)
     {
       close(in_fd);
-      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + jailed_output_path + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
+      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + " " + stdout_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
     
@@ -198,11 +256,16 @@ result_enum stdio_super_runner_task::execute(pthread_t thread_id, int user_id)
       LOG_ERROR_USER(user_id, "Failed to redirect input/output/error inside sandbox");
       _exit(127);
     }
-
+    
     close(in_fd);
     close(out_fd);
     close(err_fd);
 
+    if (!check_permissions(user_id)){
+      LOG_ERROR_USER(user_id, "Permission check failed AFTER SANDBOXING");
+      _exit(127);
+    }
+    
     struct rlimit memory_rl;
     rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
     memory_rl.rlim_cur = mem_limit_padded;
@@ -230,9 +293,14 @@ result_enum stdio_super_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
 
-    const std::string jailed_exec_path = "./" + exec_file_name;
-    char *const argv[] = {const_cast<char *>(jailed_exec_path.c_str()), nullptr};
-    execv(jailed_exec_path.c_str(), argv);
+    const char* argv[arguments.size() + 1];
+    for (size_t i = 0; i < arguments.size(); ++i)
+    {
+        argv[i] = arguments[i].c_str();
+    }
+    argv[arguments.size()] = nullptr;
+
+    execv(exec_path.c_str(), const_cast<char *const *>(argv));
     LOG_ERROR_USER(user_id, "Failed to execute the program inside sandbox");
 
     _exit(127);
@@ -307,7 +375,7 @@ result_enum stdio_super_runner_task::execute(pthread_t thread_id, int user_id)
 
     if (sig == SIGSYS)
     {
-      LOG_OTHER_USER(user_id, std::string("Seccomp violation: child pid=") + std::to_string(pid) + std::string(" exec=") + exec_file_name);
+      LOG_OTHER_USER(user_id, std::string("Seccomp violation: child pid=") + std::to_string(pid) + std::string(" exec=") + exec_path);
       return result_enum::RTE;
     }
       

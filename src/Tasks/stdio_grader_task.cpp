@@ -22,7 +22,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   
   helper.test = submission_manager::get_instance().get_submission(submission_id).tests[test_id];
 
-  if(!check_permissions()){
+  if(!check_permissions(user_id)){
     LOG_ERROR_USER(user_id, "Permission check failed");
     return result_enum::FAIL;
   }
@@ -76,8 +76,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
 
   LOG_INFO_USER(user_id, "Current status: " + general_utilities::syscall_to_string("whoami") + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir(user_id)) + general_utilities::syscall_to_string("pwd"));
 
-  auto runner_task = stdio_runner_factory(
-    submission.language,
+  auto runner_task = runner_factories::stdio_submission_runner_factory[submission.language](
     submission_id,
     exec_path,
     input_path,

@@ -15,7 +15,8 @@ class checker_task : public task{
   public:
   checker_task(std::string input, std::string output, std::string correct_output, std::string contestant_source)
       : input(input), output(output), correct_output(correct_output), contestant_source(contestant_source), point_percentage(point_percentage) {}
-  bool check_permissions() override {
+  bool check_permissions(int user_id) override {
+    (void)user_id;
     return true;
   }
 
