@@ -154,8 +154,8 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     return result_enum::FAIL;
   }
 
-  const std::string run_username = architecture_utilities::get_weak_user(user_id);
-  const std::string run_dir = architecture_utilities::get_run_dir(user_id);
+  const std::string run_username = (strong_user) ? architecture_utilities::get_strong_user(user_id) : architecture_utilities::get_weak_user(user_id);
+  const std::string run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
 
   struct passwd pw_struct;
   struct passwd *pwp;
@@ -213,7 +213,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
     
-    std::string inner_run_dir = "/runs/" + run_username;
+    std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
     if (chdir(inner_run_dir.c_str()) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");

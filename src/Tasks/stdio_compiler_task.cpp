@@ -45,7 +45,7 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     }
 
     const std::string run_username = architecture_utilities::get_weak_user(user_id);
-    const std::string run_dir = architecture_utilities::get_run_dir(user_id);
+    const std::string run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
 
     const std::string source_host_path = architecture_utilities::get_submission_source_path(submission_id);  
     const std::string output_host_path = architecture_utilities::get_submission_exec_path(submission_id);  

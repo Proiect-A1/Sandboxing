@@ -20,7 +20,8 @@ namespace architecture_utilities {
 
   std::string get_weak_user(const int& user_id);
   std::string get_strong_user(const int& user_id);
-  std::string get_run_dir(const int& user_id);
+  std::string get_run_dir_absolute_path(const int& user_id);
+  std::string get_run_dir_relative_to_sandbox_path(const int& user_id);
   std::string get_submission_dir(std::string submission_id);
   std::string get_sandbox_path();
   std::string get_submission_source_path(std::string submission_id, language_enum language = language_enum::CPP);

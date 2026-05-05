@@ -2,7 +2,7 @@
 
 
 bool architecture_utilities::change_root_to_user(const int& user_id){
-  const std::string user_dir = get_run_dir(user_id);
+  const std::string user_dir = get_run_dir_absolute_path(user_id);
   if (chroot(user_dir.c_str()) != 0){
     return false;
   }
@@ -26,7 +26,7 @@ bool architecture_utilities::change_root_to_sandbox(){
 }
 
 bool architecture_utilities::change_dir_to_user(const int& user_id){
-  const std::string user_dir = get_run_dir(user_id);
+  const std::string user_dir = get_run_dir_absolute_path(user_id);
   if (chdir(user_dir.c_str()) != 0){
     return false;
   }
@@ -55,8 +55,12 @@ std::string architecture_utilities::get_strong_user(const int& user_id){
   return "marat" + std::to_string(user_id);  
 }
 
-std::string architecture_utilities::get_run_dir(const int& user_id){
-  return get_sandbox_path()+ "/runs/" + get_weak_user(user_id);
+std::string architecture_utilities::get_run_dir_relative_to_sandbox_path(const int& user_id){
+  return "runs/" + get_weak_user(user_id);
+}
+
+std::string architecture_utilities::get_run_dir_absolute_path(const int& user_id){
+  return get_sandbox_path()+ "/" + get_run_dir_relative_to_sandbox_path(user_id);
 }
 
 std::string architecture_utilities::get_submission_dir(std::string submission_id){

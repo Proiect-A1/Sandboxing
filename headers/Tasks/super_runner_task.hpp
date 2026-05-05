@@ -41,8 +41,19 @@ class super_runner_task : public task
   std::vector<std::string> output_files; // fisiere pt care trebuie verificat daca exista in sandbox si daca se pot scrie;
   std::vector<std::string> arguments; // argumente cu care sa fie rulat programul, inclusiv numele executabilului
 public:
-  super_runner_task(std::string exec_path, std::string stdin_redirection_path, std::string stdout_redirection_path, std::string stderr_redirection_path, float time_limit, long memory_limit, std::vector<std::string> input_files, std::vector<std::string> output_files, std::vector<std::string> arguments, bool strong_user = false)
-      : exec_path(exec_path), stdin_redirection_path(stdin_redirection_path), stdout_redirection_path(stdout_redirection_path), stderr_redirection_path(stderr_redirection_path), time_limit(time_limit), memory_limit(memory_limit), time_consumed(0), memory_consumed(0), input_files(input_files), output_files(output_files), arguments(arguments), strong_user(strong_user) {}
+  super_runner_task(std::string exec_path, std::string stdin_redirection_path, std::string stdout_redirection_path, std::string stderr_redirection_path, float time_limit, long memory_limit, std::vector<std::string> input_files, std::vector<std::string> output_files, std::vector<std::string> arguments, bool strong_user = false):
+      exec_path(exec_path),
+      stdin_redirection_path(stdin_redirection_path),
+      stdout_redirection_path(stdout_redirection_path),
+      stderr_redirection_path(stderr_redirection_path),
+      time_limit(time_limit),
+      memory_limit(memory_limit),
+      time_consumed(0),
+      memory_consumed(0),
+      input_files(input_files),
+      output_files(output_files),
+      arguments(arguments),
+      strong_user(strong_user) {}
 
   bool check_permissions(int user_id) override;
   result_enum execute(pthread_t thread_id, int user_id) override;
