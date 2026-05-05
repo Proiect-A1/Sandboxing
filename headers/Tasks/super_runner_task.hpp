@@ -36,6 +36,7 @@ class super_runner_task : public task
   float time_consumed;  // in milliseconds
   long memory_consumed; // in bytes
   bool strong_user; // if true, atunci esti marat, if false, atunci esti amarat
+  int exit_code;
 
   std::vector<std::string> input_files; // fisiere pt care trebuie verificat daca exista in sandbox si daca se pot citi;
   std::vector<std::string> output_files; // fisiere pt care trebuie verificat daca exista in sandbox si daca se pot scrie;
@@ -60,6 +61,7 @@ public:
 
   float get_time_consumed() const { return time_consumed; }
   long get_memory_consumed() const { return memory_consumed; }
+  int get_exit_code() const { return exit_code; }
 };
 
 #endif

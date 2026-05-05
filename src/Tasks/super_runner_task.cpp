@@ -349,6 +349,8 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
 
   memory.release_memory(requested_memory);
 
+  exit_code = status;
+
   if (time_limit_exceeded)
   {
     return result_enum::TLE;
