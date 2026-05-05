@@ -201,12 +201,14 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
     // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
     
+    if (!strong_user)
     if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
       _exit(127);
     }
     
+    if (!strong_user)
     if (!(architecture_utilities::change_root_to_sandbox()))
     {
       LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
@@ -220,12 +222,14 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
     
+    if (!strong_user)
     if (setgid(pw.pw_gid) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
       _exit(127);
     }
     
+    if (!strong_user)
     if (setuid(pw.pw_uid) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
@@ -287,6 +291,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     // LOG_INFO_USER(user_id, "WOHOOO SUNT SMECHER" + general_utilities::syscall_to_string("whoami"));
 
+    if (!strong_user)
     if (install_seccomp_whitelist() != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to install seccomp filter");

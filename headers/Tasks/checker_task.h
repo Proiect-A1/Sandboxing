@@ -5,6 +5,7 @@
 #include <Enums/result_enum.h>
 #include <Tasks/task.h>
 #include <Utilities/architecture_utilities.h>
+#include <Tasks/runner_factories.hpp>
 class checker_task : public task{
   std::string input;
   std::string output;
