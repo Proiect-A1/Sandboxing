@@ -3,7 +3,7 @@
 
 stdio_grader_task::stdio_grader_helper::~stdio_grader_helper() {
   submission_manager& sm = submission_manager::get_instance();
-  if (system(("rm -rf " + architecture_utilities::get_run_dir(user_id)+ "/*").c_str()) != 0){
+  if (system(("rm -rf " + architecture_utilities::get_run_dir_absolute_path(user_id)+ "/*").c_str()) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory from helper");
     test_result = result_enum::FAIL;
   }
@@ -22,7 +22,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   
   helper.test = submission_manager::get_instance().get_submission(submission_id).tests[test_id];
 
-  if(!check_permissions()){
+  if(!check_permissions(user_id)){
     LOG_ERROR_USER(user_id, "Permission check failed");
     return result_enum::FAIL;
   }
@@ -30,7 +30,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     LOG_ERROR_USER(user_id, "Invalid user ID");
     return result_enum::FAIL;
   }
-  if (system(("rm -rf " + architecture_utilities::get_run_dir(user_id)+ "/*").c_str()) != 0){
+  if (system(("rm -rf " + architecture_utilities::get_run_dir_absolute_path(user_id)+ "/*").c_str()) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory");
     return result_enum::FAIL;
   }
@@ -63,21 +63,20 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   std::string username = architecture_utilities::get_weak_user(user_id);
 
 
-  if (!general_utilities::copy_file(submission_exec_path, architecture_utilities::get_run_dir(user_id) + "/" + exec_path, 0755)){
+  if (!general_utilities::copy_file(submission_exec_path, architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + exec_path, 0755)){
 
     LOG_ERROR_USER(user_id, "Couldn't copy submission_exec to run directory. Submission ID: " + submission_id + " " + submission_exec_path + " " + general_utilities::syscall_to_string("pwd") + general_utilities::syscall_to_string("whoami"));
     return result_enum::FAIL;
   }
 
-  if (!general_utilities::copy_file(problem_input_path, architecture_utilities::get_run_dir(user_id) + "/" + input_path, 0644)){
-    LOG_ERROR_USER(user_id, "Couldn't copy problem input to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " +  std::to_string(test_id) + ", Problem_input_path:" + problem_input_path + ", " + ", Destination_input_path: " + (architecture_utilities::get_run_dir(user_id) + "/" + input_path) + general_utilities::syscall_to_string("pwd") + general_utilities::syscall_to_string("whoami"));
+  if (!general_utilities::copy_file(problem_input_path, architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + input_path, 0644)){
+    LOG_ERROR_USER(user_id, "Couldn't copy problem input to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " +  std::to_string(test_id) + ", Problem_input_path:" + problem_input_path + ", " + ", Destination_input_path: " + (architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + input_path) + general_utilities::syscall_to_string("pwd") + general_utilities::syscall_to_string("whoami"));
     return result_enum::FAIL;
   }
 
-  LOG_INFO_USER(user_id, "Current status: " + general_utilities::syscall_to_string("whoami") + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir(user_id)) + general_utilities::syscall_to_string("pwd"));
+  LOG_INFO_USER(user_id, "Current status: " + general_utilities::syscall_to_string("whoami") + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)) + general_utilities::syscall_to_string("pwd"));
 
-  auto runner_task = stdio_runner_factory(
-    submission.language,
+  auto runner_task = runner_factories::stdio_submission_runner_factory[submission.language](
     submission_id,
     exec_path,
     input_path,
@@ -91,7 +90,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   }
 
   
-  LOG_INFO_USER(user_id, "Starting runner task execution. Submission ID: " + submission_id + ", Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id) + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir(user_id)) + general_utilities::syscall_to_string("whoami"));
+  LOG_INFO_USER(user_id, "Starting runner task execution. Submission ID: " + submission_id + ", Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id) + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)) + general_utilities::syscall_to_string("whoami"));
   helper.test_result = runner_task->execute(thread_id, user_id);
   helper.test.time_used = runner_task->get_time_consumed();
   helper.test.memory_used = runner_task->get_memory_consumed();
@@ -109,12 +108,12 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     return helper.test.result;
   }
 
-  if (!general_utilities::copy_file(problem_correct_output_path, ::architecture_utilities::get_run_dir(user_id) + "/" + correct_output_path, 0644)){
+  if (!general_utilities::copy_file(problem_correct_output_path, ::architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + correct_output_path, 0644)){
     LOG_ERROR_USER(user_id, "Couldn't copy problem correct output to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id));
     return result_enum::FAIL;
   }
   
-  checker_task checker(input_path, output_path, correct_output_path, "");
+  checker_task checker(submission_id, input_path, output_path, correct_output_path, "");
   
   if (checker.execute(thread_id, user_id) != result_enum::OK){
     LOG_ERROR_USER(user_id, "Checker task execution failed");

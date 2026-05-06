@@ -2,7 +2,9 @@
 
 
 result_enum checker_task::execute(pthread_t thread_id, int user_id) {
-  if (system(("diff -q " + architecture_utilities::get_run_dir(user_id) + "/" + output + " " + architecture_utilities::get_run_dir(user_id) + "/" + correct_output).c_str()) != 0)
+  // robert baga submission_id
+
+  if (system(("diff -q " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + output + " " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + correct_output).c_str()) != 0)
   {
     point_percentage = 0;
     message = "not the same";

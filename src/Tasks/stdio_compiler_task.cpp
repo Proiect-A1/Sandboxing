@@ -4,8 +4,9 @@
 #include <cerrno>
 #include <cmath>
 
-bool stdio_compiler_task::check_permissions()
+bool stdio_compiler_task::check_permissions(int user_id)
 {
+    (void)user_id;
     if (compile_command.empty() || source_file_name.empty() || output_file_name.empty())
     {
         return false;
@@ -25,7 +26,7 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
 {
     (void)thread_id;
 
-    if (!check_permissions())
+    if (!check_permissions(user_id))
     {
       LOG_ERROR_USER(user_id, "Permission check failed");
       return result_enum::FAIL;
@@ -44,7 +45,7 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     }
 
     const std::string run_username = architecture_utilities::get_weak_user(user_id);
-    const std::string run_dir = architecture_utilities::get_run_dir(user_id);
+    const std::string run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
 
     const std::string source_host_path = architecture_utilities::get_submission_source_path(submission_id);  
     const std::string output_host_path = architecture_utilities::get_submission_exec_path(submission_id);  

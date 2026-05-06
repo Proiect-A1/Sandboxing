@@ -16,6 +16,6 @@ private:
     void compile_problem_sources();
 public:
     result_enum execute(pthread_t thread_id, int user_id) override;
-    bool check_permissions() override;
+    bool check_permissions(int user_id) override;
 };
 #endif
