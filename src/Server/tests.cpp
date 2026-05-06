@@ -256,7 +256,7 @@ namespace tests
 
         task_queue::get_instance().push(eva);
 
-        //while (sm.is_done(submission_id_real) == 0);
+        while (sm.is_done(submission_id_real) == 0);
         // sleep(5);
     }
 }
