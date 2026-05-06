@@ -163,8 +163,8 @@ super_runner_task* runner_factories::validator_runner_factory_CPP(
         message_path,
         10.0f, // deocamdata 10s pentru validator mereu!! trebuie discutat daca chiar asa ramane
         1024 * 1024 * 1024, // deocamdata 1GB pentru validator mereu!! trebuie discutat daca chiar asa ramane
-        {input_path},
-        {output_path},
+        {},
+        {},
         arguments,
         true);
     created->priority = priority;
