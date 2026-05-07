@@ -39,11 +39,17 @@ void submission_data::add_completed_test(int test_id, result_enum result, float 
     send_completed_test_packet(test_id, tests[test_id]);
     if(tests_completed==test_count){
         // de trimis packet cu submisia terminata
-        LOG_INFO(std::string("Submission ") + problem_id + " rev " + std::to_string(rev_id) +
-                 " completed with " + std::to_string(points) + " points, time used: " +
-                 std::to_string(time_used) + " ms, memory used: " +
-                 std::to_string(memory_used) + " B");
+        LOG_INFO(std::string("Submission ") + problem_id  + " rev " + std::to_string(rev_id) +
+                 " completed with " + std::to_string(this->points) + " points, time used: " +
+                 std::to_string(this->time_used) + " ms, memory used: " +
+                 std::to_string(this->memory_used) + " B");
         send_completed_submission_packet();
+    }
+    else{
+      LOG_DEBUG(std::string("Submission ") + problem_id + " rev " + std::to_string(rev_id) +
+                " completed test " + std::to_string(test_id) + " with " + std::to_string(points) +
+                " points, time used: " + std::to_string(time_used) + " ms, memory used: " +
+                std::to_string(memory_used) + " B\n" + "Completed " + std::to_string(tests_completed) + "/" + std::to_string(test_count) + " tests");
     }
         
 }

@@ -11,6 +11,7 @@ stdio_grader_task::stdio_grader_helper::~stdio_grader_helper() {
     LOG_INFO_USER(user_id, "Successfully cleaned up run directory from helper");
   }
   sm.add_completed_test(submission_id, test_id, test);
+  LOG_INFO_USER(user_id, "Submission " + submission_id + "Test " + std::to_string(test_id) + " completed with result " + test.message + ", points: " + std::to_string(test.points) + ", time used: " + std::to_string(test.time_used) + " ms, memory used: " + std::to_string(test.memory_used) + " B");
 }
 
 result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
@@ -104,7 +105,6 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   if (helper.test_result != result_enum::OK){
     helper.test.points = 0;
     helper.test.result = helper.test_result;
-    sm.add_completed_test(submission_id, test_id, helper.test);
     return helper.test.result;
   }
 
@@ -133,8 +133,5 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   
   helper.test.message = checker.get_message();
   
-
-
-  LOG_INFO_USER(user_id, "Test " + std::to_string(test_id) + " completed with result " + checker.get_message() + ", points: " + std::to_string(helper.test.points) + ", time used: " + std::to_string(helper.test.time_used) + " ms, memory used: " + std::to_string(helper.test.memory_used) + " B");
   return helper.test.result;
 }
