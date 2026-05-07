@@ -11,12 +11,20 @@
 #include <filesystem>
 #include <system_error>
 namespace architecture_utilities {
+
+  const float         checker_time_limit = 10000; // in ms
+  const long long   checker_memory_limit = 1024 * 1024 * 1024; // in bytes
+  const float       validator_time_limit = 10000; // in ms
+  const long long validator_memory_limit = 1024 * 1024 * 1024; // in bytes
+  const float       generator_time_limit = 10000; // in ms
+  const long long generator_memory_limit = 1024 * 1024 * 1024; // in bytes
+
   
   bool change_root_to_user(const int& user_id); 
   bool change_root_to_sandbox(); 
   bool change_dir_to_user(const int& user_id); 
   bool change_dir_to_sandbox(); 
-
+  int clean_run_dir(const int& user_id);
 
   std::string get_weak_user(const int& user_id);
   std::string get_strong_user(const int& user_id);
@@ -26,8 +34,8 @@ namespace architecture_utilities {
   std::string get_sandbox_path();
   std::string get_submission_source_path(std::string submission_id, language_enum language = language_enum::CPP);
   std::string get_submission_exec_path(std::string submission_id, language_enum language = language_enum::CPP);
-  std::string get_problem_input_path(std::string submission_id, int rev_id, int test);
-  std::string get_problem_correct_output_path(std::string submission_id, int rev_id, int test);
+  std::string get_problem_input_path(std::string problem_id, int rev_id, int test);
+  std::string get_problem_correct_output_path(std::string problem_id, int rev_id, int test);
   std::string get_problem_data_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_script_path(const std::string& problem_id, int rev_id);
   std::string get_problem_metadata_path(const std::string& problem_id, int rev_id);

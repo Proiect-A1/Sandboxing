@@ -3,7 +3,7 @@
 
 stdio_grader_task::stdio_grader_helper::~stdio_grader_helper() {
   submission_manager& sm = submission_manager::get_instance();
-  if (system(("rm -rf " + architecture_utilities::get_run_dir_absolute_path(user_id)+ "/*").c_str()) != 0){
+  if (architecture_utilities::clean_run_dir(user_id) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory from helper");
     test_result = result_enum::FAIL;
   }
@@ -31,7 +31,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     LOG_ERROR_USER(user_id, "Invalid user ID");
     return result_enum::FAIL;
   }
-  if (system(("rm -rf " + architecture_utilities::get_run_dir_absolute_path(user_id)+ "/*").c_str()) != 0){
+  if (architecture_utilities::clean_run_dir(user_id) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory");
     return result_enum::FAIL;
   }
@@ -57,8 +57,8 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   std::string problem_input_path = architecture_utilities::get_problem_input_path(problem_id, rev_id, test_id);
   std::string problem_correct_output_path = architecture_utilities::get_problem_correct_output_path(problem_id, rev_id, test_id);
   
-  std::string input_path = "input";
-  std::string output_path = "output";
+  std::string input_path = architecture_utilities::get_run_dir_absolute_path(user_id) + "/input";
+  std::string output_path = architecture_utilities::get_run_dir_absolute_path(user_id) + "/output";
   std::string exec_path = "main_exec";
   std::string correct_output_path = "correct_output";
   std::string username = architecture_utilities::get_weak_user(user_id);
@@ -70,7 +70,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     return result_enum::FAIL;
   }
 
-  if (!general_utilities::copy_file(problem_input_path, architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + input_path, 0644)){
+  if (!general_utilities::copy_file(problem_input_path, input_path, 0644)){
     LOG_ERROR_USER(user_id, "Couldn't copy problem input to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " +  std::to_string(test_id) + ", Problem_input_path:" + problem_input_path + ", " + ", Destination_input_path: " + (architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + input_path) + general_utilities::syscall_to_string("pwd") + general_utilities::syscall_to_string("whoami"));
     return result_enum::FAIL;
   }
@@ -84,7 +84,8 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     output_path,
     problem.time_limit,
     problem.memory_limit,
-    0);
+    0,
+    false);
   if(runner_task == nullptr){
     LOG_ERROR_USER(user_id, "Failed to create runner task");
     return result_enum::FAIL;

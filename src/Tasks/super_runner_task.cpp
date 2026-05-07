@@ -193,6 +193,20 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     // all file descriptors are set before sandboxing as they are kept open
     // trebuie inchisi toti fd in afara de stdin stdout stderr inainte de a da exec ca sa nu poata face prostii
     // robert tine minte sa te joci cu fd-urile sa vezi daca mai trebuie copiate chestiile sau nu
+    int in_fd = open(stdin_redirection_path.c_str(), O_RDONLY);
+    if (in_fd < 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + " " + stdin_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
+      _exit(127);
+    }
+    
+    int out_fd = open(stdout_redirection_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (out_fd < 0)
+    {
+      close(in_fd);
+      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + " " + stdout_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
+      _exit(127);
+    }
     int err_fd = open(stderr_redirection_path.c_str(), O_WRONLY);
     if (err_fd < 0)
     {
@@ -234,20 +248,6 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     
     
-    int in_fd = open(stdin_redirection_path.c_str(), O_RDONLY);
-    if (in_fd < 0)
-    {
-      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + " " + stdin_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
-      _exit(127);
-    }
-    
-    int out_fd = open(stdout_redirection_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (out_fd < 0)
-    {
-      close(in_fd);
-      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + " " + stdout_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
-      _exit(127);
-    }
     
     if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0)
     {

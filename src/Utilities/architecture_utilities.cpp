@@ -47,6 +47,13 @@ bool architecture_utilities::change_dir_to_sandbox(){
   return true;
 }
 
+int architecture_utilities::clean_run_dir(const int& user_id){
+  // poate se implementeaza ceva mai bun cu filesystem
+  std::string run_dir = get_run_dir_absolute_path(user_id);
+  std::string command = "rm -rf " + run_dir + "/*";
+  return system(command.c_str());
+}
+
 std::string architecture_utilities::get_weak_user(const int& user_id){
   return "amarat" + std::to_string(user_id);
 }

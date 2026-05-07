@@ -3,7 +3,8 @@
 #include <vector>
 #include <string>
 struct test_metadata{
-    std::string main_path;
+    std::string source_path; // source code
+    std::string main_path; // main_exec_name
     std::vector<std::string> generator_args;
     std::vector<std::string> validator_args;
     std::vector<std::string> interactor_args; /// primul argument din vector e path-ul

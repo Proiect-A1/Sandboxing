@@ -33,7 +33,8 @@ super_runner_task* runner_factories::stdio_submission_runner_factory_CPP(
     const std::string& output_path,
     float run_time_limit,
     long long run_memory_limit,
-    uint8_t priority){
+    uint8_t priority = 0,
+    bool strong_user = false){
     if (submission_id.empty() || exec_path.empty() || input_path.empty() || output_path.empty())
     {
         return nullptr;
@@ -50,7 +51,7 @@ super_runner_task* runner_factories::stdio_submission_runner_factory_CPP(
         {},
         {},
         {exec_path},
-        false);
+        strong_user);
 
     created->priority = priority;
     return created;
@@ -63,7 +64,8 @@ super_runner_task* runner_factories::submission_runner_factory_CPP(
     const std::string& output_path,
     float run_time_limit,
     long long run_memory_limit,
-    uint8_t priority){
+    uint8_t priority = 0,
+    bool strong_user = false){
     if (submission_id.empty() || exec_path.empty() || input_path.empty() || output_path.empty())
     {
         return nullptr;
@@ -80,7 +82,7 @@ super_runner_task* runner_factories::submission_runner_factory_CPP(
         {input_path},
         {output_path},
         {exec_path},
-        false);
+        strong_user);
 
     created->priority = priority;
     return created;
@@ -96,7 +98,7 @@ super_runner_task* runner_factories::checker_runner_factory_CPP(
     const std::string& correct_output_path,
     const std::string& source_path,
     const std::vector<std::string>& arguments,
-    uint8_t priority){
+    uint8_t priority = 0){
     if (submission_id.empty() || exec_path.empty() || output_path.empty() || message_path.empty() || submission_input_path.empty() || submission_output_path.empty() || correct_output_path.empty() || source_path.empty() || arguments.empty())
     {
         return nullptr;
@@ -127,7 +129,7 @@ super_runner_task* runner_factories::generator_runner_factory_CPP(
   const std::string& output_path,
   const std::string& message_path,
   const std::vector<std::string>& arguments,
-  uint8_t priority){
+  uint8_t priority = 0){
     if (submission_id.empty() || exec_path.empty() || output_path.empty() || message_path.empty() || arguments.empty())
     {
         return nullptr;
@@ -153,11 +155,10 @@ super_runner_task* runner_factories::validator_runner_factory_CPP(
   const std::string& submission_id,
   const std::string& exec_path,
   const std::string& input_path,
-  const std::string& output_path,
   const std::string& message_path,
   const std::vector<std::string>& arguments,
-  uint8_t priority){
-    if (submission_id.empty() || exec_path.empty() || input_path.empty() || output_path.empty() || message_path.empty() || arguments.empty())
+  uint8_t priority = 0){
+    if (submission_id.empty() || exec_path.empty() || input_path.empty() || message_path.empty() || arguments.empty())
     {
         return nullptr;
     }
@@ -165,7 +166,7 @@ super_runner_task* runner_factories::validator_runner_factory_CPP(
         submission_id,
         exec_path,
         input_path,
-        output_path,
+        "/dev/null",
         message_path,
         10.0f, // deocamdata 10s pentru validator mereu!! trebuie discutat daca chiar asa ramane
         1024 * 1024 * 1024, // deocamdata 1GB pentru validator mereu!! trebuie discutat daca chiar asa ramane
