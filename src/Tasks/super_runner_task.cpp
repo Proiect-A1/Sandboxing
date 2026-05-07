@@ -11,7 +11,7 @@ static int install_seccomp_whitelist()
   };
 
   int syscalls[] = {
-    SCMP_SYS(read), SCMP_SYS(write), SCMP_SYS(writev),
+    SCMP_SYS(read), SCMP_SYS(write), SCMP_SYS(readv), SCMP_SYS(writev),
     SCMP_SYS(open), SCMP_SYS(openat), SCMP_SYS(close), SCMP_SYS(lseek),
     SCMP_SYS(fstat), SCMP_SYS(newfstatat), SCMP_SYS(stat), SCMP_SYS(pread64),
     SCMP_SYS(access), SCMP_SYS(readlink),
@@ -86,6 +86,7 @@ bool super_runner_task::check_permissions(int user_id)
     }
   }
 
+  LOG_DEBUG_USER(user_id, exec_path);
   // context checks
   for (const std::string& input_file : input_files) {
     if (!std::filesystem::exists(input_file)) {

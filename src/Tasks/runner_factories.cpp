@@ -4,18 +4,24 @@
 namespace runner_factories {
   std::unordered_map<language_enum, decltype(&stdio_submission_runner_factory_CPP)> stdio_submission_runner_factory = {
     {language_enum::CPP, stdio_submission_runner_factory_CPP},
+    {language_enum::COMPILED, stdio_submission_runner_factory_CPP},
   };
   std::unordered_map<language_enum, decltype(&submission_runner_factory_CPP)> submission_runner_factory = {
     {language_enum::CPP, submission_runner_factory_CPP},
+    {language_enum::COMPILED, submission_runner_factory_CPP},
   };
   std::unordered_map<language_enum, decltype(&checker_runner_factory_CPP)> checker_runner_factory = {
     {language_enum::CPP, checker_runner_factory_CPP},
+    {language_enum::COMPILED, checker_runner_factory_CPP},
+
   };
   std::unordered_map<language_enum, decltype(&generator_runner_factory_CPP)> generator_runner_factory = {
     {language_enum::CPP, generator_runner_factory_CPP},
+    {language_enum::COMPILED, generator_runner_factory_CPP},
   };
   std::unordered_map<language_enum, decltype(&validator_runner_factory_CPP)> validator_runner_factory = {
     {language_enum::CPP, validator_runner_factory_CPP},
+    {language_enum::COMPILED, validator_runner_factory_CPP},
   };
 }
 

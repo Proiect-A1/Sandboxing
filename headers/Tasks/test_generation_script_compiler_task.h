@@ -35,7 +35,7 @@ public:
     std::string get_compilation_message(uint32_t max_lines);
     problem_metadata get_problem_metadata();
     result_enum execute(pthread_t thread_id, int user_id) override; /// returneaza OK/FAIL
-    bool check_permissions() override;
+    bool check_permissions(int user_id) override;
     void print_error(pthread_t thread_id, int user_id,const std::string& message){}
     void print_log(pthread_t thread_id, int user_id,const std::string& message){}
 };
