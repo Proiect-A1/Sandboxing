@@ -5,6 +5,7 @@ enum class language_enum
 {
     CPP,
     COMPILED,
+    RUST,
 };
 
 #endif

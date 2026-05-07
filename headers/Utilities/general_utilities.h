@@ -9,6 +9,7 @@
 #include <system_error>
 #include <iostream>
 #include <Enums/result_enum.h>
+#include <Enums/language_enum.h>
 namespace general_utilities{
   std::string left_zero_pad (int number, int width);
   bool copy_file(const std::string& from, const std::string& to, mode_t mode);
@@ -16,6 +17,7 @@ namespace general_utilities{
   bool is_file(const std::string& path);
   bool is_executable(const std::string& path);
   std::string enum_to_string(result_enum result);
+  language_enum string_to_language(const std::string& lang);
   template <typename T>
   struct pointer_compare {
     bool operator()(const T* a, const T* b) const {

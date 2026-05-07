@@ -231,8 +231,9 @@ void IO::evaluate_request(json request , int fd)
         string submission_id = request["submissionId"].get < string > ();
         int rev_id = request["revId"].get < int > ();
         string problem_id = request["problemId"].get < string > ();
+        language_enum language = general_utilities::string_to_language(request["language"].get < string > ());
 
-        sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , fd);
+        sm.insert(submission_id, language, problem_id , rev_id , fd);
 
         submission_data submission = sm.get_submission(submission_id);
 

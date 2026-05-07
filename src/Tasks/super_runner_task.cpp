@@ -19,8 +19,10 @@ static int install_seccomp_whitelist()
     SCMP_SYS(arch_prctl), SCMP_SYS(set_tid_address), SCMP_SYS(set_robust_list),
     SCMP_SYS(prlimit64), SCMP_SYS(getrandom), SCMP_SYS(rseq),
     SCMP_SYS(futex), SCMP_SYS(ioctl), SCMP_SYS(fcntl), SCMP_SYS(uname), SCMP_SYS(sysinfo),
-    SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask), SCMP_SYS(rt_sigreturn),
-    SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group)
+    SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask), SCMP_SYS(rt_sigreturn), SCMP_SYS(sigaltstack),
+    SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(clone), SCMP_SYS(clone3), SCMP_SYS(madvise),
+    SCMP_SYS(statx), SCMP_SYS(readlinkat), SCMP_SYS(getcwd), SCMP_SYS(clock_gettime), SCMP_SYS(sched_getaffinity),
+    SCMP_SYS(poll)
   };
 
   for (int s : syscalls)

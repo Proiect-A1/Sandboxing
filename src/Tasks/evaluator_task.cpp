@@ -43,8 +43,12 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   //return result_enum::OTHER; //cand e gata scoate asta
   //LOG_DEBUG("problem exists");
   //return result_enum::OK;
+  
+  submission_manager &sm = submission_manager::get_instance();
+  submission_data submission = sm.get_submission(submission_id);
+
   auto compiler = stdio_compiler_factory(
-    language_enum::CPP,
+    submission.language,
     submission_id,
     0 // priority
   );

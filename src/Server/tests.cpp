@@ -121,6 +121,8 @@ namespace tests
     void test_problem_evaluation_protocol()
     {
     // test_submission("12345_1", "abcde", 12);
+    test_submission("8001", "abcde", 12, language_enum::RUST);
+
     // test_submission("12345_2", "abcde", 12);
     // test_submission("12345_3", "abcde", 12);
 
@@ -227,7 +229,7 @@ namespace tests
     }
 
     // reads the cpp file from $SANDBOX_PATH/../testing_data/submissions
-   void test_submission(string submission_id, string problem_id, int rev_id)
+   void test_submission(string submission_id, string problem_id, int rev_id, language_enum lang)
     {
         string submission_id_real = submission_id + "_" + to_string(rand());
 
@@ -236,9 +238,12 @@ namespace tests
 
         system(("rm -rf $SANDBOX_PATH/submissions/" + submission_id_real + " 2> /dev/null").c_str());
         system(("mkdir $SANDBOX_PATH/submissions/" + submission_id_real).c_str());
+        
+        string ext = (lang == language_enum::RUST) ? "rs" : "cpp";
+
         system((
-            "cp $SANDBOX_PATH/../testing_data/submissions/" + submission_id + "_*.cpp " +
-            "$SANDBOX_PATH/submissions/" + submission_id_real + "/main.cpp"
+            "cp $SANDBOX_PATH/../testing_data/submissions/" + submission_id + "_*." + ext + " " +
+            "$SANDBOX_PATH/submissions/" + submission_id_real + "/main." + ext
         ).c_str());
         
         // for (int i = 1; i <= 10; i++){
@@ -248,7 +253,7 @@ namespace tests
         // }
 
         submission_manager& sm = submission_manager::get_instance();
-        sm.insert(submission_id_real, language_enum::CPP, problem_id , rev_id , 1);
+        sm.insert(submission_id_real, lang, problem_id , rev_id , 1);
 
         submission_data submission = sm.get_submission(submission_id_real);
 
@@ -259,4 +264,5 @@ namespace tests
         // while (sm.is_done(submission_id_real) == 0);
         // sleep(5);
     }
+
 }
