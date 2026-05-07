@@ -188,6 +188,6 @@ int main(int argc , char *argv[])
 
     tests::run_tests();
     
-    //while(1);
+    while(1);
     return 0;
 }

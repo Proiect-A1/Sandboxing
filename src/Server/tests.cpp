@@ -120,7 +120,7 @@ namespace tests
 
     void test_problem_evaluation_protocol()
     {
-           test_submission("12345_1", "abcde", 12);
+          //  test_submission("12345_1", "abcde", 12);
     //     test_submission("12345_2", "abcde", 12);
     //     test_submission("12345_3", "abcde", 12);
 
@@ -148,7 +148,7 @@ namespace tests
 
         //for (int i = 0; i < 30; ++i)    test_submission("x100", "abcde", 12);
         // test_submission("x101", "abcde", 12);
-        // for (int i = 0; i < 20; ++i)    test_submission("x102", "abcde", 12);
+        for (int i = 0; i < 30; ++i)    test_submission("12345_1", "abcde", 12);
         // test_submission("x103", "abcde", 12);
 
     }
@@ -256,7 +256,7 @@ namespace tests
 
         task_queue::get_instance().push(eva);
 
-        while (sm.is_done(submission_id_real) == 0);
+        // while (sm.is_done(submission_id_real) == 0);
         // sleep(5);
     }
 }

@@ -3,7 +3,8 @@
 
 enum class language_enum
 {
-    CPP
+    CPP,
+    COMPILED,
 };
 
 #endif

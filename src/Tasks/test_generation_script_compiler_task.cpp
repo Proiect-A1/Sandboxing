@@ -30,7 +30,7 @@ tgsct::test_generation_script_compiler_task(const std::string& problem_id, int r
     this->rev_id = rev_id;
     this->failed = false;
 }
-bool tgsct::check_permissions(){
+bool tgsct::check_permissions(int user_id){
     return true; /// verific permisiunile in execute in mai multe locuri
 }
 void tgsct::add_fatal_error(const std::string& msg){
