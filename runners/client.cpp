@@ -96,19 +96,6 @@ void test_submission_protocol()
 {
     send_file("testing_data/evaluate_request.json");
     send_file("testing_data/submission_swapsort.cpp");
-    
-    int length; read_consistent(sockfd , &length , sizeof(length));
-    string json;
-    
-    for(int i = 1 ; i <= length ; i++)
-    {
-        char ch; read_consistent(sockfd , &ch , sizeof(ch));
-        json += ch;
-    }
-
-    cerr << json; fflush(stderr);
-    send_file("testing_data/send_problem_request.json");
-    send_file("testing_data/swapsort.1");
 
     while(1)
     {

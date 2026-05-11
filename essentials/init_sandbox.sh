@@ -44,6 +44,10 @@ groupadd marati 2> /dev/null
 setfacl -m g:amarati:--x .
 setfacl -m g:marati:--x .
 
+setfacl -m g:amarati:--x ./etc
+setfacl -m g:marati:--x ./etc
+
+
 #./runs
 setfacl -m g:amarati:--x ./runs
 setfacl -m d:g:amarati:--- ./runs
@@ -91,7 +95,7 @@ do
 
     mkdir ./runs/$name_amarat 2> /dev/null 
 
-    setfacl -m u:$name_amarat:rwx ./runs/$name_amarat
+    setfacl -m u:$name_amarat:-wx ./runs/$name_amarat
     setfacl -m d:u:$name_amarat:rwx ./runs/$name_amarat
 
     #marat
@@ -103,7 +107,7 @@ do
     usermod --password $(echo $name_marat | openssl passwd -1 -stdin) $name_marat
     usermod -s /bin/bash $name_marat 2>&1 > /dev/null
 
-    setfacl -m u:$name_marat:rwx ./runs/$name_amarat
+    setfacl -m u:$name_marat:-wx ./runs/$name_amarat
     setfacl -m d:u:$name_marat:rwx ./runs/$name_amarat
 
     echo "$name_amarat & $name_marat"

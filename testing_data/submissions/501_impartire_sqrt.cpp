@@ -12,13 +12,13 @@ int main() {
     }
     else if (x == 2)
     {
-        int a[2] = {50, 51};
-        cout << a[2] << '\n';
+        volatile int a[2] = {50, 51};
+        cout << a[(int) round(3 + sin(x*x))] << '\n';
     }
     else if (x == 3)
     {
-        int a[2] = {50, 51};
-        cout << a[-1] << '\n';
+        volatile int a[2] = {50, 51};
+        cout << a[(int) round(-2 + sin(x*x))] << '\n';
     }
     else if (x > 8)
     {
@@ -36,9 +36,9 @@ int main() {
     }
     else if (x == 6)
     {
-        int nex[10] = {0,1,2,3,4,5,6,7,8,9};
+        volatile int nex[10] = {0,1,2,3,4,5,6,7,8,9};
         function<void(int,int)> dfs = [&](int nod, int dad) {
-            if (nex[nod] != dad) dfs(nex[nod], nod);
+            dfs(nex[nod], nod);
         };  dfs(0, -1);
     }
     else if (x == 5)
