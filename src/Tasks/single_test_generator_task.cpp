@@ -14,8 +14,14 @@ single_test_generator_task::stgt_helper::~stgt_helper() {
 result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id){
 
   //ROBERT SCOATE POINTERII DE LA RUNNER_FACTORIES CA MEMORY LEAKS ROBERT
-
-  stgt_helper helper(problem_id, rev_id, test_id);
+  
+  if (user_id <= 0){
+    LOG_ERROR_USER(user_id, "Invalid user ID");
+    // de bagat in problem manager ca o dat fail
+    return result_enum::FAIL;
+  }
+  
+  stgt_helper helper(user_id, problem_id, rev_id, test_id);
 
   if (architecture_utilities::clean_run_dir(user_id) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory");
@@ -72,7 +78,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
 
 
   general_utilities::copy_file(generator_exec_path, run_dir + "/" + generator_exec_name, 0755);
-  auto generator_task_1 = runner_factories::generator_runner_factory[language_enum::COMPILED](
+  auto generator_task_1_ptr = runner_factories::generator_runner_factory[language_enum::COMPILED](
     fake_submission_id,
     test_meta.generator_args[0],
     generator_output_1_path,
@@ -80,7 +86,12 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     test_meta.generator_args,
     1 // priority
   );
-  auto generator_task_2 = runner_factories::generator_runner_factory[language_enum::COMPILED](
+  if (!generator_task_1_ptr) {
+    LOG_ERROR_USER(user_id, "Failed to create generator task 1");
+    return result_enum::FAIL;
+  }
+  auto generator_task_1 = *generator_task_1_ptr;
+  auto generator_task_2_ptr = runner_factories::generator_runner_factory[language_enum::COMPILED](
     fake_submission_id,
     test_meta.generator_args[0],
     generator_output_2_path,
@@ -88,15 +99,20 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     test_meta.generator_args,
     1 // priority
   );
+  if (!generator_task_2_ptr) {
+    LOG_ERROR_USER(user_id, "Failed to create generator task 2");
+    return result_enum::FAIL;
+  }
+  auto generator_task_2 = *generator_task_2_ptr;
 
-  result_enum aux_rez = generator_task_1->execute(thread_id, user_id);
+  result_enum aux_rez = generator_task_1.execute(thread_id, user_id);
 
   if (aux_rez != result_enum::OK){
     helper.result = aux_rez;
     LOG_INFO_USER(user_id, "Generator_1 finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
     return aux_rez;
   }
-  aux_rez = generator_task_2->execute(thread_id, user_id);
+  aux_rez = generator_task_2.execute(thread_id, user_id);
 
   if (aux_rez != result_enum::OK){
     helper.result = aux_rez;
@@ -111,12 +127,12 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     return result_enum::FAIL;
   }
 
-  //de inlocuit cu un hashsum, care trebuie retinut undeva
+  //de inlocuit cu un hashsum, care trebuie retinut undeva ca sa verificam teste duplicate
   LOG_ERROR_USER(user_id, "ROBERT BAGA HASHSUM NU FI LENES (not actual error dar sa sara in ochi)");
 
   general_utilities::copy_file(validator_exec_path, run_dir + "/" + validator_exec_name, 0755);
 
-  auto validator_task = runner_factories::validator_runner_factory[language_enum::COMPILED](
+  auto validator_task_ptr = runner_factories::validator_runner_factory[language_enum::COMPILED](
     fake_submission_id,
     validator_exec_name,
     generator_output_1_path,
@@ -125,7 +141,12 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     1
   );
 
-  aux_rez = validator_task->execute(thread_id, user_id);
+  if (!validator_task_ptr) {
+    LOG_ERROR_USER(user_id, "Failed to create validator task");
+    return result_enum::FAIL;
+  }
+  auto validator_task = *validator_task_ptr;
+  aux_rez = validator_task.execute(thread_id, user_id);
 
   if (aux_rez != result_enum::OK && aux_rez != result_enum::RTE){
     helper.result = aux_rez;
@@ -133,7 +154,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     return aux_rez;
   }
   if (aux_rez == result_enum::RTE){
-    switch(validator_task->get_exit_code()){
+    switch(validator_task.get_exit_code()){
       case 1:
       break;
 
@@ -145,7 +166,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
 
   general_utilities::copy_file(main_exec_path, run_dir + "/" + main_exec_name, 0755);
 
-  auto source_task = runner_factories::stdio_submission_runner_factory[language_enum::COMPILED](
+  auto source_task_ptr = runner_factories::stdio_submission_runner_factory[language_enum::COMPILED](
     fake_submission_id,
     main_exec_name,
     generator_output_1_path,
@@ -155,8 +176,13 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     0,
     true
   );
+  if (!source_task_ptr) {
+    LOG_ERROR_USER(user_id, "Failed to create source task");
+    return result_enum::FAIL;
+  }
+  auto source_task = *source_task_ptr;
 
-  aux_rez = source_task->execute(thread_id, user_id);
+  aux_rez = source_task.execute(thread_id, user_id);
   if (aux_rez != result_enum::OK){
     helper.result = aux_rez;
     LOG_INFO_USER(user_id, "Main source finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));

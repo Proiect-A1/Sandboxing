@@ -16,8 +16,8 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
 
     if(pid == 0)
     {
-        execlp("unzip" , "unzip" , "-d" , architecture_utilities::get_problem_data_path(problem_id , rev_id).c_str() , path.c_str() , NULL);
-        //("unzip -d " + architecture_utilities::get_problem_data_path(problem_id , rev_id) + " " + path + " 2>&1 > /dev/null").c_str());
+        execlp("unzip" , "unzip" , "-d" , architecture_utilities::get_problem_data_folder(problem_id , rev_id).c_str() , path.c_str() , NULL);
+        //("unzip -d " + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + path + " 2>&1 > /dev/null").c_str());
         LOG_ERROR("execlp failed");
         exit(0);
     }

@@ -1,4 +1,4 @@
-#include<Tasks/test_generation_script_compiler_task.h>
+#include<Tasks/test_generation_script_compiler_task.hpp>
 #include<Utilities/architecture_utilities.h>
 #include<Utilities/general_utilities.h>
 #include<fstream>
