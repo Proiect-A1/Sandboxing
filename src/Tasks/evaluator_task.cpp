@@ -5,8 +5,13 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
     LOG_ERROR_USER(user_id, "Invalid user ID");
     return result_enum::FAIL;
   }
+  if (architecture_utilities::clean_run_dir(user_id) != 0){
+    LOG_ERROR_USER(user_id, "Failed to clean run directory before evaluation");
+    LOG_DEBUG_USER(user_id, general_utilities::syscall_to_string("pwd") + " " + general_utilities::syscall_to_string("whoami") + " " + general_utilities::syscall_to_string("rm -rf " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/*"));
+    return result_enum::FAIL;
+  }
 
-    LOG_DEBUG_USER(user_id , "executinv evaluator task");
+  LOG_DEBUG_USER(user_id , "executing evaluator task");
   
   result_enum result;
   problem_manager& pm = problem_manager::get_instance();
@@ -43,16 +48,17 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   //return result_enum::OTHER; //cand e gata scoate asta
   //LOG_DEBUG("problem exists");
   //return result_enum::OK;
-  auto compiler = stdio_compiler_factory(
+  auto compiler_ptr = stdio_compiler_factory(
     language_enum::CPP,
     submission_id,
     0 // priority
   );
-  if (!compiler) {
+  if (!compiler_ptr) {
     LOG_ERROR_USER(user_id, "Failed to create compiler task");
     return result_enum::FAIL;
   }
-  result = compiler->execute(thread_id, user_id);
+  auto compiler = *compiler_ptr;
+  result = compiler.execute(thread_id, user_id);
   if (result != result_enum::OK) {
     LOG_INFO_USER(user_id, "Compilation failed on submission " + submission_id + " with result " + general_utilities::enum_to_string(result));
     // trebuie bagat in submission manager
@@ -70,6 +76,10 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
     ));
   }
 
+  if (architecture_utilities::clean_run_dir(user_id) != 0){
+    LOG_ERROR_USER(user_id, "Failed to clean run directory after evaluation");
+    return result_enum::FAIL;
+  }
   LOG_INFO_USER(user_id, "Evaluation tasks for submission " + submission_id + " have been created and added to the queue");
   return result_enum::OK;
 

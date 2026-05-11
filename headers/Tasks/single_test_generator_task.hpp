@@ -17,7 +17,7 @@ class single_test_generator_task : public task {
       int test_id;
       result_enum result;
       int user_id;
-      stgt_helper(const std::string& problem_id, int rev_id, int test_id) : problem_id(problem_id), rev_id(rev_id), test_id(test_id), result(result_enum::OK) {}
+      stgt_helper(int user_id, const std::string& problem_id, int rev_id, int test_id) : user_id(user_id), problem_id(problem_id), rev_id(rev_id), test_id(test_id), result(result_enum::OK) {}
       ~stgt_helper();
     };
     std::string problem_id;

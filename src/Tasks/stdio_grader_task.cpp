@@ -77,7 +77,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
 
   LOG_INFO_USER(user_id, "Current status: " + general_utilities::syscall_to_string("whoami") + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)) + general_utilities::syscall_to_string("pwd"));
 
-  auto runner_task = runner_factories::stdio_submission_runner_factory[submission.language](
+  auto runner_task_ptr = runner_factories::stdio_submission_runner_factory[submission.language](
     submission_id,
     exec_path,
     input_path,
@@ -86,16 +86,17 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     problem.memory_limit,
     0,
     false);
-  if(runner_task == nullptr){
+  if(runner_task_ptr == nullptr){
     LOG_ERROR_USER(user_id, "Failed to create runner task");
     return result_enum::FAIL;
   }
 
+  auto runner_task = *runner_task_ptr;
   
   LOG_INFO_USER(user_id, "Starting runner task execution. Submission ID: " + submission_id + ", Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id) + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)) + general_utilities::syscall_to_string("whoami"));
-  helper.test_result = runner_task->execute(thread_id, user_id);
-  helper.test.time_used = runner_task->get_time_consumed();
-  helper.test.memory_used = runner_task->get_memory_consumed();
+  helper.test_result = runner_task.execute(thread_id, user_id);
+  helper.test.time_used = runner_task.get_time_consumed();
+  helper.test.memory_used = runner_task.get_memory_consumed();
 
   if (helper.test_result == result_enum::FAIL)
   {
