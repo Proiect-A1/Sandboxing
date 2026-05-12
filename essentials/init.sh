@@ -21,11 +21,21 @@ cp essentials/get_dependencies.sh ./sandbox
 cd sandbox && bash init_sandbox.sh $1 
 echo "
 #include <bits/stdc++.h>
-int main(){return 0;}
+#include <zlib.h>
+#include <thread>
+#include <dlfcn.h>
+int main(){ zlibVersion(); std::thread t([](){}); t.join(); dlopen(NULL, RTLD_NOW); return 0;}
 " > main.cpp 
 
-g++ main.cpp -o main && bash get_dependencies.sh main
+g++ main.cpp -lz -lpthread -ldl -lrt -o main && bash get_dependencies.sh main
 rm main.cpp main
+
+mkdir -p usr/bin
+cp /usr/bin/python3 usr/bin/
+bash get_dependencies.sh /usr/bin/python3
+mkdir -p usr/lib/
+cp -r /usr/lib/python3* usr/lib/ 2>/dev/null
+
 rm get_dependencies.sh init_sandbox.sh
 
 mkdir etc

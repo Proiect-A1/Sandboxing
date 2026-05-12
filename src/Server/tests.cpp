@@ -124,6 +124,33 @@ namespace tests
     // test_submission("12345_2", "abcde", 12, language_enum::RUST);
     // test_submission("12345_3", "abcde", 12, language_enum::RUST);
     // test_submission("1005", "expresie", 1, language_enum::RUST);
+    // test_submission("502", "abcde", 12, language_enum::RUST);
+
+    // test_submission("12345_1", "abcde", 12, language_enum::C);
+    // test_submission("12345_2", "abcde", 12, language_enum::C);
+    // test_submission("12345_3", "abcde", 12, language_enum::C);
+    // test_submission("1005", "expresie", 1, language_enum::C);
+    // test_submission("502", "abcde", 12, language_enum::C);
+
+    // test_submission("12345_1", "abcde", 12, language_enum::CSHARP);
+    // test_submission("12345_2", "abcde", 12, language_enum::CSHARP);
+    // test_submission("12345_3", "abcde", 12, language_enum::CSHARP);
+    // test_submission("1005", "expresie", 1, language_enum::CSHARP);
+    // test_submission("502", "abcde", 12, language_enum::CSHARP);
+
+    // test_submission("12345_1", "abcde", 12, language_enum::GO);
+    // test_submission("12345_2", "abcde", 12, language_enum::GO);
+    // test_submission("12345_3", "abcde", 12, language_enum::GO);
+    // test_submission("1005", "expresie", 1, language_enum::GO);
+    // test_submission("502", "abcde", 12, language_enum::GO);
+
+    // test_submission("12345_1", "abcde", 12, language_enum::PYTHON);
+    // test_submission("12345_2", "abcde", 12, language_enum::PYTHON);
+    // test_submission("12345_3", "abcde", 12, language_enum::PYTHON);
+    // test_submission("12345_4", "abcde", 12, language_enum::PYTHON);
+    // test_submission("1005", "expresie", 1, language_enum::PYTHON);
+    // test_submission("502", "abcde", 12, language_enum::PYTHON);
+    
 
     // test_submission("12345_1", "abcde", 12);
     // test_submission("12345_2", "abcde", 12);
@@ -242,8 +269,13 @@ namespace tests
         system(("rm -rf $SANDBOX_PATH/submissions/" + submission_id_real + " 2> /dev/null").c_str());
         system(("mkdir $SANDBOX_PATH/submissions/" + submission_id_real).c_str());
         
-        string ext = (lang == language_enum::RUST) ? "rs" : "cpp";
-        string lang_folder = (lang == language_enum::RUST) ? "rs" : "cpp";
+        string ext = "cpp";
+        string lang_folder = "cpp";
+        if (lang == language_enum::RUST) { ext = "rs"; lang_folder = "rs"; }
+        else if (lang == language_enum::C) { ext = "c"; lang_folder = "c"; }
+        else if (lang == language_enum::CSHARP) { ext = "cs"; lang_folder = "cs"; }
+        else if (lang == language_enum::GO) { ext = "go"; lang_folder = "go"; }
+        else if (lang == language_enum::PYTHON) { ext = "py"; lang_folder = "py"; }
 
         system((
             "cp $SANDBOX_PATH/../testing_data/submissions/" + lang_folder + "/" + submission_id + "_*." + ext + " " +

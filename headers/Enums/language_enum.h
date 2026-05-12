@@ -6,6 +6,10 @@ enum class language_enum
     CPP,
     COMPILED,
     RUST,
+    C,
+    CSHARP,
+    GO,
+    PYTHON,
 };
 
 #endif

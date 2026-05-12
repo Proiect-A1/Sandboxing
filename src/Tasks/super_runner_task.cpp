@@ -1,8 +1,8 @@
 #include <Tasks/super_runner_task.hpp>
 
-static int install_seccomp_whitelist()
+static int install_seccomp_whitelist(const std::string& exec_path)
 {
-  scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_TRAP);
+  scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_KILL_PROCESS);
   if (!ctx) return -1;
 
   auto add = [&](int sys) {
@@ -17,12 +17,22 @@ static int install_seccomp_whitelist()
     SCMP_SYS(access), SCMP_SYS(readlink),
     SCMP_SYS(mmap), SCMP_SYS(munmap), SCMP_SYS(mprotect), SCMP_SYS(brk), SCMP_SYS(madvise),
     SCMP_SYS(arch_prctl), SCMP_SYS(set_tid_address), SCMP_SYS(set_robust_list),
-    SCMP_SYS(prlimit64), SCMP_SYS(getrandom), SCMP_SYS(rseq),
+    SCMP_SYS(prlimit64), SCMP_SYS(getrlimit), SCMP_SYS(setrlimit), SCMP_SYS(getrandom), SCMP_SYS(rseq), SCMP_SYS(membarrier),
     SCMP_SYS(futex), SCMP_SYS(ioctl), SCMP_SYS(fcntl), SCMP_SYS(uname), SCMP_SYS(sysinfo),
     SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask), SCMP_SYS(rt_sigreturn), SCMP_SYS(sigaltstack),
     SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(clone), SCMP_SYS(clone3), SCMP_SYS(madvise),
     SCMP_SYS(statx), SCMP_SYS(readlinkat), SCMP_SYS(getcwd), SCMP_SYS(clock_gettime), SCMP_SYS(sched_getaffinity),
-    SCMP_SYS(poll)
+    SCMP_SYS(poll),
+    SCMP_SYS(epoll_create1), SCMP_SYS(epoll_ctl), SCMP_SYS(epoll_wait), SCMP_SYS(epoll_pwait),
+    SCMP_SYS(eventfd2), SCMP_SYS(sched_yield), SCMP_SYS(getpid), SCMP_SYS(gettid),
+    SCMP_SYS(tgkill), SCMP_SYS(nanosleep), SCMP_SYS(mremap), SCMP_SYS(clock_getres),
+    SCMP_SYS(lstat), SCMP_SYS(getuid), SCMP_SYS(geteuid), SCMP_SYS(getgid), SCMP_SYS(getegid),
+    SCMP_SYS(dup), SCMP_SYS(dup2), SCMP_SYS(dup3),
+    SCMP_SYS(prctl), SCMP_SYS(get_mempolicy), SCMP_SYS(mbind), SCMP_SYS(set_mempolicy),
+    SCMP_SYS(epoll_pwait2), SCMP_SYS(sched_getparam), SCMP_SYS(sched_getscheduler),
+    SCMP_SYS(sched_setaffinity), SCMP_SYS(getcpu), SCMP_SYS(getrusage), SCMP_SYS(tkill),
+    SCMP_SYS(clock_nanosleep), SCMP_SYS(mincore), SCMP_SYS(fstatfs), SCMP_SYS(statfs),
+    SCMP_SYS(pipe), SCMP_SYS(pipe2)
   };
 
   for (int s : syscalls)
@@ -32,6 +42,20 @@ static int install_seccomp_whitelist()
       seccomp_release(ctx);
       return -1;
     }
+  }
+
+  int fd = open(exec_path.c_str(), O_RDONLY);
+  if (fd >= 0)
+  {
+    char shebang[18] = {0};
+    if (read(fd, shebang, 18) == 18)
+    {
+      if (strncmp(shebang, "#!/usr/bin/python3", 18) == 0)
+      {
+        if (!add(SCMP_SYS(getdents64))) { close(fd); seccomp_release(ctx); return -1; }
+      }
+    }
+    close(fd);
   }
 
   if (seccomp_load(ctx) < 0)
@@ -270,9 +294,8 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     
     struct rlimit memory_rl;
-    rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
-    memory_rl.rlim_cur = mem_limit_padded;
-    memory_rl.rlim_max = mem_limit_padded;
+    memory_rl.rlim_cur = RLIM_INFINITY; // trebuie pt Go/C#, pusesem si 6GB si tot nu mergea C#, puteti sa puneti o limita daca o gasiti, dar nu cred ca e problema
+    memory_rl.rlim_max = RLIM_INFINITY;
     if (setrlimit(RLIMIT_AS, &memory_rl) != 0){
       LOG_ERROR_USER(user_id, "Failed to set memory limit");
       _exit(127);
@@ -290,7 +313,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     // LOG_INFO_USER(user_id, "WOHOOO SUNT SMECHER" + general_utilities::syscall_to_string("whoami"));
 
-    if (install_seccomp_whitelist() != 0)
+    if (install_seccomp_whitelist(exec_path) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to install seccomp filter");
       _exit(127);
