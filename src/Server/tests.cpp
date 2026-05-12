@@ -120,9 +120,11 @@ namespace tests
 
     void test_problem_evaluation_protocol()
     {
-    // test_submission("12345_1", "abcde", 12);
-    test_submission("8001", "abcde", 12, language_enum::RUST);
+    // test_submission("12345_1", "abcde", 12, language_enum::RUST);
+    test_submission("12345_2", "abcde", 12, language_enum::RUST);
+    // test_submission("12345_3", "abcde", 12, language_enum::RUST);
 
+    // test_submission("12345_1", "abcde", 12);
     // test_submission("12345_2", "abcde", 12);
     // test_submission("12345_3", "abcde", 12);
 
