@@ -12,6 +12,10 @@ result_enum generator_task::execute(pthread_t thread_id, int user_id){
   
   LOG_DEBUG_USER(user_id, "Starting generator task execution for problem " + problem_id + ", revision " + std::to_string(rev_id));
   
+
+
+
+  
   auto script_compiler = test_generation_script_compiler_task(problem_id, rev_id);
 
   result_enum aux_result = script_compiler.execute(thread_id, user_id);
