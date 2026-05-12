@@ -31,7 +31,7 @@ void submission_data::add_completed_test(int test_id, result_enum result, float 
     tests[test_id].memory_used=memory_used;
     ++tests_completed;
     for(int group_id : tests[test_id].groups){
-        groups[group_id].add_completed_test(result, points, memory_used, time_used);
+        groups[group_id].add_completed_test(result, points, time_used, memory_used);
         if(groups[group_id].is_completed()){
             add_completed_subtask(group_id, groups[group_id]);
         }
