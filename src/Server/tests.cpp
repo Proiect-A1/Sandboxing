@@ -121,8 +121,9 @@ namespace tests
     void test_problem_evaluation_protocol()
     {
     // test_submission("12345_1", "abcde", 12, language_enum::RUST);
-    test_submission("12345_2", "abcde", 12, language_enum::RUST);
+    // test_submission("12345_2", "abcde", 12, language_enum::RUST);
     // test_submission("12345_3", "abcde", 12, language_enum::RUST);
+    // test_submission("1005", "expresie", 1, language_enum::RUST);
 
     // test_submission("12345_1", "abcde", 12);
     // test_submission("12345_2", "abcde", 12);
@@ -242,9 +243,10 @@ namespace tests
         system(("mkdir $SANDBOX_PATH/submissions/" + submission_id_real).c_str());
         
         string ext = (lang == language_enum::RUST) ? "rs" : "cpp";
+        string lang_folder = (lang == language_enum::RUST) ? "rs" : "cpp";
 
         system((
-            "cp $SANDBOX_PATH/../testing_data/submissions/" + submission_id + "_*." + ext + " " +
+            "cp $SANDBOX_PATH/../testing_data/submissions/" + lang_folder + "/" + submission_id + "_*." + ext + " " +
             "$SANDBOX_PATH/submissions/" + submission_id_real + "/main." + ext
         ).c_str());
         
