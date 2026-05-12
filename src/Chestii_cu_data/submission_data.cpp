@@ -1,7 +1,7 @@
 #include <Chestii_cu_data/submission_data.h>
 #include <Singletoni/logger.h>
 
-submission_data::submission_data(language_enum language, std::string problem_id, int rev_id, int socket_fd){
+submission_data::submission_data(std::string submission_id , language_enum language, std::string problem_id, int rev_id, int socket_fd){
     problem_metadata pmd=problem_manager::get_instance().get_metadata(problem_id,rev_id);
     points = 0;
     time_used = 0;
@@ -14,6 +14,7 @@ submission_data::submission_data(language_enum language, std::string problem_id,
     this->rev_id=rev_id;
     this->socket_fd=socket_fd; /// stdout by default
     this->language=language;
+    this -> submission_id = submission_id;
     for(const group_metadata& gmd : pmd.groups){
         groups.push_back(submission_group(gmd, this));
     }
@@ -39,7 +40,7 @@ void submission_data::add_completed_test(int test_id, result_enum result, float 
     send_completed_test_packet(test_id, tests[test_id]);
     if(tests_completed==test_count){
         // de trimis packet cu submisia terminata
-        LOG_INFO(std::string("Submission ") + problem_id  + " rev " + std::to_string(rev_id) +
+        LOG_INFO(std::string("Submission ") + submission_id + " " + problem_id  + " rev " + std::to_string(rev_id) +
                  " completed with " + std::to_string(this->points) + " points, time used: " +
                  std::to_string(this->time_used) + " ms, memory used: " +
                  std::to_string(this->memory_used) + " B");

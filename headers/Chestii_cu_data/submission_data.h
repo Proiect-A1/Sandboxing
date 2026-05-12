@@ -10,6 +10,7 @@
 #include <Enums/result_enum.h>
 #include <iostream>
 struct submission_data{
+    std::string submission_id;
     language_enum language;
 
     int tests_completed;
@@ -31,7 +32,7 @@ struct submission_data{
     std::vector<submission_test> tests;
     std::vector<submission_group> groups;
     submission_data(){}
-    submission_data(language_enum language, std::string problem_id, int rev_id, int socket_fd=1);
+    submission_data(std::string submission_data , language_enum language, std::string problem_id, int rev_id, int socket_fd=1);
     void add_completed_test(int test_id, result_enum result, float points, float time_used, long long memory_used);
     void add_completed_test(int test_id, submission_test res);
     void add_completed_subtask(int group_id, const submission_group& completed_group);

@@ -27,7 +27,7 @@ std::map<std::string, submission_data> submission_manager::get_submission_table(
     return retval;
 }
 void submission_manager::insert(std::string submission_id, language_enum language, std::string problem_id, int rev_id, int socket_fd){
-    submission_data sd(language, problem_id, rev_id, socket_fd);
+    submission_data sd(submission_id , language, problem_id, rev_id, socket_fd);
     pthread_mutex_lock(&submission_manager::mtx);
     submission_table[submission_id]=sd;
     LOG_INFO(std::string("Inserted submission ") + submission_id + " for problem " + problem_id + " rev " + std::to_string(rev_id));
