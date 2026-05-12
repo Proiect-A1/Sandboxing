@@ -158,22 +158,22 @@ super_runner_task* runner_factories::validator_runner_factory_CPP(
   const std::string& message_path,
   const std::vector<std::string>& arguments,
   uint8_t priority = 0){
-    if (submission_id.empty() || exec_path.empty() || input_path.empty() || message_path.empty() || arguments.empty())
-    {
-        return nullptr;
-    }
-    super_runner_task* created = new super_runner_task(
-        submission_id,
-        exec_path,
-        input_path,
-        "/dev/null",
-        message_path,
-        10.0f, // deocamdata 10s pentru validator mereu!! trebuie discutat daca chiar asa ramane
-        1024 * 1024 * 1024, // deocamdata 1GB pentru validator mereu!! trebuie discutat daca chiar asa ramane
-        {},
-        {},
-        arguments,
-        true);
+  if (submission_id.empty() || exec_path.empty() || input_path.empty() || message_path.empty() || arguments.empty())
+  {
+      return nullptr;
+  }
+  super_runner_task* created = new super_runner_task(
+      submission_id,
+      exec_path,
+      input_path,
+      "/dev/null",
+      message_path,
+      10.0f, // deocamdata 10s pentru validator mereu!! trebuie discutat daca chiar asa ramane
+      1024 * 1024 * 1024, // deocamdata 1GB pentru validator mereu!! trebuie discutat daca chiar asa ramane
+      {},
+      {},
+      arguments,
+      true);
     created->priority = priority;
     return created;
 }
