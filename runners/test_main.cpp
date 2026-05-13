@@ -148,9 +148,11 @@ void receive_request(int client_fd)
             request_string += ch;
         }
         
+        LOG_DEBUG("payload received: " + request_string);
+        
         json j = json::parse(request_string);
         LOG_DEBUG(std::string("Request string: ") + j.dump());
-
+        
         if(!j.contains("request"))
         {
             LOG_ERROR("Invalid request received");
@@ -164,6 +166,7 @@ void receive_request(int client_fd)
     catch(exception &e)
     {
         LOG_ERROR(std::string("Invalid request received: ") + e.what());
+        rem_fd(client_fd);
     }   
        
 }

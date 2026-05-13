@@ -31,7 +31,7 @@ int IO::read_consistent_w_buffer(int fd , void *data , int len)
     try 
     {
         int total_read = 0;
-
+        std::cerr << "here" << std::endl;
         while(len)
         {
             char byte = get_char_fd(fd); 
@@ -64,6 +64,11 @@ int IO::read_consistent(int fd , void *data , int len)
     }
 
     return total_read;
+}
+
+void IO::reset()
+{
+    current_pos = length = 0;
 }
 
 char IO::get_char_fd(int fd)

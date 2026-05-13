@@ -226,6 +226,44 @@ namespace tests
         pm.add_revision(new_problem);
     }
 
+    //problema hardcoadata de test
+    void register_problem_expresie_hardcodata()
+    {
+        string problem_id = "05ba3116-b99c-4499-856b-866b41a0f627";
+        string problem_ver_id = "05ba3116-b99c-4499-856b-866b41a0f627.1";
+        int rev_id = 1;
+
+        system("cp -r testing_data/expresie/inputs/expresie.1 sandbox/inputs");
+        system("cp -r testing_data/expresie/correct_outputs/expresie.1 sandbox/correct_outputs");
+        system("mv sandbox/inputs/expresie.1 sandbox/inputs/05ba3116-b99c-4499-856b-866b41a0f627.1");
+        system("mv sandbox/correct_outputs/expresie.1 sandbox/correct_outputs/05ba3116-b99c-4499-856b-866b41a0f627.1");
+        
+        
+        problem_metadata new_problem;
+        new_problem.problem_id = problem_id;
+        new_problem.rev_id = rev_id;
+        new_problem.group_count = 6;
+        new_problem.test_count = 6;
+        new_problem.time_limit = 9000; // 9 secunde
+        new_problem.memory_limit = 1024ll * 1024 * 64; // 64 MB
+        new_problem.total_points = 100.0;
+        new_problem.problem_status = problem_status_enum::DONE;
+        new_problem.groups = std::vector<group_metadata>{
+            { 0, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN},
+            {20, 1, group_type_enum::GROUP_MIN}
+        };
+        new_problem.tests = std::vector<test_metadata>(6, test_metadata("", {}, {}, {}, {}, {}));
+        for (int i = 0; i < 6; i++){
+            new_problem.tests[i].groups.push_back(i);
+        }
+
+        problem_manager& pm = problem_manager::get_instance();
+        pm.add_revision(new_problem);
+    }
     // reads the cpp file from $SANDBOX_PATH/../testing_data/submissions
    void test_submission(string submission_id, string problem_id, int rev_id)
     {

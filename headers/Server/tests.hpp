@@ -14,6 +14,7 @@ namespace tests
     void test_problem_evaluation_protocol();
     void register_problem_abcde();
     void register_problem_expresie();
+    void register_problem_expresie_hardcodata();
     void test_submission(string submission_id, string problem_id, int rev_id);
     void test_preparator_task();
 }

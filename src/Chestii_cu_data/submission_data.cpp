@@ -1,5 +1,6 @@
 #include <Chestii_cu_data/submission_data.h>
 #include <Singletoni/logger.h>
+#include <Server/IO.hpp>
 
 submission_data::submission_data(std::string submission_id , language_enum language, std::string problem_id, int rev_id, std::string download_link, int socket_fd){
     problem_metadata pmd=problem_manager::get_instance().get_metadata(problem_id,rev_id);
@@ -45,13 +46,19 @@ void submission_data::add_completed_test(int test_id, result_enum result, float 
                  " completed with " + std::to_string(this->points) + " points, time used: " +
                  std::to_string(this->time_used) + " ms, memory used: " +
                  std::to_string(this->memory_used) + " B");
+
+        //TREBUIE MODIFICAT CU PARAMETRII BUNI IN LOC DE -1
+        IO::done_submission_request(submission_id , this -> points  , -1 , -1 , this -> memory_used , this -> time_used , this -> socket_fd);
         send_completed_submission_packet();
     }
     else{
-      LOG_DEBUG(std::string("Submission ") + problem_id + " rev " + std::to_string(rev_id) +
+      LOG_DEBUG(std::string("Submission ") + submission_id + " rev " + std::to_string(rev_id) +
                 " completed test " + std::to_string(test_id) + " with " + std::to_string(points) +
                 " points, time used: " + std::to_string(time_used) + " ms, memory used: " +
                 std::to_string(memory_used) + " B\n" + "Completed " + std::to_string(tests_completed) + "/" + std::to_string(test_count) + " tests");
+    
+        //TREBUIE MODIFICAT CU TOTI PARAMETRII BUNI
+         IO::done_test_request(submission_id , test_id , 1 , "skibidi toiilet 67676767" , points , -1 , -1 , memory_used , time_used , socket_fd);
     }
         
 }

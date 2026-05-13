@@ -17,6 +17,7 @@ class IO
 
     public:
         IO();
+        void reset();
         void execute(string command , json j , int fd);
         static int read_consistent(int fd , void *data , int len);
         int read_consistent_w_buffer(int fd , void *data , int len);

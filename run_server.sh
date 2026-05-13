@@ -20,6 +20,9 @@ echo $1
 if [ $# -eq 1 -a $1 == 'server' ]
 then 
     ./runners/main 10.8.0.3 6000 15
+elif [ $# -eq 1 -a $1 == 'local' ]
+then
+    ./runners/main 10.8.0.2 6000 15
 else
     ./runners/main 127.0.0.1 6000 15
 fi
