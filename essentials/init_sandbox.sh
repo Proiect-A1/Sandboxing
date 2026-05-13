@@ -44,8 +44,8 @@ groupadd marati 2> /dev/null
 setfacl -m g:amarati:--x .
 setfacl -m g:marati:--x .
 
-setfacl -m g:amarati:--x ./etc
-setfacl -m g:marati:--x ./etc
+setfacl -m g:amarati:--- ./etc
+setfacl -m g:marati:--- ./etc
 
 
 #./runs

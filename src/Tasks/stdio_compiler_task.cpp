@@ -52,16 +52,17 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     const std::string source_run_path = run_dir + "/" + source_file_name;
     const std::string output_run_path = run_dir + "/" + output_file_name;
 
-    struct passwd pw_struct;
-    struct passwd *pw;
-    char pw_buf[8192];
-    int pw_res = getpwnam_r(run_username.c_str(), &pw_struct, pw_buf, sizeof(pw_buf), &pw);
-    if (pw_res != 0 || pw == nullptr)
-    {
-      LOG_ERROR_USER(user_id, "Failed to get user information for sandbox user");
-      return result_enum::FAIL;
-    }
-
+struct passwd pw_struct;
+  struct passwd *pwp;
+  char pw_buf[8192];
+  int pw_res = getpwnam_r(run_username.c_str(), &pw_struct, pw_buf, sizeof(pw_buf), &pwp);
+  if (pw_res != 0 || pwp == nullptr)
+  {
+    LOG_ERROR_USER(user_id, "Failed to get user information for sandbox user");
+    return result_enum::FAIL;
+  }
+  struct passwd pw = pw_struct;
+    
     if (!general_utilities::copy_file(source_host_path, source_run_path, 0644))
     {
       LOG_ERROR_USER(user_id, "Couldn't copy source file to run directory");
@@ -82,17 +83,38 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
 
         //daca vrem chroot trebe sa includem niste librarii in plus aduse aici, eventual mutam chroot in wrapperu de la comanda, dar again nu e necesar ca runneru oricum e jailed. adica e problema de user experience
         // g++: fatal error: cannot execute 'cc1plus': posix_spawnp: No such file or directory
-        // if (!architecture_utilities::change_root_to_sandbox())
-        // {
-        //   print_error(thread_id, user_id, "Failed to change root to sandbox");
-        //   _exit(127);
-        // }
-
-        if (!architecture_utilities::change_dir_to_user(user_id))
+       
+       //ROBERT ITI DAI FORMAT SINGUR LA COD
+        if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
         {
-            LOG_ERROR_USER(user_id, "Failed to change directory to user's run directory");
-            _exit(127);
+        LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
+        _exit(127);
         }
+    
+    if (!(architecture_utilities::change_root_to_sandbox()))
+    {
+      LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
+      _exit(127);
+    }
+    
+    std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
+    if (chdir(inner_run_dir.c_str()) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
+      _exit(127);
+    }
+    
+    if (setgid(pw.pw_gid) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
+      _exit(127);
+    }
+    
+    if (setuid(pw.pw_uid) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
+      _exit(127);
+    }
 
 
         int null_fd = open("/dev/null", O_RDONLY);

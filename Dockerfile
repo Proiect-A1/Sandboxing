@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt full-upgrade -y && apt-get install -y git iptables vim openssl acl sudo g++ libseccomp-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt full-upgrade -y && apt-get install -y git iptables vim openssl acl sudo g++ libseccomp-dev libwebsockets-dev debootstrap && rm -rf /var/lib/apt/lists/*
 
 COPY . . 
 

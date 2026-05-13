@@ -128,7 +128,7 @@ namespace tests
     //     test_submission("1001", "expresie", 1);
     //     test_submission("1002", "expresie", 1);
     //     test_submission("1003", "expresie", 1);
-        test_submission("1004", "expresie", 1);
+        //test_submission("1004", "expresie", 1);
     //     test_submission("1005", "expresie", 1);
     //      test_submission("1009", "expresie", 1);
     //     test_submission("1010", "expresie", 1);
@@ -145,7 +145,7 @@ namespace tests
         // test_submission("z400", "abcde", 12);
         // test_submission("z401", "abcde", 12);
         // test_submission("z402", "abcde", 12);
-
+        test_submission("cmp01" , "abcde" , 12);
         //for (int i = 0; i < 30; ++i)    test_submission("x100", "abcde", 12);
         // test_submission("x101", "abcde", 12);
             for (int i = 0; i < 100; ++i)    test_submission("12345_1", "abcde", 12);

@@ -15,18 +15,20 @@ fi
 rm -r sandbox 2> /dev/null
 mkdir sandbox 2> /dev/null
 
+debootstrap questing ./sandbox http://archive.ubuntu.com/ubuntu/
+chroot ./sandbox apt install g++ rustc -y
+
 cp essentials/init_sandbox.sh ./sandbox
 cp essentials/get_dependencies.sh ./sandbox
+#cp essentials/fix_g++.sh ./sandbox
 
 cd sandbox && bash init_sandbox.sh $1 
-echo "
-#include <bits/stdc++.h>
-int main(){return 0;}
-" > main.cpp 
 
-g++ main.cpp -o main && bash get_dependencies.sh main
-rm main.cpp main
+#g++ main.cpp -o main && bash get_dependencies.sh main
+#bash fix_g++.sh fail 
+#rm main.cpp main
 rm get_dependencies.sh init_sandbox.sh
+#rm fix_g++.sh 
 
 mkdir etc
 cp /etc/passwd etc
