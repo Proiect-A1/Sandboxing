@@ -31,7 +31,7 @@ int IO::read_consistent_w_buffer(int fd , void *data , int len)
     try 
     {
         int total_read = 0;
-
+        std::cerr << "here" << std::endl;
         while(len)
         {
             char byte = get_char_fd(fd); 
@@ -64,6 +64,11 @@ int IO::read_consistent(int fd , void *data , int len)
     }
 
     return total_read;
+}
+
+void IO::reset()
+{
+    current_pos = length = 0;
 }
 
 char IO::get_char_fd(int fd)
@@ -231,8 +236,9 @@ void IO::evaluate_request(json request , int fd)
         string submission_id = request["submissionId"].get < string > ();
         int rev_id = request["revId"].get < int > ();
         string problem_id = request["problemId"].get < string > ();
+        string url = request["downloadLink"].get < string > ();
 
-        sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , fd);
+        sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , url , fd);
 
         submission_data submission = sm.get_submission(submission_id);
 
