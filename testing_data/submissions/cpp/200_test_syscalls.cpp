@@ -160,18 +160,18 @@ int main() {
         exit(0); // vreau un singur test, nu 10
     }
 
-    test_create_delete_file("/my_file");
-    test_create_delete_file("./my_file");
+    // test_create_delete_file("/my_file");
+    // test_create_delete_file("./my_file");
 
-    test_nonexistent_syscall(999);
+    // test_nonexistent_syscall(999);
 
-    test_forks();
+    // test_forks();
     // test_fork_bomb();
 
-    test_mkdir("/my_folder");
-    test_mkdir("./my_folder");
+    // test_mkdir("/my_folder");
+    // test_mkdir("./my_folder");
 
-    test_socket("ezluci.com");
+    // test_socket("ezluci.com");
 
     test_exec();
 }

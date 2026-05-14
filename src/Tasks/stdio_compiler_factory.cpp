@@ -33,7 +33,7 @@ stdio_compiler_task* stdio_compiler_factory(
             language,
             compilation_limits::COMPILATION_TIME_LIMIT.at(language),
             compilation_limits::EXECUTABLE_SIZE_LIMIT.at(language),
-            {"/usr/bin/rustc", "--edition=2021", "-O", "-o", "main_exec", "main.rs"}
+            {"/usr/bin/rustc", "--edition=2021", "-O", "-C", "linker=/usr/bin/gcc", "-o", "main_exec", "main.rs"}
         );
     } else if (language == language_enum::C) {
         created = new stdio_compiler_task(

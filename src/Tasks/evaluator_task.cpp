@@ -1,4 +1,5 @@
 #include <Tasks/evaluator_task.h> 
+#include <Tasks/download.h>
 
 result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   if (user_id <= 0) {
@@ -22,7 +23,11 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       pm.add_revision(meta); 
 
       submission_manager &sm = submission_manager::get_instance();
-      IO::pull_problem_request(problem_id , rev_id , sm.get_submission(submission_id).socket_fd);
+    //  IO::pull_problem_request(problem_id , rev_id , sm.get_submission(submission_id).socket_fd);
+     download_task *dt = new download_task(sm.get_submission(submission_id).download_link , problem_id , rev_id); 
+      dt -> priority = 1000; //prioritate mare
+      task_queue::get_instance().push(dt);
+
       evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
       ev -> priority++;
       task_queue::get_instance().push(ev);
@@ -76,5 +81,4 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
 
   LOG_INFO_USER(user_id, "Evaluation tasks for submission " + submission_id + " have been created and added to the queue");
   return result_enum::OK;
-
 }

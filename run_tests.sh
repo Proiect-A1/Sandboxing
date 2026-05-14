@@ -10,6 +10,6 @@ echo "RUNNING TESTS..."
 echo "SANDBOX FOUND IN: $SANDBOX_PATH"
 
 cd runners
-g++ -I ../headers test_main.cpp ../src/*/* -o test_main -lseccomp
+g++ -I ../headers test_main.cpp ../src/*/* -o test_main -lseccomp -lwebsockets
 cd ..
 ./runners/test_main 127.0.0.1 6000 15

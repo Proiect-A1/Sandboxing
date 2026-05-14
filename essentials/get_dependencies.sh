@@ -14,7 +14,7 @@ for i in $list
 do
 	file=$i
 	sudo mkdir -p .$(dirname $file)
-	sudo cp $file .$file
+	sudo cp -n $file .$file
 done
 
 

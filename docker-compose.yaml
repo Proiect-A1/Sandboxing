@@ -6,3 +6,5 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    stdin_open: true
+    tty: true

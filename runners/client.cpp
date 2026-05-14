@@ -96,19 +96,6 @@ void test_submission_protocol()
 {
     send_file("testing_data/evaluate_request.json");
     send_file("testing_data/submission_swapsort.cpp");
-    
-    int length; read_consistent(sockfd , &length , sizeof(length));
-    string json;
-    
-    for(int i = 1 ; i <= length ; i++)
-    {
-        char ch; read_consistent(sockfd , &ch , sizeof(ch));
-        json += ch;
-    }
-
-    cerr << json; fflush(stderr);
-    send_file("testing_data/send_problem_request.json");
-    send_file("testing_data/swapsort.1");
 
     while(1)
     {
@@ -124,6 +111,26 @@ void test_submission_protocol()
     }
 }
 
+void test_submission_protocol_expresie_hardcodata()
+{
+    send_file("testing_data/evaluate_request2.json");
+    send_file("testing_data/submission_swapsort.cpp");
+
+    while(1)
+    {
+        int length; read_consistent(sockfd , &length , 4);
+
+        for(int i = 0 ; i  < length; i++)
+        {
+            char ch; read_consistent(sockfd , &ch , sizeof(ch));
+            cout << ch; fflush(stdout);
+        }
+
+        cout << endl;
+    }
+}
+
+
 int main(int argc , char *argv[])
 {
     if(argc != 3) handle_error(1 , "Provide IP PORT");
@@ -135,7 +142,7 @@ int main(int argc , char *argv[])
     sockfd = socket(AF_INET , SOCK_STREAM , 0); if(sockfd == -1) handle_error(1 , "socket()");
     if(connect(sockfd , (sockaddr *) &socket_address , sizeof(socket_address)) == -1) handle_error(1 , "connect()");
 
-    test_submission_protocol();
+    test_submission_protocol_expresie_hardcodata();
     while(1);
     return 0;
 }

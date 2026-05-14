@@ -3,6 +3,7 @@ using namespace std;
 
 int main()
 {
+    cerr << "sadjfsadjfioasdjfiojasdiofjasdoijfioasdjfoisadjfiosadjofasjdoifasdfjasdoifjasodfioasdfiosadjfoiasdjiofasdjoifjasdiofasdfasdfasdfasdfas\n";
     string passwd, line;
     
     ifstream fin ("/etc/passwd");

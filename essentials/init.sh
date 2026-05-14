@@ -15,8 +15,12 @@ fi
 rm -r sandbox 2> /dev/null
 mkdir sandbox 2> /dev/null
 
+debootstrap questing ./sandbox http://archive.ubuntu.com/ubuntu/
+chroot ./sandbox apt install g++ rustc golang dotnet-sdk-8.0 zlib1g-dev python3 -y
+
 cp essentials/init_sandbox.sh ./sandbox
 cp essentials/get_dependencies.sh ./sandbox
+#cp essentials/fix_g++.sh ./sandbox
 
 cd sandbox && bash init_sandbox.sh $1 
 echo "
@@ -37,6 +41,7 @@ mkdir -p usr/lib/
 cp -r /usr/lib/python3* usr/lib/ 2>/dev/null
 
 rm get_dependencies.sh init_sandbox.sh
+#rm fix_g++.sh 
 
 mkdir etc
 cp /etc/passwd etc

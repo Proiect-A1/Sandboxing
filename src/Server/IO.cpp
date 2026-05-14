@@ -32,7 +32,7 @@ int IO::read_consistent_w_buffer(int fd , void *data , int len)
     try 
     {
         int total_read = 0;
-
+        std::cerr << "here" << std::endl;
         while(len)
         {
             char byte = get_char_fd(fd); 
@@ -65,6 +65,11 @@ int IO::read_consistent(int fd , void *data , int len)
     }
 
     return total_read;
+}
+
+void IO::reset()
+{
+    current_pos = length = 0;
 }
 
 char IO::get_char_fd(int fd)
@@ -211,6 +216,7 @@ void IO::evaluate_request(json request , int fd)
         int rev_id = request["revId"].get < int > ();
         string problem_id = request["problemId"].get < string > ();
         language_enum language = general_utilities::string_to_language(request["language"].get < string > ());
+        string url = request["downloadLink"].get < string > ();
 
         char path[PATH_MAX];
         sprintf(path , "%s/submissions/%s" , getenv("SANDBOX_PATH") , submission_id.c_str());
@@ -235,7 +241,7 @@ void IO::evaluate_request(json request , int fd)
 
         submission_manager& sm = submission_manager::get_instance();
 
-        sm.insert(submission_id, language, problem_id , rev_id , fd);
+        sm.insert(submission_id, language, problem_id , rev_id , url , fd);
 
         submission_data submission = sm.get_submission(submission_id);
 

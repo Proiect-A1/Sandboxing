@@ -168,6 +168,8 @@ void receive_request(int client_fd)
     catch(exception &e)
     {
         LOG_ERROR(std::string("Invalid request received: ") + e.what());
+        helper.reset();
+        rem_fd(client_fd);
     }   
        
 }
@@ -250,6 +252,9 @@ int main(int argc , char *argv[])
     add_fd(0 , EPOLLIN);
     create_threads();
     init_users();
+
+    //problema hardcodata de test
+    tests::register_problem_expresie_hardcodata();
 
     LOG_INFO("Epoll set");
     epoll_event ev[EVENTS_BUFF_SIZE];
