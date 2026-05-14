@@ -7,7 +7,9 @@ submission_manager& submission_manager::get_instance(){
   static submission_manager instance;
   return instance;
 }
-
+size_t submission_manager::size(){
+    return submission_table.size();
+}
 submission_data submission_manager::get_submission(std::string submission_id){
     pthread_mutex_lock(&submission_manager::mtx);
     submission_data retval;
@@ -44,6 +46,14 @@ void submission_manager::erase(std::string submission_id){
     }
     pthread_mutex_unlock(&submission_manager::mtx);
 }
+void submission_manager::unsafe_erase(std::string submission_id){
+    const size_t erased_count = submission_table.erase(submission_id);
+    if (erased_count == 0) {
+        LOG_WARNING(std::string("Attempted to erase missing submission ") + submission_id);
+    } else {
+        LOG_INFO(std::string("Erased submission ") + submission_id);
+    }
+}
 
 bool submission_manager::count(std::string submission_id){
     pthread_mutex_lock(&submission_manager::mtx);
@@ -72,7 +82,10 @@ bool submission_manager::set_verdict(std::string submission_id, result_enum resu
     pthread_mutex_lock(&submission_manager::mtx);
     std::cout << general_utilities::enum_to_string(result) << ' ' << points << std::endl;
     auto it=submission_table.find(submission_id);
-    if(it==submission_table.end()) return false;
+    if(it==submission_table.end()){
+        pthread_mutex_unlock(&submission_manager::mtx);
+        return false;
+    }
     it->second.set_verdict(result, points, time_used, memory_used);
     submission_table.erase(it);
     pthread_mutex_unlock(&submission_manager::mtx);
