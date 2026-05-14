@@ -42,7 +42,7 @@ jobs:
           git checkout dev
           git reset --hard sandbox/dev
           git clean -fd
-          docker compose down && docker compose up --build -d
+          sudo docker compose down && sudo docker compose up --build -d
           echo "Deployment successful!"
           EOF
 
