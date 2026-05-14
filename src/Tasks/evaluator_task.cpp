@@ -60,7 +60,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   result = compiler->execute(thread_id, user_id);
   if (result != result_enum::OK) {
     LOG_INFO_USER(user_id, "Compilation failed on submission " + submission_id + " with result " + general_utilities::enum_to_string(result));
-    // trebuie bagat in submission manager
+    submission_manager::get_instance().set_verdict(submission_id, result_enum::CPE, 0, 0.0, 0);
     return result;
   }
 
