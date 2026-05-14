@@ -15,7 +15,7 @@ fi
 rm -r sandbox 2> /dev/null
 mkdir sandbox 2> /dev/null
 
-debootstrap questing ./sandbox http://archive.ubuntu.com/ubuntu/
+debootstrap --variant=minbase questing ./sandbox http://archive.ubuntu.com/ubuntu/
 chroot ./sandbox apt install g++ rustc -y
 
 cp essentials/init_sandbox.sh ./sandbox
