@@ -9,17 +9,33 @@ preparator::preparator(std::string problem_id , int rev_id)
 result_enum preparator::execute(pthread_t thread_id, int user_id)
 {
     std::string path = architecture_utilities::get_sandbox_path() + "/tmp/" + problem_id + "." + std::to_string(rev_id);
-    int pid = fork();
+    // int pid = fork();
 
-    if(pid == 0)
-    {
-        execlp("unzip" , "unzip" , "-d" , architecture_utilities::get_problem_data_folder(problem_id , rev_id).c_str() , path.c_str() , NULL);
-        //("unzip -d " + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + path + " 2>&1 > /dev/null").c_str());
-        LOG_ERROR("execlp failed");
-        exit(0);
-    }
+    // if(pid == 0)
+    // {
+    //     std::string aux_str = architecture_utilities::get_problem_data_folder(problem_id , rev_id);
+    //     execlp("unzip" , "unzip" , "-d" , aux_str.c_str() , path.c_str() , NULL);
+    //     //("unzip -d " + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + path + " 2>&1 > /dev/null").c_str());
+    //     LOG_ERROR("execlp failed");
+    //     exit(0);
+    // }
 
-    wait(&pid);
+    // wait(&pid);
+
+    // system("unzip -d " + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + path + " 2>&1 > /dev/null");
+
+    // trebe verificat daca o venit cu testele
+    
+    std::string tests_path = architecture_utilities::get_problem_tests_folder("swapsort", 1);
+    std::string inputs_path = architecture_utilities::get_problem_tests_inputs_folder("swapsort", 1);
+    std::string correct_outputs_path = architecture_utilities::get_problem_tests_correct_outputs_folder("swapsort", 1);
+    std::string problem_inputs_path = architecture_utilities::get_sandbox_path() + "/inputs/" + problem_id + "." + std::to_string(rev_id);
+    std::string problem_correct_outputs_path = architecture_utilities::get_sandbox_path() + "/correct_outputs/" + problem_id + "." + std::to_string(rev_id);
+    mkdir(tests_path.c_str(), 0700);
+    mkdir(inputs_path.c_str(), 0700);
+    mkdir(correct_outputs_path.c_str(), 0700);
+    mkdir(problem_inputs_path.c_str(), 0700);
+    mkdir(problem_correct_outputs_path.c_str(), 0700);
 
     problem_manager &pm = problem_manager::get_instance();
     pm.update_problem_status(problem_id , rev_id , problem_status_enum::DOWNLOADED); //add generator
