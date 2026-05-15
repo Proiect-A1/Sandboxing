@@ -47,8 +47,49 @@ void Logger::open_log_file() {
     current_date = get_only_date();
     const std::string log_dir = "logs";
     std::filesystem::create_directories(log_dir);
-    std::string filename = log_dir + "/" + current_date + ".log";
-    log_file = fopen(filename.c_str(), "a");
+
+    auto build_log_filename = [](const std::string& dir, const std::string& date, int instance) {
+        char suffix[64];
+        snprintf(suffix, sizeof(suffix), "%s-%03d.log", date.c_str(), instance);
+        return dir + "/" + std::string(suffix);
+    };
+
+    auto open_unique_log_file = [](const std::string& filename) -> FILE* {
+        int fd = open(filename.c_str(), O_CREAT | O_EXCL | O_WRONLY, 0644);
+        if (fd < 0) {
+            return nullptr;
+        }
+
+        FILE* file = fdopen(fd, "a");
+        if (file == nullptr) {
+            close(fd);
+            std::filesystem::remove(filename);
+        }
+        return file;
+    };
+
+    FILE* new_file = nullptr;
+    std::string filename;
+
+    for (int instance = 0; instance < 1000; ++instance) {
+        filename = build_log_filename(log_dir, current_date, instance);
+        new_file = open_unique_log_file(filename);
+        if (new_file != nullptr) {
+            break;
+        }
+        if (errno != EEXIST) {
+            break;
+        }
+    }
+
+    if (new_file == nullptr) {
+        if (filename.empty()) {
+            filename = build_log_filename(log_dir, current_date, 0);
+        }
+        new_file = fopen(filename.c_str(), "a");
+    }
+
+    log_file = new_file;
 
     if (log_file != nullptr) {
         setvbuf(log_file, NULL, _IONBF, 0);
