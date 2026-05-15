@@ -47,8 +47,6 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     const std::string run_username = architecture_utilities::get_weak_user(user_id);
     const std::string run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
 
-    const std::string source_host_path = architecture_utilities::get_submission_source_path(submission_id, language);  
-    const std::string output_host_path = architecture_utilities::get_submission_exec_path(submission_id, language);  
 
     const std::string source_run_path = run_dir + "/" + source_file_name;
     const std::string output_run_path = run_dir + "/" + output_file_name;
@@ -64,14 +62,6 @@ struct passwd pw_struct;
   }
   struct passwd pw = pw_struct;
     
-    if (!general_utilities::copy_file(source_host_path, source_run_path, 0644))
-    {
-      LOG_ERROR_USER(user_id, " | " + source_host_path + " | " + source_run_path + " | " + general_utilities::syscall_to_string("pwd") + general_utilities::syscall_to_string("whoami"));
-
-      return result_enum::FAIL;
-    }
-
-    unlink(output_run_path.c_str());
     pid_t pid = fork();
     if (pid < 0)
     {
@@ -106,6 +96,8 @@ struct passwd pw_struct;
       LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
       _exit(127);
     }
+
+    LOG_DEBUG_USER(user_id, "Changed directory to run directory inside sandbox: " + inner_run_dir + " : " +general_utilities::syscall_to_string("ls"));
     
     // if (setgid(pw.pw_gid) != 0)
     // {
@@ -194,7 +186,7 @@ struct passwd pw_struct;
 
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
     {
-        LOG_ERROR_USER(user_id, "Compiler process exited with non-zero status: " + std::to_string(WEXITSTATUS(status)));
+        LOG_DEBUG_USER(user_id, "Compiler process exited with non-zero status: " + std::to_string(WEXITSTATUS(status)));
         if (WEXITSTATUS(status) == 127){
           return result_enum::FAIL;
         }
@@ -204,7 +196,7 @@ struct passwd pw_struct;
     struct stat st;
     if (stat(output_run_path.c_str(), &st) != 0)
     {
-        LOG_ERROR_USER(user_id, "Failed to stat compiled output file");
+        LOG_DEBUG_USER(user_id, "Failed to stat compiled output file");
         return result_enum::CPE;
     }
     if ((long)st.st_size > exec_size_limit)
@@ -213,17 +205,6 @@ struct passwd pw_struct;
         return result_enum::CPE;
     }
 
-    if (rename(output_run_path.c_str(), output_host_path.c_str()) != 0)
-    {
-        if (!general_utilities::copy_file(output_run_path, output_host_path, 0755))
-        {
-            LOG_ERROR_USER(user_id, "Failed to copy compiled output file");
-            return result_enum::FAIL;
-        }
-        unlink(output_run_path.c_str());
-    }
-
-    chmod(output_host_path.c_str(), 0755);
     LOG_INFO_USER(user_id, "Compilation completed for submission " + submission_id + " with result " + general_utilities::enum_to_string(result_enum::OK) + " in " + std::to_string(compile_time_ms) + "ms, time_limit: " + std::to_string((long long)time_limit) + "ms");
     return result_enum::OK;
 }

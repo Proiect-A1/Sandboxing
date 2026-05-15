@@ -8,6 +8,7 @@
 #include <Server/tests.hpp>
 
 #include <Tasks/evaluator_task.h>
+#include <Tasks/preparator.h>
 #include <Tasks/stdio_grader_task.h>
 #include <iostream>
 #include <Utilities/general_utilities.h>
@@ -189,8 +190,73 @@ int main(int argc , char *argv[])
     create_threads();
     init_users();
 
-    tests::run_tests();
+    // tests::run_tests();
+
+
+    auto script_compiler = test_generation_script_compiler_task("swapsort", 1);
+
+    script_compiler.execute(0, 1);
+
+    auto new_problem = script_compiler.get_problem_metadata();
+    auto output = new_problem;
+    cout<<"Time limit: "<<output.time_limit<<"s\n";
+    cout<<"Memory limit: "<<output.memory_limit<<"B\n";
+    cout<<"Total points: "<<output.total_points<<'\n';
+    cout<<"Subtask count: "<<output.group_count<<'\n';
+    for(int i=0;i<output.groups.size();i++){
+        cout<<"Group "<<i<<": "<<output.groups[i].total_points<<" points, "<<output.groups[i].test_count<<" tests\n";
+    }
+    cout<<"Test count: "<<output.test_count<<'\n';
+    for(int i=0;i<output.tests.size();i++){
+        cout<<"TEST "<<i<<'\n';
+        cout<<"Groups: ";
+        for(auto it : output.tests[i].groups){
+            cout<<it<<' ';
+        }
+        cout<<'\n';
+        cout<<"Generator args: ";
+        for(auto it : output.tests[i].generator_args){
+            cout<<it<<' ';
+        }
+        cout<<'\n';
+        cout<<"Validator args: ";
+        for(auto it : output.tests[i].validator_args){
+            cout<<it<<' ';
+        }
+        cout<<'\n';
+        cout<<"Main exe: "<<output.tests[i].main_path;
+        cout<<'\n';
+        cout<<"Checker args: ";
+        for(auto it : output.tests[i].checker_args){
+            cout<<it<<' ';
+        }
+        cout<<'\n';
+        cout<<"Interactor args: ";
+        for(auto it : output.tests[i].interactor_args){
+            cout<<it<<' ';
+        }
+        cout<<"\n\n";
+    }
     
-    while(submission_manager::get_instance().size()>0);
+    // if (system(command.c_str()) != 0){
+    //     LOG_ERROR_USER(user_id, "Failed to create tests folder for problem " + problem_id + " rev " + std::to_string(rev_id));
+    //     return result_enum::FAIL;
+    // }
+    new_problem.problem_status = problem_status_enum::NOT_EXISTS;
+    problem_manager::get_instance().add_revision(new_problem);
+
+
+    task_queue::get_instance().push(new preparator("swapsort", 1));
+    // task_queue::get_instance().push(new generator_task("swapsort", 1));
+
+    while(true){
+      cout << general_utilities::enum_to_string(problem_manager::get_instance().get_problem_status("swapsort", 1)) << ' ' << problem_manager::get_instance().get_metadata("swapsort", 1).tests_to_generate_count << endl;
+      sleep(1);
+    }
+
+    while(submission_manager::get_instance().size()>0){
+    }
+    LOG_INFO("All tests completed, exiting main thread");
+    while(true);
     return 0;
 }

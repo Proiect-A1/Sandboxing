@@ -86,23 +86,27 @@ std::string architecture_utilities::get_sandbox_path(){
 }
 
 std::string architecture_utilities::get_submission_source_path(std::string submission_id, language_enum language) {
+  return get_sandbox_path() + "/submissions/" + submission_id + "/" + get_submission_source_name(language);
+}
+
+std::string architecture_utilities::get_submission_source_name(language_enum language){
   if (language == language_enum::CPP) {
-    return get_sandbox_path() + "/submissions/" + submission_id + "/main.cpp";
+    return "main.cpp";
   }
   if (language == language_enum::RUST) {
-    return get_sandbox_path() + "/submissions/" + submission_id + "/main.rs";
+    return "main.rs";
   }
   if (language == language_enum::C) {
-    return get_sandbox_path() + "/submissions/" + submission_id + "/main.c";
+    return "main.c";
   }
   if (language == language_enum::CSHARP) {
-    return get_sandbox_path() + "/submissions/" + submission_id + "/main.cs";
+    return "main.cs";
   }
   if (language == language_enum::GO) {
-    return get_sandbox_path() + "/submissions/" + submission_id + "/main.go";
+    return "main.go";
   }
   if (language == language_enum::PYTHON) {
-    return get_sandbox_path() + "/submissions/" + submission_id + "/main.py";
+    return "main.py";
   }
   return "";
 }
@@ -156,6 +160,15 @@ std::string architecture_utilities::get_problem_source_exec_path(const std::stri
 // folder path getters ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 std::string architecture_utilities::get_problem_data_folder(const std::string& problem_id, int rev_id){
   return get_sandbox_path() + "/problem_data/" + problem_id + "." + std::to_string(rev_id);
+}
+std::string architecture_utilities::get_problem_tests_folder(const std::string& problem_id, int rev_id){
+  return get_problem_data_folder(problem_id, rev_id) + "/files/tests";
+}
+std::string architecture_utilities::get_problem_tests_inputs_folder(const std::string& problem_id, int rev_id){
+  return get_problem_tests_folder(problem_id, rev_id) + "/inputs";
+}
+std::string architecture_utilities::get_problem_tests_correct_outputs_folder(const std::string& problem_id, int rev_id){
+  return get_problem_tests_folder(problem_id, rev_id) + "/correct_outputs";
 }
 std::string architecture_utilities::get_problem_raw_tests_folder(const std::string& problem_id, int rev_id){
   return get_problem_data_folder(problem_id, rev_id) + "/files/raw_tests";

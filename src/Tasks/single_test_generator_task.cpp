@@ -8,7 +8,7 @@ single_test_generator_task::stgt_helper::~stgt_helper() {
     LOG_DEBUG_USER(user_id, "Successfully cleaned up run directory from helper");
   }
 
-  auto pm = problem_manager::get_instance(); 
+  problem_manager& pm = problem_manager::get_instance(); 
   if (result != result_enum::OK){
     LOG_ERROR_USER(user_id, "Test generation finished with NON-OK result: " + general_utilities::enum_to_string(result));
     pm.update_problem_status(problem_id, rev_id, problem_status_enum::FAILED);
@@ -30,6 +30,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   }
   
   stgt_helper helper(user_id, problem_id, rev_id, test_id);
+  helper.result = result_enum::FAIL;
 
   if (architecture_utilities::clean_run_dir(user_id) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory");
@@ -232,14 +233,15 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     LOG_ERROR_USER(user_id, "Failed to copy correct output to problem correct output path");
     return result_enum::FAIL;
   }
-  if (!general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_raw_tests_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".in", 0755)){
-    LOG_ERROR_USER(user_id, "Failed to copy generator output to raw tests folder");
+  if (!general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_tests_inputs_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".in", 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy generator output to tests folder");
     return result_enum::FAIL;
   }
-  if (!general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_raw_tests_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".ok", 0755)){
-    LOG_ERROR_USER(user_id, "Failed to copy correct output to raw tests folder");
+  if (!general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_tests_correct_outputs_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".ok", 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy correct output to tests folder");
     return result_enum::FAIL;
   }
 
+  helper.result = result_enum::OK;
   return result_enum::OK;
 }
