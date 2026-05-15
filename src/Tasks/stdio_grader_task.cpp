@@ -63,7 +63,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   std::string correct_output_path = "correct_output";
   std::string username = architecture_utilities::get_weak_user(user_id);
 
-
+  
   if (!general_utilities::copy_file(submission_exec_path, architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + exec_path, 0755)){
 
     LOG_ERROR_USER(user_id, "Couldn't copy submission_exec to run directory. Submission ID: " + submission_id + " " + submission_exec_path + " " + general_utilities::syscall_to_string("pwd") + general_utilities::syscall_to_string("whoami"));

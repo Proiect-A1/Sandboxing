@@ -167,7 +167,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
 
     if (aux_rez != result_enum::OK && aux_rez != result_enum::RTE){
       helper.result = aux_rez;
-      LOG_INFO_USER(user_id, "Validator finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
+      LOG_ERROR_USER(user_id, "Validator finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
       return aux_rez;
     }
     if (aux_rez == result_enum::RTE){
@@ -204,7 +204,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   result_enum aux_rez = source_task.execute(thread_id, user_id);
   if (aux_rez != result_enum::OK){
     helper.result = aux_rez;
-    LOG_INFO_USER(user_id, "Main source finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
+    LOG_ERROR_USER(user_id, "Main source finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
     return aux_rez;
   }
 
@@ -220,14 +220,26 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
 
   if (aux_rez != result_enum::OK){
     helper.result = aux_rez;
-    LOG_INFO_USER(user_id, "Checker finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
+    LOG_ERROR_USER(user_id, "Checker finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
     return aux_rez;
   }
 
-  general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_input_path(problem_id, rev_id, test_id), 0755);
-  general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_correct_output_path(problem_id, rev_id, test_id), 0755);
-  general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_raw_tests_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".in", 0755);
-  general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_raw_tests_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".ok", 0755);
+  if (!general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_input_path(problem_id, rev_id, test_id), 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy generator output to problem input path");
+    return result_enum::FAIL;
+  }
+  if (!general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_correct_output_path(problem_id, rev_id, test_id), 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy correct output to problem correct output path");
+    return result_enum::FAIL;
+  }
+  if (!general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_raw_tests_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".in", 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy generator output to raw tests folder");
+    return result_enum::FAIL;
+  }
+  if (!general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_raw_tests_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".ok", 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy correct output to raw tests folder");
+    return result_enum::FAIL;
+  }
 
   return result_enum::OK;
 }

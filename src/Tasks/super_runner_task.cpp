@@ -216,7 +216,6 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
   }
 
 
-
   if (pid == 0)
   {
     setpgid(0, 0);
@@ -239,7 +238,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + " " + stdout_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
-    int err_fd = open(stderr_redirection_path.c_str(), O_WRONLY);
+    int err_fd = open(stderr_redirection_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (err_fd < 0)
     {
       LOG_ERROR_USER(user_id, "Failed to open stderr_redirection_path before sandbox restrictions: " + stderr_redirection_path);
@@ -300,8 +299,9 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     
     struct rlimit memory_rl;
-    memory_rl.rlim_cur = RLIM_INFINITY; // trebuie pt Go/C#, pusesem si 6GB si tot nu mergea C#, puteti sa puneti o limita daca o gasiti, dar nu cred ca e problema
-    memory_rl.rlim_max = RLIM_INFINITY;
+    rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
+    memory_rl.rlim_cur = mem_limit_padded;
+    memory_rl.rlim_max = mem_limit_padded;
     if (setrlimit(RLIMIT_AS, &memory_rl) != 0){
       LOG_ERROR_USER(user_id, "Failed to set memory limit");
       _exit(127);
@@ -380,7 +380,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
   memory_consumed = (long)(usage.ru_maxrss * 1024L);
 
   memory.release_memory(requested_memory);
-
+  
   exit_code = status;
 
   if (time_limit_exceeded)

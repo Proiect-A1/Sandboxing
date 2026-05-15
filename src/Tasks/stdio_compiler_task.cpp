@@ -66,7 +66,8 @@ struct passwd pw_struct;
     
     if (!general_utilities::copy_file(source_host_path, source_run_path, 0644))
     {
-      LOG_ERROR_USER(user_id, " ");
+      LOG_ERROR_USER(user_id, " | " + source_host_path + " | " + source_run_path + " | " + general_utilities::syscall_to_string("pwd") + general_utilities::syscall_to_string("whoami"));
+
       return result_enum::FAIL;
     }
 
@@ -92,30 +93,31 @@ struct passwd pw_struct;
         _exit(127);
         }
     
-    if (!(architecture_utilities::change_root_to_sandbox()))
-    {
-      LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
-      _exit(127);
-    }
+    // if (!(architecture_utilities::change_root_to_sandbox()))
+    // {
+    //   LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
+    //   _exit(127);
+    // }
     
-    std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
+    // std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
+    std::string inner_run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
     if (chdir(inner_run_dir.c_str()) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
       _exit(127);
     }
     
-    if (setgid(pw.pw_gid) != 0)
-    {
-      LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
-      _exit(127);
-    }
+    // if (setgid(pw.pw_gid) != 0)
+    // {
+    //   LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
+    //   _exit(127);
+    // }
     
-    if (setuid(pw.pw_uid) != 0)
-    {
-      LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
-      _exit(127);
-    }
+    // if (setuid(pw.pw_uid) != 0)
+    // {
+    //   LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
+    //   _exit(127);
+    // }
 
 
         int null_fd = open("/dev/null", O_RDONLY);
@@ -186,17 +188,23 @@ struct passwd pw_struct;
 
     if (WIFSIGNALED(status))
     {
+        LOG_ERROR_USER(user_id, "Compiler process was killed by signal: " + std::to_string(WTERMSIG(status)));
         return result_enum::CPE;
     }
 
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
     {
+        LOG_ERROR_USER(user_id, "Compiler process exited with non-zero status: " + std::to_string(WEXITSTATUS(status)));
+        if (WEXITSTATUS(status) == 127){
+          return result_enum::FAIL;
+        }
         return result_enum::CPE;
     }
 
     struct stat st;
     if (stat(output_run_path.c_str(), &st) != 0)
     {
+        LOG_ERROR_USER(user_id, "Failed to stat compiled output file");
         return result_enum::CPE;
     }
     if ((long)st.st_size > exec_size_limit)
@@ -209,6 +217,7 @@ struct passwd pw_struct;
     {
         if (!general_utilities::copy_file(output_run_path, output_host_path, 0755))
         {
+            LOG_ERROR_USER(user_id, "Failed to copy compiled output file");
             return result_enum::FAIL;
         }
         unlink(output_run_path.c_str());

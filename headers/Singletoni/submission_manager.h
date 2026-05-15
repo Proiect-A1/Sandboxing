@@ -1,6 +1,7 @@
 #ifndef SUBMISSION_MANAGER_H
 #define SUBMISSION_MANAGER_H
 #include <map>
+#include <iostream>
 #include <Chestii_cu_data/submission_data.h>
 #include <Chestii_cu_data/submission_test.h>
 #include <Utilities/general_utilities.h>
@@ -9,7 +10,8 @@
 class submission_manager{ // singleton
     static pthread_mutex_t mtx;
     std::map<std::string, submission_data> submission_table; /// submission_id -> submission_data
-    submission_manager() = default;
+    submission_manager(){
+    };
 public:
     static submission_manager& get_instance();
     size_t size();

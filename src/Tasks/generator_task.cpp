@@ -36,7 +36,7 @@ result_enum generator_task::execute(pthread_t thread_id, int user_id){
 
   for (int i = 0; i < prob_meta.test_count; i++){
 
-    task_queue::get_instance().push(new single_test_generator_task(problem_id, rev_id, 0, prob_meta.tests[i], (long long)(prob_meta.memory_limit), prob_meta.time_limit));
+    task_queue::get_instance().push(new single_test_generator_task(problem_id, rev_id, i, prob_meta.tests[i], (long long)(prob_meta.memory_limit), prob_meta.time_limit));
   }
 
   return result_enum::OK;

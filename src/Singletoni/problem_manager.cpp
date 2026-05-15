@@ -137,8 +137,8 @@ void problem_manager::start_generating_tests(std::string problem_id, int rev_id)
 }
 void problem_manager::add_generated_test(std::string problem_id, int rev_id){
   pthread_mutex_lock(&mtx);
-    
   if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+    LOG_INFO("YOOOO gata inca un test " + std::to_string(problems[problem_id][rev_id].tests_to_generate_count) + " ramase pentru problem " + problem_id + " rev " + std::to_string(rev_id));
     problems[problem_id][rev_id].tests_to_generate_count--;
     if (problems[problem_id][rev_id].tests_to_generate_count <= 0){
       problems[problem_id][rev_id].problem_status = problem_status_enum::DONE;
