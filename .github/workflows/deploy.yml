@@ -40,8 +40,8 @@ jobs:
           cd ~/sandbox
           git fetch --all
           git checkout dev
-          git reset --hard sandbox/dev
           git pull sandbox dev
+          git reset --hard sandbox/dev
           git clean -fd
           sudo docker compose down && sudo docker compose up --build -d
           echo "Deployment successful!"
