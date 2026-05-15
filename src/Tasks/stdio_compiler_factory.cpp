@@ -59,14 +59,14 @@ stdio_compiler_task* stdio_compiler_factory(
         );
     } else if (language == language_enum::GO) {
         created = new stdio_compiler_task(
-            "/usr/bin/go",
+            "/bin/bash",
             "main.go",
             "main_exec",
             submission_id,
             language,
             compilation_limits::COMPILATION_TIME_LIMIT.at(language),
             compilation_limits::EXECUTABLE_SIZE_LIMIT.at(language),
-            {"/usr/bin/go", "build", "-o", "main_exec", "main.go"}
+            {"/bin/bash", "-c", "export GOROOT=$(dirname $(dirname $(readlink -f /usr/bin/go))) && export GOCACHE=$PWD/.gocache && /usr/bin/go build -o main_exec main.go"}
         );
     } else if (language == language_enum::PYTHON) {
         created = new stdio_compiler_task(
