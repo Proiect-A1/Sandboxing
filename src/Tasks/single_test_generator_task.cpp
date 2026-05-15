@@ -104,6 +104,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
       return result_enum::FAIL;
     }
     auto generator_task_1 = *generator_task_1_ptr;
+    delete generator_task_1_ptr;
     auto generator_task_2_ptr = runner_factories::generator_runner_factory[language_enum::COMPILED](
       fake_submission_id,
       test_meta.generator_args[0],
@@ -117,7 +118,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
       return result_enum::FAIL;
     }
     auto generator_task_2 = *generator_task_2_ptr;
-
+    delete generator_task_2_ptr;
     result_enum aux_rez = generator_task_1.execute(thread_id, user_id);
 
     if (aux_rez != result_enum::OK){
@@ -161,6 +162,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
       return result_enum::FAIL;
     }
     auto validator_task = *validator_task_ptr;
+    delete validator_task_ptr;
     result_enum aux_rez = validator_task.execute(thread_id, user_id);
 
     if (aux_rez != result_enum::OK && aux_rez != result_enum::RTE){
@@ -197,6 +199,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     return result_enum::FAIL;
   }
   auto source_task = *source_task_ptr;
+  delete source_task_ptr;
 
   result_enum aux_rez = source_task.execute(thread_id, user_id);
   if (aux_rez != result_enum::OK){
