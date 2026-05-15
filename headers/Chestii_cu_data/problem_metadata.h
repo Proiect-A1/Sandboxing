@@ -15,6 +15,8 @@ struct problem_metadata {
 
   int group_count;
   int test_count;
+  int sources_to_compile_count;
+  int tests_to_generate_count;
   float time_limit;
   float total_points;
   long long memory_limit;

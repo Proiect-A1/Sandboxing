@@ -2,6 +2,8 @@
 #define PROBLEM_MANAGER_H
 
 #include <Chestii_cu_data/problem_metadata.h>
+#include <Singletoni/task_queue.h>
+#include <Tasks/generator_task.hpp>
 #include <map>
 #include <pthread.h>
 #include <sys/mman.h>
@@ -24,6 +26,10 @@ class problem_manager {
   problem_metadata get_metadata(std::string problem_id, int rev_id);
   void update_problem_status(std::string problem_id , int rev_id , problem_status_enum problem_status);
   problem_status_enum get_problem_status(std::string problem_id , int rev_id);
+  void start_generating_tests(std::string problem_id, int rev_id);
+  void add_generated_test(std::string problem_id, int rev_id);
+  void start_compiling_sources(std::string problem_id, int rev_id, int sources_to_compile_count);
+  void add_compiled_source(std::string problem_id, int rev_id);
 };
 
 

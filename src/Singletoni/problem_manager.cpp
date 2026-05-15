@@ -120,3 +120,68 @@ problem_status_enum problem_manager::get_problem_status(std::string problem_id ,
     pthread_mutex_unlock(&mtx);
     return problem_status_enum::NOT_EXISTS;
 }
+
+void problem_manager::start_generating_tests(std::string problem_id, int rev_id){
+  pthread_mutex_lock(&mtx);
+    
+  if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+    problems[problem_id][rev_id].problem_status = problem_status_enum::GENERATING;
+    problems[problem_id][rev_id].tests_to_generate_count = problems[problem_id][rev_id].test_count;
+    LOG_INFO(std::string("Started generating tests for problem ") + problem_id + " rev " + std::to_string(rev_id));
+    pthread_mutex_unlock(&mtx);
+    return;
+  }
+
+  LOG_WARNING(std::string("Metadata not found for problem ") + problem_id + " rev " + std::to_string(rev_id));
+  pthread_mutex_unlock(&mtx);
+}
+void problem_manager::add_generated_test(std::string problem_id, int rev_id){
+  pthread_mutex_lock(&mtx);
+    
+  if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+    problems[problem_id][rev_id].tests_to_generate_count--;
+    if (problems[problem_id][rev_id].tests_to_generate_count <= 0){
+      problems[problem_id][rev_id].problem_status = problem_status_enum::DONE;
+      LOG_INFO(std::string("All tests generated for problem ") + problem_id + " rev " + std::to_string(rev_id) + ". Problem is now DONE.");
+
+    }
+  }
+  else {
+    LOG_WARNING(std::string("Metadata not found for problem ") + problem_id + " rev " + std::to_string(rev_id));
+  }
+
+  pthread_mutex_unlock(&mtx);
+}
+
+void problem_manager::start_compiling_sources(std::string problem_id, int rev_id, int sources_to_compile_count){
+  pthread_mutex_lock(&mtx);
+    
+  if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+    problems[problem_id][rev_id].problem_status = problem_status_enum::COMPILING;
+    problems[problem_id][rev_id].sources_to_compile_count = sources_to_compile_count;
+    LOG_INFO(std::string("Started compiling sources for problem ") + problem_id + " rev " + std::to_string(rev_id));
+    pthread_mutex_unlock(&mtx);
+    return;
+  }
+
+  LOG_WARNING(std::string("Metadata not found for problem ") + problem_id + " rev " + std::to_string(rev_id));
+  pthread_mutex_unlock(&mtx);
+}
+
+void problem_manager::add_compiled_source(std::string problem_id, int rev_id){
+  pthread_mutex_lock(&mtx);
+    
+  if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+    problems[problem_id][rev_id].sources_to_compile_count--;
+    if (problems[problem_id][rev_id].sources_to_compile_count <= 0){
+      problems[problem_id][rev_id].problem_status = problem_status_enum::GENERATING;
+      LOG_INFO(std::string("All sources compiled for problem ") + problem_id + " rev " + std::to_string(rev_id) + ". Problem is now GENERATING.");
+      task_queue::get_instance().push(new generator_task(problem_id, rev_id));
+    }
+  }
+  else {
+    LOG_WARNING(std::string("Metadata not found for problem ") + problem_id + " rev " + std::to_string(rev_id));
+  }
+
+  pthread_mutex_unlock(&mtx);
+}
