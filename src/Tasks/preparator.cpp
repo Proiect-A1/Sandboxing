@@ -23,13 +23,13 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
 
     // wait(&pid);
 
-    // system("unzip -d " + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + path + " 2>&1 > /dev/null");
-
+    system((std::string("unzip -d ") + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + path + " 2>&1 > /dev/null").c_str());
+    LOG_DEBUG("Unzip finished");
     // trebe verificat daca o venit cu testele
     
-    std::string tests_path = architecture_utilities::get_problem_tests_folder("swapsort", 1);
-    std::string inputs_path = architecture_utilities::get_problem_tests_inputs_folder("swapsort", 1);
-    std::string correct_outputs_path = architecture_utilities::get_problem_tests_correct_outputs_folder("swapsort", 1);
+    std::string tests_path = architecture_utilities::get_problem_tests_folder(problem_id , rev_id);
+    std::string inputs_path = architecture_utilities::get_problem_tests_inputs_folder(problem_id , rev_id);
+    std::string correct_outputs_path = architecture_utilities::get_problem_tests_correct_outputs_folder(problem_id , rev_id);
     std::string problem_inputs_path = architecture_utilities::get_sandbox_path() + "/inputs/" + problem_id + "." + std::to_string(rev_id);
     std::string problem_correct_outputs_path = architecture_utilities::get_sandbox_path() + "/correct_outputs/" + problem_id + "." + std::to_string(rev_id);
     mkdir(tests_path.c_str(), 0700);
@@ -51,6 +51,8 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
     folders_to_search.push_back(architecture_utilities::get_problem_interactors_folder(problem_id, rev_id));
 
     for (auto folder : folders_to_search){
+        LOG_ERROR(std::string("bla bla") + folder);
+
         if (std::filesystem::exists(folder)) {
             for (const auto& entry : std::filesystem::directory_iterator(folder)) {
                 if (entry.is_regular_file() && entry.path().extension() == ".cpp") {
@@ -64,6 +66,7 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
 
     for (auto source : sources_to_compile){
         task_queue::get_instance().push(new problem_compiler_task(problem_id, rev_id, source));
+        LOG_ERROR(std::string("HERERHERHEREHRHERHERHERHEHREHREHRE        ") + source);
     }
 
     

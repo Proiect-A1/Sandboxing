@@ -79,6 +79,7 @@ int download_task::callback_http(struct lws *wsi, enum lws_callback_reasons reas
 
 result_enum download_task::execute(pthread_t thread_id , int user_id)
 {
+    LOG_DEBUG("Started downloading");
     struct lws_context_creation_info info;
     struct lws_client_connect_info i;
     struct lws_context *context;
@@ -103,7 +104,7 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
 
     context = lws_create_context(&info);
     if (!context) {
-        fprintf(stderr, "Failed to create lws context\n");
+        LOG_ERROR("Failed to create lws context\n");
         close(client_data.fd);
         return result_enum::FAIL;
     }
@@ -112,7 +113,7 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     int port;
 
     if (lws_parse_uri((char *) url.c_str(), &protocol, &address, &port, &path)) {
-        fprintf(stderr, "Failed to parse URL\n");
+        LOG_ERROR("Failed to parse URL\n");
         return result_enum::FAIL;
     }
 
@@ -136,7 +137,7 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     i.port = 443;
     
     if (!lws_client_connect_via_info(&i)) {
-        fprintf(stderr, "Failed to initiate connection\n");
+        LOG_ERROR("Failed to initiate connection\n");
         lws_context_destroy(context);
         close(client_data.fd);
         return result_enum::FAIL;
@@ -153,5 +154,6 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     prep -> priority = 1000000;
     task_queue::get_instance().push(prep);
 
+    LOG_DEBUG("Downloaded successfully");
     return result_enum::OK;
 }

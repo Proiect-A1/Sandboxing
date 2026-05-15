@@ -1,0 +1,41 @@
+run_server.sh: line 20: [: too many arguments
+run_server.sh: line 23: [: too many arguments
+here
+here
+[2026/05/16 00:51:50:7554] N: lws_create_context: LWS: 4.3.5-unknown, NET CLI SRV H1 H2 WS ConMon IPV6-on
+[2026/05/16 00:51:50:7574] N: __lws_lc_tag:  ++ [wsi|0|pipe] (1)
+[2026/05/16 00:51:50:7575] N: __lws_lc_tag:  ++ [vh|0|netlink] (1)
+[2026/05/16 00:51:50:7579] N: __lws_lc_tag:  ++ [vh|1|default||-1] (2)
+/testing_data/swapsort.1
+127.0.0.1
+[2026/05/16 00:51:50:7632] N: __lws_lc_tag:  ++ [wsicli|0|GET/h1/default/127.0.0.1] (1)
+[2026/05/16 00:51:50:7633] N: lws_gate_accepts: on = 0
+[2026/05/16 00:51:50:7648] N: accepting self-signed certificate (verify_callback)
+[2026/05/16 00:51:50:7650] N: lws_gate_accepts: on = 0
+[2026/05/16 00:51:50:7660] N: __lws_lc_untag:  -- [wsi|0|pipe] (0) 8.574ms
+[2026/05/16 00:51:50:7661] N: lws_gate_accepts: on = 0
+[2026/05/16 00:51:50:7665] N: __lws_lc_untag:  -- [vh|1|default||-1] (1) 8.519ms
+[2026/05/16 00:51:50:7665] N: __lws_lc_untag:  -- [wsicli|0|GET/h1/default/127.0.0.1] (0) 3.255ms
+[2026/05/16 00:51:50:7668] N: __lws_lc_untag:  -- [vh|0|netlink] (0) 9.378ms
+main.cpp: In function ‘void check_for_pragmas(checker&, char*)’:
+main.cpp:28:10: warning: ignoring return value of ‘size_t fread(void*, size_t, size_t, FILE*)’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+   28 |     fread(buff, 1, MAX_SUBMISSION_SIZE, fin);
+      |     ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+diff: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat12//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat12/correct_output: No such file or directory
+diff: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat11//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat11/correct_output: No such file or directory
+diff: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat17//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat17/correct_output: No such file or directory
+diff: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat14//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat14/correct_output: No such file or directory
+cat: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat12//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat12/correct_output: No such file or directory (os error 2)
+cat: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat11//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat11/correct_output: No such file or directory (os error 2)
+cat: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat17//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat17/correct_output: No such file or directory (os error 2)
+cat: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat14//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat14/correct_output: No such file or directory (os error 2)
+diff: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat15//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat15/correct_output: No such file or directory
+diff: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat19//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat19/correct_output: No such file or directory
+cat: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat15//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat15/correct_output: No such file or directory (os error 2)
+cat: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat19//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat19/correct_output: No such file or directory (os error 2)
+diff: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat16//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat16/correct_output: No such file or directory
+diff: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat13//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat13/correct_output: No such file or directory
+cat: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat16//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat16/correct_output: No such file or directory (os error 2)
+cat: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat13//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat13/correct_output: No such file or directory (os error 2)
+diff: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat18//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat18/correct_output: No such file or directory
+cat: /home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat18//home/sochu/Documents/Projects/sandbox/sandbox/runs/amarat18/correct_output: No such file or directory (os error 2)

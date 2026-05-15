@@ -12,7 +12,8 @@ result_enum problem_compiler_task::execute(pthread_t thread_id, int user_id){
   stdio_compiler_task compiler = *compiler_ptr;
 
   general_utilities::copy_file(source_path, architecture_utilities::get_run_dir_absolute_path(user_id) + "/main.cpp", 0755);
-  general_utilities::copy_file(architecture_utilities::get_sandbox_path() + "/headers/problem.h", architecture_utilities::get_run_dir_absolute_path(user_id) + "/problem.h", 0755);
+  general_utilities::copy_file(architecture_utilities::get_sandbox_path() + "/../headers/problem.h", architecture_utilities::get_run_dir_absolute_path(user_id) + "/problem.h", 0755);
+
   result_enum rez = compiler.execute(thread_id, user_id);
   if (rez != result_enum::OK){
     LOG_ERROR_USER(user_id, "Problem compiler task failed with result: " + general_utilities::enum_to_string(rez));
