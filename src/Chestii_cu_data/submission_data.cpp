@@ -81,7 +81,7 @@ void submission_data::send_completed_test_packet(int test_id, const submission_t
     //            " points, time used: " + std::to_string(time_used) + " ms, memory used: " +
     //            std::to_string(memory_used) + " B\n" + "Completed " + std::to_string(tests_completed) + "/" + std::to_string(test_count) + " tests");
     //TREBUIE MODIFICAT CU TOTI PARAMETRII BUNI
-    //IO::done_test_request(submission_id , test_id , (int)completed_test.result, completed_test.message, points, memory_used , time_used , socket_fd);
+    IO::done_test_request(submission_id , test_id , (int)completed_test.result, completed_test.message, points, memory_used , time_used , socket_fd);
 }
 void submission_data::send_completed_subtask_packet(int group_id, const submission_group& completed_group){
     // de trimis packet cu subtask terminat
@@ -105,6 +105,6 @@ void submission_data::send_completed_submission_packet(){
                  std::to_string(this->memory_used) + " B");
     // de trimis packet cu sursa terminata
     float total_points=problem_manager::get_instance().get_metadata(problem_id, rev_id).total_points;
-    //IO::done_submission_request(this->submission_id , this -> points, total_points, this->points/total_points*100 , this -> memory_used , this -> time_used , this -> socket_fd);
+    IO::done_submission_request(this->submission_id , this -> points, total_points, this->points/total_points*100 , this -> memory_used , this -> time_used , this -> socket_fd);
     //std::cout << "Problem " << problem_id << " rev " << rev_id << " completed with " << points << " points, time used: " << time_used << " ms, memory used: " << memory_used << " B\n";
 }
