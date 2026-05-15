@@ -21,7 +21,9 @@ class generator_task : public task{
     std::string problem_id;
     int rev_id;
 public:
-    generator_task(const std::string& problem_id, int rev_id);
+    generator_task(const std::string& problem_id, int rev_id) : problem_id(problem_id), rev_id(rev_id) {
+        priority = 2;
+    }
     result_enum execute(pthread_t thread_id, int user_id) override;
     bool check_permissions(int user_id) override {return true;};
 };
