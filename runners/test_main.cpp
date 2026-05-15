@@ -191,6 +191,6 @@ int main(int argc , char *argv[])
 
     tests::run_tests();
     
-    while(1);
+    while(submission_manager::get_instance().size()>0);
     return 0;
 }
