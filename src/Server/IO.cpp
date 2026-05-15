@@ -9,6 +9,7 @@
 #include <Singletoni/user_queue.h>
 #include <Tasks/evaluator_task.h>
 #include <Tasks/preparator.h>
+#include <Utilities/architecture_utilities.h>
 
 using namespace std;
 
@@ -209,12 +210,19 @@ void IO::evaluate_request(json request , int fd)
 {
     try 
     {
-        char path[PATH_MAX];
-        sprintf(path , "%s/submissions/%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str());
-        if(mkdir(path , 0770) == -1) handle_error(1 , "mkdir() evaluate_request()");
-        sprintf(path , "%s/submissions/%s/main.%s" , getenv("SANDBOX_PATH") , request["submissionId"].get < string > ().c_str() , request["language"].get < string > ().c_str());
+        string submission_id = request["submissionId"].get < string > ();
+        int rev_id = request["revId"].get < int > ();
+        string problem_id = request["problemId"].get < string > ();
+        language_enum language = general_utilities::string_to_language(request["language"].get < string > ());
+        string url = request["downloadLink"].get < string > ();
 
-        int submission_fd = open(path , O_CREAT | O_TRUNC | O_RDWR , 0660); if(submission_fd == -1) handle_error(1 , "open() evaluate_request()");
+        char path[PATH_MAX];
+        sprintf(path , "%s/submissions/%s" , getenv("SANDBOX_PATH") , submission_id.c_str());
+        if(mkdir(path , 0770) == -1) handle_error(1 , "mkdir() evaluate_request()");
+        
+        string source_path = architecture_utilities::get_submission_source_path(submission_id, language);
+
+        int submission_fd = open(source_path.c_str() , O_CREAT | O_TRUNC | O_RDWR , 0660); if(submission_fd == -1) handle_error(1 , "open() evaluate_request()");
         int length; if(read_consistent_w_buffer(fd , &length , sizeof(length)) != sizeof(length)) handle_error(1 , "read_consistent() evaluate_request()");
 
         for(int i = 1 ; i <= length ; i++)
@@ -231,12 +239,7 @@ void IO::evaluate_request(json request , int fd)
 
         submission_manager& sm = submission_manager::get_instance();
 
-        string submission_id = request["submissionId"].get < string > ();
-        int rev_id = request["revId"].get < int > ();
-        string problem_id = request["problemId"].get < string > ();
-        string url = request["downloadLink"].get < string > ();
-
-        sm.insert(submission_id, language_enum::CPP, problem_id , rev_id , url , fd);
+        sm.insert(submission_id, language, problem_id , rev_id , url , fd);
 
         submission_data submission = sm.get_submission(submission_id);
 

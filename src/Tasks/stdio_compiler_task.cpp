@@ -47,8 +47,9 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     const std::string run_username = architecture_utilities::get_weak_user(user_id);
     const std::string run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
 
-    const std::string source_host_path = architecture_utilities::get_submission_source_path(submission_id);  
-    const std::string output_host_path = architecture_utilities::get_submission_exec_path(submission_id);  
+    const std::string source_host_path = architecture_utilities::get_submission_source_path(submission_id, language);  
+    const std::string output_host_path = architecture_utilities::get_submission_exec_path(submission_id, language);  
+
     const std::string source_run_path = run_dir + "/" + source_file_name;
     const std::string output_run_path = run_dir + "/" + output_file_name;
 
@@ -124,17 +125,17 @@ struct passwd pw_struct;
             close(null_fd);
         }
 
+        setenv("TMPDIR", ".", 1);
+
         std::string source_in_jail = source_file_name;
         std::string output_in_jail = output_file_name;
 
-        char *const argv[] = {
-            const_cast<char *>(compile_command.c_str()),
-            const_cast<char *>("-std=c++17"),
-            const_cast<char *>("-O2"),
-            const_cast<char *>("-o"),
-            const_cast<char *>(output_in_jail.c_str()),
-            const_cast<char *>(source_in_jail.c_str()),
-            nullptr};
+        char **argv = new char *[arguments.size() + 1];
+        for (size_t i = 0; i < arguments.size(); ++i)
+        {
+            argv[i] = const_cast<char *>(arguments[i].c_str());
+        }
+        argv[arguments.size()] = nullptr;
 
         long sec = (long)std::ceil(time_limit / 1000.0f);
         if (sec <= 0) sec = 1;

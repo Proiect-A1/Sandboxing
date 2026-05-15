@@ -107,6 +107,8 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   }
 
   if (helper.test_result != result_enum::OK){
+    //std::string err_dump = general_utilities::syscall_to_string("cat " + output_path);
+    //LOG_ERROR_USER(user_id, "CRASH DUMP:\n" + err_dump);
     helper.test.points = 0;
     helper.test.result = helper.test_result;
     return helper.test.result;

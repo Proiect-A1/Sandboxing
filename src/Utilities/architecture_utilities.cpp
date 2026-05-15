@@ -89,11 +89,26 @@ std::string architecture_utilities::get_submission_source_path(std::string submi
   if (language == language_enum::CPP) {
     return get_sandbox_path() + "/submissions/" + submission_id + "/main.cpp";
   }
+  if (language == language_enum::RUST) {
+    return get_sandbox_path() + "/submissions/" + submission_id + "/main.rs";
+  }
+  if (language == language_enum::C) {
+    return get_sandbox_path() + "/submissions/" + submission_id + "/main.c";
+  }
+  if (language == language_enum::CSHARP) {
+    return get_sandbox_path() + "/submissions/" + submission_id + "/main.cs";
+  }
+  if (language == language_enum::GO) {
+    return get_sandbox_path() + "/submissions/" + submission_id + "/main.go";
+  }
+  if (language == language_enum::PYTHON) {
+    return get_sandbox_path() + "/submissions/" + submission_id + "/main.py";
+  }
   return "";
 }
 
 std::string architecture_utilities::get_submission_exec_path(std::string submission_id, language_enum language) {
-  if (language == language_enum::CPP) {
+  if (language == language_enum::CPP || language == language_enum::RUST || language == language_enum::C || language == language_enum::CSHARP || language == language_enum::GO || language == language_enum::PYTHON) {
     return get_sandbox_path() + "/submissions/" + submission_id + "/main_exec";
   }
   return "";

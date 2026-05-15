@@ -35,7 +35,7 @@ void submission_data::add_completed_test(int test_id, result_enum result, float 
     tests[test_id].memory_used=memory_used;
     ++tests_completed;
     for(int group_id : tests[test_id].groups){
-        groups[group_id].add_completed_test(result, points, memory_used, time_used);
+        groups[group_id].add_completed_test(result, points, time_used, memory_used);
         if(groups[group_id].is_completed()){
             add_completed_subtask(group_id, groups[group_id]);
         }
@@ -45,6 +45,15 @@ void submission_data::add_completed_test(int test_id, result_enum result, float 
         LOG_DEBUG("fur curent");
         // de trimis packet cu submisia terminata
         send_completed_submission_packet();
+    }
+    else{
+      LOG_INFO(std::string("Submission ") + problem_id + " rev " + std::to_string(rev_id) +
+                " completed test " + std::to_string(test_id) + " with " + std::to_string(points) +
+                " points, time used: " + std::to_string(time_used) + " ms, memory used: " +
+                std::to_string(memory_used) + " B\n" + "Completed " + std::to_string(tests_completed) + "/" + std::to_string(test_count) + " tests");
+    
+        //TREBUIE MODIFICAT CU TOTI PARAMETRII BUNI
+         IO::done_test_request(submission_id , test_id , 1 , "skibidi toiilet 67676767" , points , -1 , -1 , memory_used , time_used , socket_fd);
     }
         
 }

@@ -5,23 +5,47 @@ namespace runner_factories {
   std::unordered_map<language_enum, decltype(&stdio_submission_runner_factory_CPP)> stdio_submission_runner_factory = {
     {language_enum::CPP, stdio_submission_runner_factory_CPP},
     {language_enum::COMPILED, stdio_submission_runner_factory_CPP},
+    {language_enum::RUST, stdio_submission_runner_factory_CPP},
+    {language_enum::C, stdio_submission_runner_factory_CPP},
+    {language_enum::CSHARP, stdio_submission_runner_factory_CPP},
+    {language_enum::GO, stdio_submission_runner_factory_CPP},
+    {language_enum::PYTHON, stdio_submission_runner_factory_CPP},
   };
   std::unordered_map<language_enum, decltype(&submission_runner_factory_CPP)> submission_runner_factory = {
     {language_enum::CPP, submission_runner_factory_CPP},
     {language_enum::COMPILED, submission_runner_factory_CPP},
+    {language_enum::RUST, submission_runner_factory_CPP},
+    {language_enum::C, submission_runner_factory_CPP},
+    {language_enum::CSHARP, submission_runner_factory_CPP},
+    {language_enum::GO, submission_runner_factory_CPP},
+    {language_enum::PYTHON, submission_runner_factory_CPP},
   };
   std::unordered_map<language_enum, decltype(&checker_runner_factory_CPP)> checker_runner_factory = {
     {language_enum::CPP, checker_runner_factory_CPP},
     {language_enum::COMPILED, checker_runner_factory_CPP},
-
+    {language_enum::RUST, checker_runner_factory_CPP},
+    {language_enum::C, checker_runner_factory_CPP},
+    {language_enum::CSHARP, checker_runner_factory_CPP},
+    {language_enum::GO, checker_runner_factory_CPP},
+    {language_enum::PYTHON, checker_runner_factory_CPP},
   };
   std::unordered_map<language_enum, decltype(&generator_runner_factory_CPP)> generator_runner_factory = {
     {language_enum::CPP, generator_runner_factory_CPP},
     {language_enum::COMPILED, generator_runner_factory_CPP},
+    {language_enum::RUST, generator_runner_factory_CPP},
+    {language_enum::C, generator_runner_factory_CPP},
+    {language_enum::CSHARP, generator_runner_factory_CPP},
+    {language_enum::GO, generator_runner_factory_CPP},
+    {language_enum::PYTHON, generator_runner_factory_CPP},
   };
   std::unordered_map<language_enum, decltype(&validator_runner_factory_CPP)> validator_runner_factory = {
     {language_enum::CPP, validator_runner_factory_CPP},
     {language_enum::COMPILED, validator_runner_factory_CPP},
+    {language_enum::RUST, validator_runner_factory_CPP},
+    {language_enum::C, validator_runner_factory_CPP},
+    {language_enum::CSHARP, validator_runner_factory_CPP},
+    {language_enum::GO, validator_runner_factory_CPP},
+    {language_enum::PYTHON, validator_runner_factory_CPP},
   };
 }
 
@@ -46,6 +70,7 @@ super_runner_task* runner_factories::stdio_submission_runner_factory_CPP(
         input_path,
         output_path,
         "/dev/null",
+        //output_path, // pt debug in loc de /dev/null
         run_time_limit,
         run_memory_limit,
         {},

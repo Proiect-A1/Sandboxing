@@ -11,6 +11,15 @@ std::string general_utilities::left_zero_pad (int number, int width) {
   return std::string(width - num_str.length(), '0') + num_str;
 }
 
+language_enum general_utilities::string_to_language(const std::string& lang) {
+  if (lang == "rust") return language_enum::RUST;
+  if (lang == "c") return language_enum::C;
+  if (lang == "csharp") return language_enum::CSHARP;
+  if (lang == "go") return language_enum::GO;
+  if (lang == "python") return language_enum::PYTHON;
+  return language_enum::CPP;
+}
+
 bool general_utilities::copy_file(const std::string &from, const std::string &to, mode_t mode)
 {
   std::error_code ec;
