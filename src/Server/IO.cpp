@@ -134,6 +134,7 @@ string IO::recv(int fd)
 
 void IO::done_test_request(string submissionId , int testId , int verdict , string message, float scorePercent , long long memory , float time , int sockfd)
 {   
+    if(sockfd == 1) return;
     json request;
     request["request"] = "doneTest";
     request["submissionId"] = submissionId;
@@ -148,6 +149,7 @@ void IO::done_test_request(string submissionId , int testId , int verdict , stri
 
 void IO::done_subtask_request(string submissionId , int subtaskId , float score , float maxScore , float scorePercent , long long maxMemory , float maxTime , int sockfd)
 {
+    if(sockfd == 1) return;
     json request;
     request["request"] = "doneSubtask";
     request["submissionId"] = submissionId;
@@ -162,6 +164,7 @@ void IO::done_subtask_request(string submissionId , int subtaskId , float score 
 
 void IO::done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long maxMemory , float maxTime , int sockfd)
 {
+    if(sockfd == 1) return;
     json request;
     request["request"] = "doneSubmission"; 
     request["submissionId"] = submissionId;
