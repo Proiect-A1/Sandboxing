@@ -140,6 +140,7 @@ void problem_manager::add_generated_test(std::string problem_id, int rev_id){
   if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
     LOG_INFO("YOOOO gata inca un test " + std::to_string(problems[problem_id][rev_id].tests_to_generate_count) + " ramase pentru problem " + problem_id + " rev " + std::to_string(rev_id));
     problems[problem_id][rev_id].tests_to_generate_count--;
+    LOG_INFO("YOOOO gata inca un test " + std::to_string(problems[problem_id][rev_id].tests_to_generate_count) + " ramase pentru problem " + problem_id + " rev " + std::to_string(rev_id));
     if (problems[problem_id][rev_id].tests_to_generate_count <= 0){
       problems[problem_id][rev_id].problem_status = problem_status_enum::DONE;
       LOG_INFO(std::string("All tests generated for problem ") + problem_id + " rev " + std::to_string(rev_id) + ". Problem is now DONE.");

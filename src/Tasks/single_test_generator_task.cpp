@@ -8,7 +8,7 @@ single_test_generator_task::stgt_helper::~stgt_helper() {
     LOG_DEBUG_USER(user_id, "Successfully cleaned up run directory from helper");
   }
 
-  auto pm = problem_manager::get_instance(); 
+  problem_manager& pm = problem_manager::get_instance(); 
   if (result != result_enum::OK){
     LOG_ERROR_USER(user_id, "Test generation finished with NON-OK result: " + general_utilities::enum_to_string(result));
     pm.update_problem_status(problem_id, rev_id, problem_status_enum::FAILED);

@@ -49,7 +49,6 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
         task_queue::get_instance().push(new problem_compiler_task(problem_id, rev_id, source));
     }
 
-    pm.update_problem_status(problem_id , rev_id , problem_status_enum::DONE);
     
     return result_enum::OTHER; //n-ar trebui sa returneze nimic
 }
