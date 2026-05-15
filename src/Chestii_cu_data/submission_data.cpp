@@ -85,12 +85,12 @@ void submission_data::send_completed_test_packet(int test_id, const submission_t
 }
 void submission_data::send_completed_subtask_packet(int group_id, const submission_group& completed_group){
     // de trimis packet cu subtask terminat
-    //IO::done_subtask_request(this->submission_id, group_id, completed_group.points, completed_group.total_points, completed_group.point_percentage, completed_group.memory_used, completed_group.time_used, this->socket_fd);
+    IO::done_subtask_request(this->submission_id, group_id, completed_group.points, completed_group.total_points, completed_group.point_percentage, completed_group.memory_used, completed_group.time_used, this->socket_fd);
     // TODO: de pus un log_debug corect
-    // LOG_DEBUG(std::string("Submission ") + submission_id + ", problem " + problem_id + " rev " + std::to_string(rev_id) +
-    //            " completed group " + std::to_string(group_id) + " with " + std::to_string(completed_group.points) +
-    //            " points, time used: " + std::to_string(time_used) + " ms, memory used: " +
-    //            std::to_string(memory_used) + " B\n" + "Completed " + std::to_string(completed_group.tests_completed) + "/" + std::to_string(completed_group.test_count) + " tests");
+    LOG_DEBUG(std::string("Submission ") + submission_id + ", problem " + problem_id + " rev " + std::to_string(rev_id) +
+               " completed group " + std::to_string(group_id) + " with " + std::to_string(completed_group.points) +
+               " points, time used: " + std::to_string(time_used) + " ms, memory used: " +
+               std::to_string(memory_used) + " B\n" + "Completed " + std::to_string(completed_group.tests_completed) + "/" + std::to_string(completed_group.test_count) + " tests");
     //std::cout << "Problem " << problem_id << " rev " << rev_id 
     //          << " completed group " << group_id <<" with " << completed_group.points 
     //          << " points, time used: " << completed_group.time_used 
