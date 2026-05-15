@@ -27,6 +27,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       //add the rem things in generator or whatever
       meta.problem_status = problem_status_enum::NOT_EXISTS;
       pm.add_revision(meta); 
+      pm.update_problem_status(problem_id , rev_id , problem_status_enum::DOWNLOADING);
 
       submission_manager &sm = submission_manager::get_instance();
     //  IO::pull_problem_request(problem_id , rev_id , sm.get_submission(submission_id).socket_fd);
