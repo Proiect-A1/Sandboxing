@@ -92,7 +92,9 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   }
 
   auto runner_task = *runner_task_ptr;
-  
+  delete runner_task_ptr;
+
+
   LOG_INFO_USER(user_id, "Starting runner task execution. Submission ID: " + submission_id + ", Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id) + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)) + general_utilities::syscall_to_string("whoami"));
   helper.test_result = runner_task.execute(thread_id, user_id);
   helper.test.time_used = runner_task.get_time_consumed();

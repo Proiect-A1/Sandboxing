@@ -63,6 +63,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
     return result_enum::FAIL;
   }
   auto compiler = *compiler_ptr;
+  delete compiler_ptr;
   result = compiler.execute(thread_id, user_id);
   if (result != result_enum::OK) {
     LOG_INFO_USER(user_id, "Compilation failed on submission " + submission_id + " with result " + general_utilities::enum_to_string(result));
