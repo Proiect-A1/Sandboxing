@@ -62,6 +62,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
     submission_id,
     0 // priority
   );
+  
   if (!compiler_ptr) {
     LOG_ERROR_USER(user_id, "Failed to create compiler task");
     return result_enum::FAIL;

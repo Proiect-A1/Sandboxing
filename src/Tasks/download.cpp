@@ -132,7 +132,7 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     i.alpn = "http/1.1";
     i.protocol = "http";
     i.opaque_user_data = &client_data;
-    i.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
+    i.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK | LCCSCF_ALLOW_EXPIRED;
     i.port = 443;
     
     if (!lws_client_connect_via_info(&i)) {

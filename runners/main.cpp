@@ -254,14 +254,20 @@ int main(int argc , char *argv[])
     init_users();
 
     //problema hardcodata de test
-    tests::register_problem_expresie_hardcodata();
+  //  tests::register_problem_expresie_hardcodata();
 
     LOG_INFO("Epoll set");
     epoll_event ev[EVENTS_BUFF_SIZE];
     int num_events;
 
-    while((num_events = epoll_wait(epollfd , ev , EVENTS_BUFF_SIZE , -1)) > 0)
+
+    while(1)
     {
+        num_events = epoll_wait(epollfd , ev , EVENTS_BUFF_SIZE , -1);
+
+        if(num_events <= 0)
+            continue;
+
         for(int i = 0 ; i < num_events ; i++)
         {
             int events_mask = ev[i].events;
@@ -289,6 +295,7 @@ int main(int argc , char *argv[])
     
     handle_error(1 , "epoll_wait()");  
     close(epollfd);
+    while(1);
 
     return 0;
 }
