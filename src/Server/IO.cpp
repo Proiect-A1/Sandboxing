@@ -132,7 +132,7 @@ string IO::recv(int fd)
     
 }
 
-void IO::done_test_request(string submissionId , int testId , int verdict , string message , float score , float maxScore , float scorePercent , long long memory , long long time , int sockfd)
+void IO::done_test_request(string submissionId , int testId , int verdict , string message, float scorePercent , long long memory , float time , int sockfd)
 {   
     json request;
     request["request"] = "doneTest";
@@ -140,15 +140,13 @@ void IO::done_test_request(string submissionId , int testId , int verdict , stri
     request["testId"] = testId;
     request["verdict"] = verdict;
     request["message"] = message;
-    request["score"] = score;
-    request["maxScore"] = maxScore;
     request["score%"] = scorePercent;
     request["memory"] = memory;
     request["time"] = time;
     IO::send(request.dump().c_str() , sockfd);
 }
 
-void IO::done_subtask_request(string submissionId , int subtaskId , float score , float maxScore , float scorePercent , long long maxMemory , long long maxTime , int sockfd)
+void IO::done_subtask_request(string submissionId , int subtaskId , float score , float maxScore , float scorePercent , long long maxMemory , float maxTime , int sockfd)
 {
     json request;
     request["request"] = "doneSubtask";
@@ -162,7 +160,7 @@ void IO::done_subtask_request(string submissionId , int subtaskId , float score 
     send(request.dump().c_str() , sockfd);
 }
 
-void IO::done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long maxMemory , long long maxTime , int sockfd)
+void IO::done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long maxMemory , float maxTime , int sockfd)
 {
     json request;
     request["request"] = "doneSubmission"; 

@@ -66,7 +66,7 @@ struct passwd pw_struct;
     
     if (!general_utilities::copy_file(source_host_path, source_run_path, 0644))
     {
-      LOG_ERROR_USER(user_id, "Couldn't copy source file to run directory");
+      LOG_ERROR_USER(user_id, " ");
       return result_enum::FAIL;
     }
 

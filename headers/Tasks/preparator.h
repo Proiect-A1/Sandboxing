@@ -3,6 +3,12 @@
 
 #include <string>
 #include <Tasks/task.h>
+#include <Utilities/architecture_utilities.h>
+#include <Singletoni/problem_manager.h>
+#include <sys/wait.h>
+#include <filesystem>
+#include <Tasks/stdio_compiler_factory.h>
+#include <Tasks/problem_compiler_task.hpp>
 
 class preparator : public task{
     std::string problem_id;

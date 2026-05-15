@@ -4,6 +4,32 @@
 #include <pthread.h>
 #include <cstdio>
 #include <string>
+#include <chrono>
+#include <filesystem>
+#include <sys/time.h>
+#include <unistd.h>
+#include <vector>
+#include <cstring>
+#include <cctype>
+#include <string>
+#include <chrono>
+#include <cstdlib>
+#include <csignal>
+#include <filesystem>
+#include <fcntl.h>
+#include <grp.h>
+#include <pwd.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <seccomp.h>
+#include <errno.h>
+#include <fstream>
 
 enum class LogLevel {
     INFO,
@@ -39,14 +65,14 @@ public:
 
 #define LOG_INFO(msg)    Logger::get_instance().log(LogLevel::INFO,    __FILE__, __LINE__, msg)
 #define LOG_WARNING(msg) Logger::get_instance().log(LogLevel::WARNING, __FILE__, __LINE__, msg)
-#define LOG_ERROR(msg)   Logger::get_instance().log(LogLevel::ERROR,   __FILE__, __LINE__, std::string(msg) + "\n | " + std::string(strerror(errno)))
+#define LOG_ERROR(msg)   Logger::get_instance().log(LogLevel::ERROR,   __FILE__, __LINE__, std::string(msg) + "\n | " + std::to_string(errno) + " " + std::string(strerror(errno)))
 #define LOG_DEBUG(msg)   Logger::get_instance().log(LogLevel::DEBUG,   __FILE__, __LINE__, msg)
 #define LOG_FATAL(msg)   Logger::get_instance().log(LogLevel::FATAL,   __FILE__, __LINE__, msg)
 #define LOG_OTHER(msg)   Logger::get_instance().log(LogLevel::OTHER,   __FILE__, __LINE__, msg)
 
 #define LOG_INFO_USER(user_id, msg)    Logger::get_instance().log(LogLevel::INFO,    __FILE__, __LINE__, user_id, msg)
 #define LOG_WARNING_USER(user_id, msg) Logger::get_instance().log(LogLevel::WARNING, __FILE__, __LINE__, user_id, msg)
-#define LOG_ERROR_USER(user_id, msg)   Logger::get_instance().log(LogLevel::ERROR,   __FILE__, __LINE__, user_id, std::string(msg) + "\n | " + std::string(strerror(errno)))
+#define LOG_ERROR_USER(user_id, msg)   Logger::get_instance().log(LogLevel::ERROR,   __FILE__, __LINE__, user_id, std::string(msg) + "\n | " + std::to_string(errno) + " " + std::string(strerror(errno)))
 #define LOG_DEBUG_USER(user_id, msg)   Logger::get_instance().log(LogLevel::DEBUG,   __FILE__, __LINE__, user_id, msg)
 #define LOG_FATAL_USER(user_id, msg)   Logger::get_instance().log(LogLevel::FATAL,   __FILE__, __LINE__, user_id, msg)
 #define LOG_OTHER_USER(user_id, msg)   Logger::get_instance().log(LogLevel::OTHER,   __FILE__, __LINE__, user_id, msg)

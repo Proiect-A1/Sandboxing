@@ -6,10 +6,10 @@
 #include <Singletoni/memory_manager.h>
 #include <Singletoni/problem_manager.h>
 #include <Singletoni/submission_manager.h>
+#include <Singletoni/task_queue.h>
 #include <vector>
 #include <map>
 #include <iostream>
-#include <Singletoni/task_queue.h>
 #include <Server/IO.hpp>
 class evaluator_task : public task {
   std::string submission_id;
