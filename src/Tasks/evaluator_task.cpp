@@ -57,7 +57,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   submission_manager &sm = submission_manager::get_instance();
   submission_data submission = sm.get_submission(submission_id);
 
-  auto compiler = stdio_compiler_factory(
+  auto compiler_ptr = stdio_compiler_factory(
     submission.language,
     submission_id,
     0 // priority

@@ -53,7 +53,7 @@ void submission_data::add_completed_test(int test_id, result_enum result, float 
                 std::to_string(memory_used) + " B\n" + "Completed " + std::to_string(tests_completed) + "/" + std::to_string(test_count) + " tests");
     
         //TREBUIE MODIFICAT CU TOTI PARAMETRII BUNI
-         IO::done_test_request(submission_id , test_id , 1 , "skibidi toiilet 67676767" , points , -1 , -1 , memory_used , time_used , socket_fd);
+//         IO::done_test_request(submission_id , test_id , 1 , "skibidi toiilet 67676767" , points , -1 , -1 , memory_used , time_used , socket_fd);
     }
         
 }
@@ -87,7 +87,7 @@ void submission_data::send_completed_subtask_packet(int group_id, const submissi
     // de trimis packet cu subtask terminat
     //IO::done_subtask_request(this->submission_id, group_id, completed_group.points, completed_group.total_points, completed_group.point_percentage, completed_group.memory_used, completed_group.time_used, this->socket_fd);
     // TODO: de pus un log_debug corect
-    //LOG_DEBUG(std::string("Submission ") + submission_id + ", problem " + problem_id + " rev " + std::to_string(rev_id) +
+    // LOG_DEBUG(std::string("Submission ") + submission_id + ", problem " + problem_id + " rev " + std::to_string(rev_id) +
     //            " completed group " + std::to_string(group_id) + " with " + std::to_string(completed_group.points) +
     //            " points, time used: " + std::to_string(time_used) + " ms, memory used: " +
     //            std::to_string(memory_used) + " B\n" + "Completed " + std::to_string(completed_group.tests_completed) + "/" + std::to_string(completed_group.test_count) + " tests");

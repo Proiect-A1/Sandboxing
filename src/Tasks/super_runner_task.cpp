@@ -313,11 +313,11 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     // LOG_INFO_USER(user_id, "WOHOOO SUNT SMECHER" + general_utilities::syscall_to_string("whoami"));
 
-    /*if (install_seccomp_whitelist() != 0)
+    if (install_seccomp_whitelist(exec_path) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to install seccomp filter");
       _exit(127);
-    }*/
+    }
 
     const char* argv[arguments.size() + 1];
     for (size_t i = 0; i < arguments.size(); ++i)
