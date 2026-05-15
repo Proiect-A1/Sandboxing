@@ -36,8 +36,8 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       task_queue::get_instance().push(dt);
 
       evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
-      ev -> priority++;
-      //task_queue::get_instance().push(ev);
+      // ev -> priority++;
+      task_queue::get_instance().push(ev);
       LOG_DEBUG_USER(user_id , "problem needs download");
       return result_enum::NONE;
   }
@@ -45,8 +45,8 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   {
       //sleep(2);
       evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
-      ev -> priority++; //ar trebui pe puteri de 2 
-     // task_queue::get_instance().push(ev);
+      // ev -> priority++; //ar trebui pe puteri de 2 
+     task_queue::get_instance().push(ev);
       LOG_DEBUG_USER(user_id , "still not done");
       return result_enum::NONE;
   } 

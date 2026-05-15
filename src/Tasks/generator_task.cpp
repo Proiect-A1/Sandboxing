@@ -32,6 +32,8 @@ result_enum generator_task::execute(pthread_t thread_id, int user_id){
 
   problem_metadata prob_meta = script_compiler.get_problem_metadata();
 
+  problem_manager::get_instance().add_revision(prob_meta);
+
   problem_manager::get_instance().start_generating_tests(problem_id, rev_id);
 
   for (int i = 0; i < prob_meta.test_count; i++){

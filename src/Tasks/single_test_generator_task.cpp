@@ -213,7 +213,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     fake_submission_id,
     generator_output_1_path,
     correct_output_path,
-    correct_output_path,
+    "correct_output",
     source_name
   );
 

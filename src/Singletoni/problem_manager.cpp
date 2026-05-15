@@ -127,7 +127,7 @@ void problem_manager::start_generating_tests(std::string problem_id, int rev_id)
   if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
     problems[problem_id][rev_id].problem_status = problem_status_enum::GENERATING;
     problems[problem_id][rev_id].tests_to_generate_count = problems[problem_id][rev_id].test_count;
-    LOG_INFO(std::string("Started generating tests for problem ") + problem_id + " rev " + std::to_string(rev_id));
+    LOG_INFO(std::string("Started generating tests for problem ") + problem_id + " rev " + std::to_string(rev_id) + " with " + std::to_string(problems[problem_id][rev_id].test_count) + " tests to generate");
     pthread_mutex_unlock(&mtx);
     return;
   }
