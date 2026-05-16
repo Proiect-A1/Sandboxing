@@ -16,6 +16,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   LOG_DEBUG_USER(user_id , "executing evaluator task");
   
   result_enum result;
+  language_enum language = submission_manager::get_instance().get_submission(submission_id).language;
   problem_manager& pm = problem_manager::get_instance();
 
   if(pm.exists_revision(problem_id , rev_id) == 0)
@@ -40,7 +41,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       // ev -> priority++;
       ev->priority = -100;
       sleep(2);
-      // task_queue::get_instance().push(ev);
+      task_queue::get_instance().push(ev);
       return result_enum::NONE;
     }
     else if(pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE)
@@ -51,9 +52,10 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       // ev -> priority++; //ar trebui pe puteri de 2 
       ev->priority = -100;
       sleep(2);
-    //  task_queue::get_instance().push(ev);
+     task_queue::get_instance().push(ev);
       return result_enum::NONE;
   } 
+  submission_manager::get_instance().insert(submission_id, language, problem_id , rev_id , "" ,  submission_manager::get_instance().get_submission(submission_id).socket_fd);
 
   LOG_DEBUG("problem downloaded");
   //return result_enum::OTHER; //cand e gata scoate asta

@@ -23,6 +23,8 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
 
   //ROBERT SCOATE POINTERII DE LA RUNNER_FACTORIES CA MEMORY LEAKS ROBERT
   
+  
+
   if (user_id <= 0){
     LOG_ERROR_USER(user_id, "Invalid user ID");
     // de bagat in problem manager ca o dat fail
@@ -139,6 +141,10 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     if (system(check_command.c_str()) != 0){
       helper.result = result_enum::FAIL;
       LOG_INFO_USER(user_id, "Generator is non deterministic");
+      std::string pth = architecture_utilities::get_sandbox_path() + "/tmp/swapsort"; 
+      mkdir(pth.c_str(), 0755);
+      general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_sandbox_path() + "/tmp/swapsort/" + general_utilities::left_zero_pad(test_id, 3) + "_1.in", 0755);
+      general_utilities::copy_file(generator_output_2_path, architecture_utilities::get_sandbox_path() + "/tmp/swapsort/" + general_utilities::left_zero_pad(test_id, 3) + "_2.in", 0755);
       return result_enum::FAIL;
     }
 

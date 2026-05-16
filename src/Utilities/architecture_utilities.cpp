@@ -52,10 +52,7 @@ int architecture_utilities::clean_run_dir(const int& user_id){
   std::string run_dir = get_run_dir_absolute_path(user_id);
   std::string command = "rm -rf " + run_dir + "/*";
   LOG_DEBUG_USER(user_id, "Cleaning run directory with command: " + command);
-  LOG_DEBUG_USER(user_id, "Aici merge");
-  // int aux = system(command.c_str());
-  int aux = 0;
-  LOG_DEBUG_USER(user_id, "Aici nu");
+  int aux = system(command.c_str());
   return aux;
 }
 

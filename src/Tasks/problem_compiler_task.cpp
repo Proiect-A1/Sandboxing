@@ -17,11 +17,13 @@ result_enum problem_compiler_task::execute(pthread_t thread_id, int user_id){
   general_utilities::copy_file(source_path, architecture_utilities::get_run_dir_absolute_path(user_id) + "/main.cpp", 0755);
   general_utilities::copy_file(architecture_utilities::get_sandbox_path() + "/../headers/problem.h", architecture_utilities::get_run_dir_absolute_path(user_id) + "/problem.h", 0755);
 
+  LOG_DEBUG_USER(user_id, "Starting compilation process for problem compilation");
   result_enum rez = compiler.execute(thread_id, user_id);
   if (rez != result_enum::OK){
     LOG_ERROR_USER(user_id, "Problem compiler task failed with result: " + general_utilities::enum_to_string(rez));
     return rez;
   }
+  LOG_DEBUG_USER(user_id, "Compilation process finished successfully for problem compilation");
 
   general_utilities::copy_file(architecture_utilities::get_run_dir_absolute_path(user_id) + "/main_exec", source_path.substr(0, source_path.size() - 4), 0755);
   problem_manager::get_instance().add_compiled_source(problem_id, rev_id);

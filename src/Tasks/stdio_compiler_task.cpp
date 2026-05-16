@@ -61,9 +61,11 @@ struct passwd pw_struct;
     return result_enum::FAIL;
   }
   struct passwd pw = pw_struct;
+
+  LOG_DEBUG_USER(user_id, "Preparing to fork");
     
+  pthread_mutex_lock(&Logger::mtx);
     pid_t pid = fork();
-    pthread_mutex_lock(&Logger::mtx);
     if (pid < 0)
     {
         pthread_mutex_unlock(&Logger::mtx);
@@ -144,7 +146,7 @@ struct passwd pw_struct;
             LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
             _exit(127);
         }
-
+        LOG_DEBUG_USER(user_id, "Compiler has reached exec");
         execv(compile_command.c_str(), argv);
         LOG_ERROR_USER(user_id, "Failed to execute compile command");
         _exit(127);

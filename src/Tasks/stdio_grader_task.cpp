@@ -121,6 +121,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   
   checker_task checker(submission_id, input_path, output_path, correct_output_path, "");
   
+  
   if (checker.execute(thread_id, user_id) != result_enum::OK){
     LOG_ERROR_USER(user_id, "Checker task execution failed");
     return result_enum::FAIL;

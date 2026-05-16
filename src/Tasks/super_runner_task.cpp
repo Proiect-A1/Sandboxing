@@ -211,8 +211,8 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
 
   if (pid < 0)
   {
-    memory.release_memory(requested_memory);
     pthread_mutex_unlock(&Logger::mtx);
+    memory.release_memory(requested_memory);
     LOG_ERROR_USER(user_id, "Failed to fork process for execution");
     return result_enum::FAIL;
   }
@@ -223,7 +223,6 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     pthread_mutex_unlock(&Logger::mtx);
     setpgid(0, 0);
 
-    pthread_mutex_unlock(&(Logger::mtx));
     
     // DECOMENTATI TOT CE TINE DE err_fd CA SA DATI REDIRECT STDERR-ului LA /dev/null 
     // all file descriptors are set before sandboxing as they are kept open
@@ -322,7 +321,6 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
       _exit(127);
     }
-    LOG_INFO_USER(user_id, "WOHOOO SUNT SMECHER" + general_utilities::syscall_to_string("whoami"));
 
     if (install_seccomp_whitelist(exec_path) != 0)
     {
