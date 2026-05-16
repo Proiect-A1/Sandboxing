@@ -215,7 +215,7 @@ result_enum upload_task::execute(pthread_t thread_id, int user_id)
     i.path = full_path;
     i.host = address;
     i.origin = address;
-    i.method = "POST";
+    i.method = "PUT";
     i.alpn = "http/1.1";
     i.protocol = "http";
     i.opaque_user_data = &client_data;
