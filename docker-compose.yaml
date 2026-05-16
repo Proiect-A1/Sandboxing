@@ -1,5 +1,5 @@
 services:
-  sandbox:
+  sandbox-sandbox:
     build: .
     ports:
       - "6000:6000"
