@@ -50,3 +50,28 @@ jobs:
       - name: Cleanup VPN
         if: always()
         run: sudo killall openvpn
+
+      - name: Checkout code2
+        uses: actions/checkout@v4
+
+      - name: Configure SSH Key2
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY2 }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.SSH_KNOWN_HOSTS2 }}" >> ~/.ssh/known_hosts
+
+      - name: Prep
+        run: |
+          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER2 }}@${{ secrets.SERVER_IP }} << 'EOF'
+          echo "Starting deployment..."
+          set -e
+          cd ~/sandbox/Sandbox
+          git fetch --all
+          git checkout dev
+          git pull sandbox dev
+          git reset --hard sandbox/dev
+          git clean -fd
+          sudo docker compose down && sudo docker compose up --build -d
+          echo "Deployment successful!"
+          EOF
