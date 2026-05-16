@@ -51,6 +51,10 @@ jobs:
         if: always()
         run: sudo killall openvpn
 
+  deploy2:
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Checkout code2
         uses: actions/checkout@v4
 
