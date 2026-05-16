@@ -112,7 +112,9 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     const char *protocol, *address, *path;
     int port;
 
-    if (lws_parse_uri((char *) url.c_str(), &protocol, &address, &port, &path)) {
+    std::string url_cp = url;
+
+    if (lws_parse_uri((char *) url_cp.c_str(), &protocol, &address, &port, &path)) {
         LOG_ERROR("Failed to parse URL\n");
         return result_enum::FAIL;
     }

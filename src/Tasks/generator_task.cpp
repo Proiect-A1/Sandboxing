@@ -32,14 +32,22 @@ result_enum generator_task::execute(pthread_t thread_id, int user_id){
 
   problem_metadata prob_meta = script_compiler.get_problem_metadata();
 
+  std::cerr << "gen1: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
+  
   problem_manager::get_instance().add_revision(prob_meta);
 
+  std::cerr << "gen2: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
+ 
   problem_manager::get_instance().start_generating_tests(problem_id, rev_id);
 
+  std::cerr << "gen3: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
+ 
   for (int i = 0; i < prob_meta.test_count; i++){
 
     task_queue::get_instance().push(new single_test_generator_task(problem_id, rev_id, i, prob_meta.tests[i], (long long)(prob_meta.memory_limit), prob_meta.time_limit));
   }
 
+   std::cerr << "gen4: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
+ 
   return result_enum::OK;
 }

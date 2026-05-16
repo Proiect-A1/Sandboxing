@@ -10,6 +10,7 @@
 #include<set>
 #include<vector>
 #include<Server/header_helper.hpp>
+#include <Singletoni/problem_manager.h>
 
 static float parse_float(const std::string& s){
     size_t ptr=0;
@@ -229,6 +230,9 @@ result_enum tgsct::execute(pthread_t thread_id, int user_id){
     output.memory_limit = ml;
     output.rev_id=this->rev_id;
     output.problem_id=this->problem_id;
+    //robert nu se mai atinge de metadate
+    output.founding_submission_id =  problem_manager::get_instance().get_metadata_unsafe(problem_id , rev_id).founding_submission_id;
+ 
     auto cover_gen = [&](int line_no, const std::vector<std::string>& tokens, std::vector<std::string>& out_args) -> bool {
         if(validate_generator_args(line_no, tokens)){
             out_args.clear();

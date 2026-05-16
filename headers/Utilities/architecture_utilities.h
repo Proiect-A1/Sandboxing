@@ -56,6 +56,7 @@ namespace architecture_utilities {
   std::string get_problem_checkers_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_generators_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_interactors_folder(const std::string& problem_id, int rev_id);
+  std::string get_problem_zip(const std::string& problem_id , int rev_id);
   int get_sandbox_workers();
 }
 #endif

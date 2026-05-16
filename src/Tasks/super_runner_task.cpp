@@ -335,6 +335,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     argv[arguments.size()] = nullptr;
 
+    sleep(0.5);
     execv(exec_path.c_str(), const_cast<char *const *>(argv));
     LOG_ERROR_USER(user_id, "Failed to execute the program inside sandbox");
 

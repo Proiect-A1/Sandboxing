@@ -1,5 +1,6 @@
 #include <Singletoni/problem_manager.h>
 #include <Singletoni/logger.h>
+#include <Tasks/upload.h>
 
 pthread_mutex_t problem_manager::mtx = PTHREAD_MUTEX_INITIALIZER;
 
@@ -11,6 +12,7 @@ problem_manager& problem_manager::get_instance() {
 void problem_manager::add_revision(problem_metadata metadata) {
   pthread_mutex_lock(&mtx);
   problems[metadata.problem_id][metadata.rev_id] = metadata;
+  std::cerr << "founding submission id is: " << metadata.founding_submission_id << std::endl;
   LOG_INFO(std::string("Added revision ") + std::to_string(metadata.rev_id) + " for problem " + metadata.problem_id);
   pthread_mutex_unlock(&mtx);
 }
@@ -92,6 +94,15 @@ problem_metadata problem_manager::get_metadata(std::string problem_id, int rev_i
   return problem_metadata(); // return default metadata if problem or revision does not exist
 }
 
+problem_metadata problem_manager::get_metadata_unsafe(std::string problem_id, int rev_id) {
+  if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+    auto metadata = problems[problem_id][rev_id];
+    return metadata;
+  }
+  LOG_WARNING(std::string("Metadata not found for problem ") + problem_id + " rev " + std::to_string(rev_id));
+  return problem_metadata(); // return default metadata if problem or revision does not exist
+}
+
 void problem_manager::update_problem_status(std::string problem_id , int rev_id , problem_status_enum problem_status)
 {
     pthread_mutex_lock(&mtx);
@@ -141,10 +152,15 @@ void problem_manager::add_generated_test(std::string problem_id, int rev_id){
     LOG_INFO("YOOOO gata inca un test " + std::to_string(problems[problem_id][rev_id].tests_to_generate_count) + " ramase pentru problem " + problem_id + " rev " + std::to_string(rev_id));
     problems[problem_id][rev_id].tests_to_generate_count--;
     LOG_INFO("YOOOO gata inca un test " + std::to_string(problems[problem_id][rev_id].tests_to_generate_count) + " ramase pentru problem " + problem_id + " rev " + std::to_string(rev_id));
+    std::cerr << "founding submission id: " << problems[problem_id][rev_id].founding_submission_id << "   problem_id  " << problems[problem_id][rev_id].problem_id << "   " << problems[problem_id][rev_id].rev_id << std::endl;
+    
     if (problems[problem_id][rev_id].tests_to_generate_count <= 0){
       problems[problem_id][rev_id].problem_status = problem_status_enum::DONE;
       LOG_INFO(std::string("All tests generated for problem ") + problem_id + " rev " + std::to_string(rev_id) + ". Problem is now DONE.");
-
+      
+      std::cerr << "founding submission id: " << problems[problem_id][rev_id].founding_submission_id << "   problem_id  " << problems[problem_id][rev_id].problem_id << "   " << problems[problem_id][rev_id].rev_id << std::endl;
+      upload_task *upl = new upload_task(submission_manager::get_instance().get_submission(problems[problem_id][rev_id].founding_submission_id).download_link , problem_id , rev_id);
+      task_queue::get_instance().push(upl);
     }
   }
   else {
@@ -158,6 +174,8 @@ void problem_manager::start_compiling_sources(std::string problem_id, int rev_id
   pthread_mutex_lock(&mtx);
     
   if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+    std::cerr << "founding submission id: started compiling" << problems[problem_id][rev_id].founding_submission_id << "   problem_id  " << problems[problem_id][rev_id].problem_id << "   " << problems[problem_id][rev_id].rev_id << std::endl;
+
     problems[problem_id][rev_id].problem_status = problem_status_enum::COMPILING;
     problems[problem_id][rev_id].sources_to_compile_count = sources_to_compile_count;
     LOG_INFO(std::string("Started compiling sources for problem ") + problem_id + " rev " + std::to_string(rev_id));
@@ -173,6 +191,7 @@ void problem_manager::add_compiled_source(std::string problem_id, int rev_id){
   pthread_mutex_lock(&mtx);
     
   if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
+       std::cerr << "founding submission id: add compiled factor" << problems[problem_id][rev_id].founding_submission_id << "   problem_id  " << problems[problem_id][rev_id].problem_id << "   " << problems[problem_id][rev_id].rev_id << std::endl;
     problems[problem_id][rev_id].sources_to_compile_count--;
     LOG_DEBUG("Compiled source for problem " + problem_id + " rev " + std::to_string(rev_id) + ". " + std::to_string(problems[problem_id][rev_id].sources_to_compile_count) + " sources left to compile.");
     if (problems[problem_id][rev_id].sources_to_compile_count <= 0){

@@ -189,6 +189,11 @@ std::string architecture_utilities::get_problem_interactors_folder(const std::st
   return get_problem_data_folder(problem_id, rev_id) + "/files/interactors";
 }
 
+std::string architecture_utilities::get_problem_zip(const std::string& problem_id , int rev_id)
+{
+  return architecture_utilities::get_sandbox_path() + "/tmp/" + problem_id + "." + std::to_string(rev_id);
+}
+
 int architecture_utilities::get_sandbox_workers()
 {
   static const char* workers = getenv("SANDBOX_WORKERS");
