@@ -190,7 +190,8 @@ int main(int argc , char *argv[])
     create_threads();
     init_users();
 
-    // tests::run_tests();
+    tests::run_tests();
+    return 0;
 
 
     auto script_compiler = test_generation_script_compiler_task("swapsort", 1);

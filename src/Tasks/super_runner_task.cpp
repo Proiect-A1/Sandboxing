@@ -202,7 +202,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
 
   LOG_INFO_USER(user_id, "Waiting for memory allocation of " + std::to_string(memory_limit) + " B");
   memory_manager &memory = memory_manager::get_instance();
-  const unsigned long long requested_memory = memory_limit;
+  const unsigned long long requested_memory = memory_limit + 64 * 1024 * 1024;
   memory.blocking_request_memory(requested_memory);
   LOG_INFO_USER(user_id, "Memory allocated " + std::to_string(memory_limit) + " B");
   
