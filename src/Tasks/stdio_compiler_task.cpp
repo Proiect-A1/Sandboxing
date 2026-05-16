@@ -79,7 +79,7 @@ struct passwd pw_struct;
        //ROBERT ITI DAI FORMAT SINGUR LA COD
         if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
         {
-        LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
+        // LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
         _exit(127);
         }
     
@@ -93,11 +93,11 @@ struct passwd pw_struct;
     std::string inner_run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
     if (chdir(inner_run_dir.c_str()) != 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
       _exit(127);
     }
 
-    LOG_DEBUG_USER(user_id, "Changed directory to run directory inside sandbox: " + inner_run_dir + " : " +general_utilities::syscall_to_string("ls"));
+    // LOG_DEBUG_USER(user_id, "Changed directory to run directory inside sandbox: " + inner_run_dir + " : " +general_utilities::syscall_to_string("ls"));
     
     // if (setgid(pw.pw_gid) != 0)
     // {
@@ -138,7 +138,7 @@ struct passwd pw_struct;
         cpu_rl.rlim_max = (rlim_t)sec;
         if (setrlimit(RLIMIT_CPU, &cpu_rl) != 0)
         {
-            LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
+            // LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
             _exit(127);
         }
 

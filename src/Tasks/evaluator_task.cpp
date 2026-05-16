@@ -35,19 +35,23 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       dt -> priority = 1000; //prioritate mare
       task_queue::get_instance().push(dt);
 
+      LOG_DEBUG_USER(user_id , "problem needs download");
       evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
       // ev -> priority++;
+      ev->priority = -100;
+      sleep(2);
       task_queue::get_instance().push(ev);
-      LOG_DEBUG_USER(user_id , "problem needs download");
       return result_enum::NONE;
-  }
-  else if(pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE)
-  {
+    }
+    else if(pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE)
+    {
       //sleep(2);
+      LOG_DEBUG_USER(user_id , "still not done");
       evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
       // ev -> priority++; //ar trebui pe puteri de 2 
+      ev->priority = -100;
+      sleep(2);
      task_queue::get_instance().push(ev);
-      LOG_DEBUG_USER(user_id , "still not done");
       return result_enum::NONE;
   } 
 

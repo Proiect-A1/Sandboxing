@@ -219,6 +219,8 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
   if (pid == 0)
   {
     setpgid(0, 0);
+
+    pthread_mutex_unlock(&(Logger::mtx));
     
     // DECOMENTATI TOT CE TINE DE err_fd CA SA DATI REDIRECT STDERR-ului LA /dev/null 
     // all file descriptors are set before sandboxing as they are kept open
@@ -227,7 +229,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     int in_fd = open(stdin_redirection_path.c_str(), O_RDONLY);
     if (in_fd < 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + " " + stdin_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
+      // LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + " " + stdin_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
     
@@ -235,13 +237,13 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     if (out_fd < 0)
     {
       close(in_fd);
-      LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + " " + stdout_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
+      // LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + " " + stdout_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
     int err_fd = open(stderr_redirection_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (err_fd < 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to open stderr_redirection_path before sandbox restrictions: " + stderr_redirection_path);
+      // LOG_ERROR_USER(user_id, "Failed to open stderr_redirection_path before sandbox restrictions: " + stderr_redirection_path);
       _exit(127);
     }
     // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
@@ -249,32 +251,32 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     
     if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
       _exit(127);
     }
     
     if (!(architecture_utilities::change_root_to_sandbox()))
     {
-      LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
       _exit(127);
     }
     
     std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
     if (chdir(inner_run_dir.c_str()) != 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
       _exit(127);
     }
     
     if (setgid(pw.pw_gid) != 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
       _exit(127);
     }
     
     if (setuid(pw.pw_uid) != 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
       _exit(127);
     }
     
@@ -285,7 +287,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       close(in_fd);
       close(out_fd);
       close(err_fd);
-      LOG_ERROR_USER(user_id, "Failed to redirect input/output/error inside sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to redirect input/output/error inside sandbox");
       _exit(127);
     }
     
@@ -294,7 +296,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     close(err_fd);
 
     if (!check_permissions(user_id)){
-      LOG_ERROR_USER(user_id, "Permission check failed AFTER SANDBOXING");
+      // LOG_ERROR_USER(user_id, "Permission check failed AFTER SANDBOXING");
       _exit(127);
     }
     
@@ -303,7 +305,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     memory_rl.rlim_cur = mem_limit_padded;
     memory_rl.rlim_max = mem_limit_padded;
     if (setrlimit(RLIMIT_AS, &memory_rl) != 0){
-      LOG_ERROR_USER(user_id, "Failed to set memory limit");
+      // LOG_ERROR_USER(user_id, "Failed to set memory limit");
       _exit(127);
     }
 
@@ -314,14 +316,14 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     cpu_rl.rlim_max = (rlim_t)sec + 1;
     if (setrlimit(RLIMIT_CPU, &cpu_rl) != 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
+      // LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
       _exit(127);
     }
     // LOG_INFO_USER(user_id, "WOHOOO SUNT SMECHER" + general_utilities::syscall_to_string("whoami"));
 
     if (install_seccomp_whitelist(exec_path) != 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to install seccomp filter");
+      // LOG_ERROR_USER(user_id, "Failed to install seccomp filter");
       _exit(127);
     }
 
@@ -333,7 +335,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     argv[arguments.size()] = nullptr;
 
     execv(exec_path.c_str(), const_cast<char *const *>(argv));
-    LOG_ERROR_USER(user_id, "Failed to execute the program inside sandbox");
+    // LOG_ERROR_USER(user_id, "Failed to execute the program inside sandbox");
 
     _exit(127);
   }

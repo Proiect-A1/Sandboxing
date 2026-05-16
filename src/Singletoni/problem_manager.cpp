@@ -174,10 +174,12 @@ void problem_manager::add_compiled_source(std::string problem_id, int rev_id){
     
   if (problems.count(problem_id) && problems[problem_id].count(rev_id)) {
     problems[problem_id][rev_id].sources_to_compile_count--;
+    LOG_DEBUG("Compiled source for problem " + problem_id + " rev " + std::to_string(rev_id) + ". " + std::to_string(problems[problem_id][rev_id].sources_to_compile_count) + " sources left to compile.");
     if (problems[problem_id][rev_id].sources_to_compile_count <= 0){
       problems[problem_id][rev_id].problem_status = problem_status_enum::GENERATING;
       LOG_INFO(std::string("All sources compiled for problem ") + problem_id + " rev " + std::to_string(rev_id) + ". Problem is now GENERATING.");
       task_queue::get_instance().push(new generator_task(problem_id, rev_id));
+      // LOG_INFO(std::string("Pushed generator task for problem ") + problem_id + " rev " + std::to_string(rev_id) + " to task queue.");
     }
   }
   else {
