@@ -42,21 +42,21 @@ enum class LogLevel {
 
 class Logger {
 private:
-    static pthread_mutex_t mtx;
 
-    FILE* log_file;
-    std::string current_date;
+FILE* log_file;
+std::string current_date;
 
-    Logger();
+Logger();
     
-    std::string get_only_date();
+std::string get_only_date();
     std::string get_only_timestamp();
     const char* level_to_string(LogLevel level);
     
     void open_log_file();
     void check_rotation();
-
-public:
+    
+  public:
+    static pthread_mutex_t mtx;
     static Logger& get_instance();
     ~Logger();
     void log(LogLevel level, const char* file, int line, const std::string& message);

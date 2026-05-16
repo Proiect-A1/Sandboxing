@@ -72,8 +72,8 @@ bool submission_manager::add_completed_test(std::string submission_id, int test_
         return false;
     }
     // std::cout << general_utilities::enum_to_string(test_result.result) << ' ' << test_result.points << std::endl;
-    submission_table[submission_id].add_completed_test(test_id, test_result);
     LOG_INFO(std::string("Added completed test ") + std::to_string(test_id) + " to submission " + submission_id);
+    submission_table[submission_id].add_completed_test(test_id, test_result);
     pthread_mutex_unlock(&submission_manager::mtx);
     return true;
 }
@@ -87,7 +87,6 @@ bool submission_manager::set_verdict(std::string submission_id, result_enum resu
         return false;
     }
     it->second.set_verdict(result, points, time_used, memory_used);
-    submission_table.erase(it);
     pthread_mutex_unlock(&submission_manager::mtx);
     return true;
 }

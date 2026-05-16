@@ -2,6 +2,7 @@
 #include <Tasks/download.h>
 
 result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
+  LOG_DEBUG_USER(user_id, "YOOOOOO A INCEPUT GENERATOROAREA");
   if (user_id <= 0) {
     LOG_ERROR_USER(user_id, "Invalid user ID");
     return result_enum::FAIL;
@@ -15,6 +16,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   LOG_DEBUG_USER(user_id , "executing evaluator task");
   
   result_enum result;
+  language_enum language = submission_manager::get_instance().get_submission(submission_id).language;
   problem_manager& pm = problem_manager::get_instance();
 
   if(pm.exists_revision(problem_id , rev_id) == 0)
@@ -26,6 +28,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       //add the rem things in generator or whatever
       meta.problem_status = problem_status_enum::NOT_EXISTS;
       pm.add_revision(meta); 
+      pm.update_problem_status(problem_id , rev_id , problem_status_enum::DOWNLOADING);
 
       submission_manager &sm = submission_manager::get_instance();
     //  IO::pull_problem_request(problem_id , rev_id , sm.get_submission(submission_id).socket_fd);
@@ -33,21 +36,26 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       dt -> priority = 1000; //prioritate mare
       task_queue::get_instance().push(dt);
 
-      evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
-      ev -> priority++;
-      task_queue::get_instance().push(ev);
       LOG_DEBUG_USER(user_id , "problem needs download");
-      return result_enum::NONE;
-  }
-  else if(pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE)
-  {
-      //sleep(2);
       evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
-      ev -> priority++; //ar trebui pe puteri de 2 
+      // ev -> priority++;
+      ev->priority = -100;
+      sleep(2);
       task_queue::get_instance().push(ev);
+      return result_enum::NONE;
+    }
+    else if(pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE)
+    {
+      //sleep(2);
       LOG_DEBUG_USER(user_id , "still not done");
+      evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
+      // ev -> priority++; //ar trebui pe puteri de 2 
+      ev->priority = -100;
+      sleep(2);
+     task_queue::get_instance().push(ev);
       return result_enum::NONE;
   } 
+  submission_manager::get_instance().insert(submission_id, language, problem_id , rev_id , "" ,  submission_manager::get_instance().get_submission(submission_id).socket_fd);
 
   LOG_DEBUG("problem downloaded");
   //return result_enum::OTHER; //cand e gata scoate asta
@@ -57,11 +65,14 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   submission_manager &sm = submission_manager::get_instance();
   submission_data submission = sm.get_submission(submission_id);
 
+  general_utilities::copy_file(architecture_utilities::get_submission_source_path(submission_id, submission.language), architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + architecture_utilities::get_submission_source_name(submission.language), 0755);
+
   auto compiler_ptr = stdio_compiler_factory(
     submission.language,
     submission_id,
     0 // priority
   );
+  
   if (!compiler_ptr) {
     LOG_ERROR_USER(user_id, "Failed to create compiler task");
     return result_enum::FAIL;
@@ -74,6 +85,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
     submission_manager::get_instance().set_verdict(submission_id, result_enum::CPE, 0, 0.0, 0);
     return result;
   }
+  general_utilities::copy_file(architecture_utilities::get_run_dir_absolute_path(user_id) + "/main_exec", architecture_utilities::get_submission_exec_path(submission_id, submission.language), 0755);
 
 
   problem_metadata problem = pm.get_metadata(problem_id, rev_id);

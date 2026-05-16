@@ -8,7 +8,9 @@ single_test_generator_task::stgt_helper::~stgt_helper() {
     LOG_DEBUG_USER(user_id, "Successfully cleaned up run directory from helper");
   }
 
-  auto pm = problem_manager::get_instance(); 
+  problem_manager& pm = problem_manager::get_instance(); 
+  std::cerr << "in the stgt time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
+    
   if (result != result_enum::OK){
     LOG_ERROR_USER(user_id, "Test generation finished with NON-OK result: " + general_utilities::enum_to_string(result));
     pm.update_problem_status(problem_id, rev_id, problem_status_enum::FAILED);
@@ -23,13 +25,18 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
 
   //ROBERT SCOATE POINTERII DE LA RUNNER_FACTORIES CA MEMORY LEAKS ROBERT
   
+  
+
   if (user_id <= 0){
     LOG_ERROR_USER(user_id, "Invalid user ID");
     // de bagat in problem manager ca o dat fail
     return result_enum::FAIL;
   }
-  
+  std::cerr << "before the stgt helper line time time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
   stgt_helper helper(user_id, problem_id, rev_id, test_id);
+  std::cerr << "in the stgt helper line time time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
+    
+  helper.result = result_enum::FAIL;
 
   if (architecture_utilities::clean_run_dir(user_id) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory");
@@ -104,6 +111,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
       return result_enum::FAIL;
     }
     auto generator_task_1 = *generator_task_1_ptr;
+    delete generator_task_1_ptr;
     auto generator_task_2_ptr = runner_factories::generator_runner_factory[language_enum::COMPILED](
       fake_submission_id,
       test_meta.generator_args[0],
@@ -117,7 +125,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
       return result_enum::FAIL;
     }
     auto generator_task_2 = *generator_task_2_ptr;
-
+    delete generator_task_2_ptr;
     result_enum aux_rez = generator_task_1.execute(thread_id, user_id);
 
     if (aux_rez != result_enum::OK){
@@ -137,6 +145,10 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     if (system(check_command.c_str()) != 0){
       helper.result = result_enum::FAIL;
       LOG_INFO_USER(user_id, "Generator is non deterministic");
+      std::string pth = architecture_utilities::get_sandbox_path() + "/tmp/swapsort"; 
+      mkdir(pth.c_str(), 0755);
+      general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_sandbox_path() + "/tmp/swapsort/" + general_utilities::left_zero_pad(test_id, 3) + "_1.in", 0755);
+      general_utilities::copy_file(generator_output_2_path, architecture_utilities::get_sandbox_path() + "/tmp/swapsort/" + general_utilities::left_zero_pad(test_id, 3) + "_2.in", 0755);
       return result_enum::FAIL;
     }
 
@@ -161,11 +173,12 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
       return result_enum::FAIL;
     }
     auto validator_task = *validator_task_ptr;
+    delete validator_task_ptr;
     result_enum aux_rez = validator_task.execute(thread_id, user_id);
 
     if (aux_rez != result_enum::OK && aux_rez != result_enum::RTE){
       helper.result = aux_rez;
-      LOG_INFO_USER(user_id, "Validator finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
+      LOG_ERROR_USER(user_id, "Validator finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
       return aux_rez;
     }
     if (aux_rez == result_enum::RTE){
@@ -197,11 +210,12 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     return result_enum::FAIL;
   }
   auto source_task = *source_task_ptr;
+  delete source_task_ptr;
 
   result_enum aux_rez = source_task.execute(thread_id, user_id);
   if (aux_rez != result_enum::OK){
     helper.result = aux_rez;
-    LOG_INFO_USER(user_id, "Main source finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
+    LOG_ERROR_USER(user_id, "Main source finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
     return aux_rez;
   }
 
@@ -209,7 +223,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     fake_submission_id,
     generator_output_1_path,
     correct_output_path,
-    correct_output_path,
+    "correct_output",
     source_name
   );
 
@@ -217,14 +231,27 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
 
   if (aux_rez != result_enum::OK){
     helper.result = aux_rez;
-    LOG_INFO_USER(user_id, "Checker finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
+    LOG_ERROR_USER(user_id, "Checker finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
     return aux_rez;
   }
 
-  general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_input_path(problem_id, rev_id, test_id), 0755);
-  general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_correct_output_path(problem_id, rev_id, test_id), 0755);
-  general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_raw_tests_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".in", 0755);
-  general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_raw_tests_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".ok", 0755);
+  if (!general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_input_path(problem_id, rev_id, test_id), 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy generator output to problem input path");
+    return result_enum::FAIL;
+  }
+  if (!general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_correct_output_path(problem_id, rev_id, test_id), 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy correct output to problem correct output path");
+    return result_enum::FAIL;
+  }
+  if (!general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_tests_inputs_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".in", 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy generator output to tests folder");
+    return result_enum::FAIL;
+  }
+  if (!general_utilities::copy_file(correct_output_path, architecture_utilities::get_problem_tests_correct_outputs_folder(problem_id, rev_id) + "/" + general_utilities::left_zero_pad(test_id, 3) + ".ok", 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy correct output to tests folder");
+    return result_enum::FAIL;
+  }
 
+  helper.result = result_enum::OK;
   return result_enum::OK;
 }

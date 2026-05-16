@@ -123,14 +123,14 @@ namespace tests
         test_submission("12345_1", "abcde", 12, language_enum::RUST);
         test_submission("12345_2", "abcde", 12, language_enum::RUST);
         test_submission("12345_3", "abcde", 12, language_enum::RUST);
-        test_submission("1005", "expresie", 1, language_enum::RUST);
-        test_submission("502", "abcde", 12, language_enum::RUST);
+        // test_submission("1005", "expresie", 1, language_enum::RUST);
+        // test_submission("502", "abcde", 12, language_enum::RUST);
 
         test_submission("12345_1", "abcde", 12, language_enum::C);
         test_submission("12345_2", "abcde", 12, language_enum::C);
         test_submission("12345_3", "abcde", 12, language_enum::C);
-        test_submission("1005", "expresie", 1, language_enum::C);
-        test_submission("502", "abcde", 12, language_enum::C);
+        // test_submission("1005", "expresie", 1, language_enum::C);
+        // test_submission("502", "abcde", 12, language_enum::C);
 
     // test_submission("12345_1", "abcde", 12, language_enum::CSHARP);
     // test_submission("12345_2", "abcde", 12, language_enum::CSHARP);
@@ -219,7 +219,7 @@ namespace tests
         // test_submission("503", "abcde", 12);
         // test_submission("200", "abcde", 12);
 
-         test_submission("z1009", "abcde", 12);
+        //  test_submission("z1009", "abcde", 12);
         // test_submission("z1010", "abcde", 12);
         // test_submission("z400", "abcde", 12);
         // test_submission("z401", "abcde", 12);

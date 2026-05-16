@@ -98,13 +98,13 @@ void submission_data::send_completed_subtask_packet(int group_id, const submissi
 }
 void submission_data::send_completed_submission_packet(){
     LOG_INFO("fur curent 2");
-    submission_manager::get_instance().unsafe_erase(this->submission_id);
     LOG_INFO(std::string("Submission ") + submission_id + " " + problem_id  + " rev " + std::to_string(rev_id) +
-                 " completed with " + std::to_string(this->points) + " points, time used: " +
-                 std::to_string(this->time_used) + " ms, memory used: " +
-                 std::to_string(this->memory_used) + " B");
+    " completed with " + std::to_string(this->points) + " points, time used: " +
+    std::to_string(this->time_used) + " ms, memory used: " +
+    std::to_string(this->memory_used) + " B");
     // de trimis packet cu sursa terminata
     float total_points=problem_manager::get_instance().get_metadata(problem_id, rev_id).total_points;
     IO::done_submission_request(this->submission_id , this -> points, total_points, this->points/total_points*100 , this -> memory_used , this -> time_used , this -> socket_fd);
     //std::cout << "Problem " << problem_id << " rev " << rev_id << " completed with " << points << " points, time used: " << time_used << " ms, memory used: " << memory_used << " B\n";
+    submission_manager::get_instance().unsafe_erase(submission_id);
 }

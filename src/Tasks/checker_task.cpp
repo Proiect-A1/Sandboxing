@@ -4,7 +4,9 @@
 result_enum checker_task::execute(pthread_t thread_id, int user_id) {
   // robert baga submission_id
 
-  if (system(("diff -wBb -q " + output + " " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + correct_output).c_str()) != 0)
+  LOG_DEBUG_USER(user_id, "MANIGGAAAAA " + output + "\n" + correct_output);
+  std::string command  = "diff -wBb -q " + output + " " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + correct_output;
+  if (system(command.c_str()) != 0)
   {
     point_percentage = 0;
     message = "not the same";

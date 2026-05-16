@@ -50,6 +50,19 @@ std::string general_utilities::enum_to_string(result_enum result){
     return "TROLLEZI";
 }
 
+std::string general_utilities::enum_to_string(problem_status_enum status){
+  switch(status) {
+    case problem_status_enum::NOT_EXISTS: return "NOT_EXISTS";
+    case problem_status_enum::DOWNLOADING: return "DOWNLOADING";
+    case problem_status_enum::COMPILING: return "COMPILING";
+    case problem_status_enum::DOWNLOADED: return "DOWNLOADED";
+    case problem_status_enum::GENERATING: return "GENERATING";
+    case problem_status_enum::DONE: return "DONE";
+    case problem_status_enum::FAILED: return "FAILED";
+    }
+    return "TROLLEZI";
+}
+
 bool general_utilities::is_file(const std::string& path){
     struct stat buff;
     if(stat(path.c_str(),&buff)==-1) return false;

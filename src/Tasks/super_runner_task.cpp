@@ -205,21 +205,24 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
   const unsigned long long requested_memory = memory_limit;
   memory.blocking_request_memory(requested_memory);
   LOG_INFO_USER(user_id, "Memory allocated " + std::to_string(memory_limit) + " B");
-
+  
+  pthread_mutex_lock(&Logger::mtx);
   pid_t pid = fork();
 
   if (pid < 0)
   {
+    pthread_mutex_unlock(&Logger::mtx);
     memory.release_memory(requested_memory);
     LOG_ERROR_USER(user_id, "Failed to fork process for execution");
     return result_enum::FAIL;
   }
 
 
-
   if (pid == 0)
   {
+    pthread_mutex_unlock(&Logger::mtx);
     setpgid(0, 0);
+
     
     // DECOMENTATI TOT CE TINE DE err_fd CA SA DATI REDIRECT STDERR-ului LA /dev/null 
     // all file descriptors are set before sandboxing as they are kept open
@@ -239,7 +242,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       LOG_ERROR_USER(user_id, "Failed to open output file inside sandbox " + run_username + " " + stdout_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
       _exit(127);
     }
-    int err_fd = open(stderr_redirection_path.c_str(), O_WRONLY);
+    int err_fd = open(stderr_redirection_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (err_fd < 0)
     {
       LOG_ERROR_USER(user_id, "Failed to open stderr_redirection_path before sandbox restrictions: " + stderr_redirection_path);
@@ -300,8 +303,9 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     
     struct rlimit memory_rl;
-    memory_rl.rlim_cur = RLIM_INFINITY; // trebuie pt Go/C#, pusesem si 6GB si tot nu mergea C#, puteti sa puneti o limita daca o gasiti, dar nu cred ca e problema
-    memory_rl.rlim_max = RLIM_INFINITY;
+    rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
+    memory_rl.rlim_cur = mem_limit_padded;
+    memory_rl.rlim_max = mem_limit_padded;
     if (setrlimit(RLIMIT_AS, &memory_rl) != 0){
       LOG_ERROR_USER(user_id, "Failed to set memory limit");
       _exit(127);
@@ -317,7 +321,6 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
       _exit(127);
     }
-    // LOG_INFO_USER(user_id, "WOHOOO SUNT SMECHER" + general_utilities::syscall_to_string("whoami"));
 
     if (install_seccomp_whitelist(exec_path) != 0)
     {
@@ -332,11 +335,13 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     argv[arguments.size()] = nullptr;
 
+    sleep(0.5);
     execv(exec_path.c_str(), const_cast<char *const *>(argv));
     LOG_ERROR_USER(user_id, "Failed to execute the program inside sandbox");
 
     _exit(127);
   }
+  pthread_mutex_unlock(&Logger::mtx);
 
   setpgid(pid, pid);
 
@@ -380,7 +385,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
   memory_consumed = (long)(usage.ru_maxrss * 1024L);
 
   memory.release_memory(requested_memory);
-
+  
   exit_code = status;
 
   if (time_limit_exceeded)

@@ -79,6 +79,7 @@ int download_task::callback_http(struct lws *wsi, enum lws_callback_reasons reas
 
 result_enum download_task::execute(pthread_t thread_id , int user_id)
 {
+    LOG_DEBUG("Started downloading");
     struct lws_context_creation_info info;
     struct lws_client_connect_info i;
     struct lws_context *context;
@@ -103,7 +104,7 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
 
     context = lws_create_context(&info);
     if (!context) {
-        fprintf(stderr, "Failed to create lws context\n");
+        LOG_ERROR("Failed to create lws context\n");
         close(client_data.fd);
         return result_enum::FAIL;
     }
@@ -111,8 +112,10 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     const char *protocol, *address, *path;
     int port;
 
-    if (lws_parse_uri((char *) url.c_str(), &protocol, &address, &port, &path)) {
-        fprintf(stderr, "Failed to parse URL\n");
+    std::string url_cp = url;
+
+    if (lws_parse_uri((char *) url_cp.c_str(), &protocol, &address, &port, &path)) {
+        LOG_ERROR("Failed to parse URL\n");
         return result_enum::FAIL;
     }
 
@@ -132,11 +135,11 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     i.alpn = "http/1.1";
     i.protocol = "http";
     i.opaque_user_data = &client_data;
-    i.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
+    i.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK | LCCSCF_ALLOW_EXPIRED;
     i.port = 443;
     
     if (!lws_client_connect_via_info(&i)) {
-        fprintf(stderr, "Failed to initiate connection\n");
+        LOG_ERROR("Failed to initiate connection\n");
         lws_context_destroy(context);
         close(client_data.fd);
         return result_enum::FAIL;
@@ -153,5 +156,6 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     prep -> priority = 1000000;
     task_queue::get_instance().push(prep);
 
+    LOG_DEBUG("Downloaded successfully");
     return result_enum::OK;
 }

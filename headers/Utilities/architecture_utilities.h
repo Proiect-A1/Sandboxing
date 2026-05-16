@@ -33,6 +33,7 @@ namespace architecture_utilities {
   std::string get_submission_dir(std::string submission_id);
   std::string get_sandbox_path();
   std::string get_submission_source_path(std::string submission_id, language_enum language = language_enum::CPP);
+  std::string get_submission_source_name(language_enum language);
   std::string get_submission_exec_path(std::string submission_id, language_enum language = language_enum::CPP);
   std::string get_problem_input_path(std::string problem_id, int rev_id, int test);
   std::string get_problem_correct_output_path(std::string problem_id, int rev_id, int test);
@@ -46,12 +47,16 @@ namespace architecture_utilities {
   std::string get_problem_interactor_exec_path(const std::string& problem_id, int rev_id, const std::string& interactor_exec_name);
   
   std::string get_problem_data_folder(const std::string& problem_id, int rev_id);
+  std::string get_problem_tests_folder(const std::string& problem_id, int rev_id);
+  std::string get_problem_tests_inputs_folder(const std::string& problem_id, int rev_id);
+  std::string get_problem_tests_correct_outputs_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_raw_tests_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_sources_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_validators_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_checkers_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_generators_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_interactors_folder(const std::string& problem_id, int rev_id);
+  std::string get_problem_zip(const std::string& problem_id , int rev_id);
   int get_sandbox_workers();
 }
 #endif

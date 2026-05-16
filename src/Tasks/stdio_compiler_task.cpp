@@ -47,8 +47,6 @@ result_enum stdio_compiler_task::execute(pthread_t thread_id, int user_id)
     const std::string run_username = architecture_utilities::get_weak_user(user_id);
     const std::string run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
 
-    const std::string source_host_path = architecture_utilities::get_submission_source_path(submission_id, language);  
-    const std::string output_host_path = architecture_utilities::get_submission_exec_path(submission_id, language);  
 
     const std::string source_run_path = run_dir + "/" + source_file_name;
     const std::string output_run_path = run_dir + "/" + output_file_name;
@@ -63,23 +61,21 @@ struct passwd pw_struct;
     return result_enum::FAIL;
   }
   struct passwd pw = pw_struct;
-    
-    if (!general_utilities::copy_file(source_host_path, source_run_path, 0644))
-    {
-      LOG_ERROR_USER(user_id, " ");
-      return result_enum::FAIL;
-    }
 
-    unlink(output_run_path.c_str());
+  LOG_DEBUG_USER(user_id, "Preparing to fork");
+    
+  pthread_mutex_lock(&Logger::mtx);
     pid_t pid = fork();
     if (pid < 0)
     {
+        pthread_mutex_unlock(&Logger::mtx);
         LOG_ERROR_USER(user_id, "Couldn't fork");
         return result_enum::FAIL;
     }
 
     if (pid == 0)
     {
+        pthread_mutex_unlock(&Logger::mtx);
         setpgid(0, 0);
 
         //daca vrem chroot trebe sa includem niste librarii in plus aduse aici, eventual mutam chroot in wrapperu de la comanda, dar again nu e necesar ca runneru oricum e jailed. adica e problema de user experience
@@ -92,30 +88,33 @@ struct passwd pw_struct;
         _exit(127);
         }
     
-    if (!(architecture_utilities::change_root_to_sandbox()))
-    {
-      LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
-      _exit(127);
-    }
+    // if (!(architecture_utilities::change_root_to_sandbox()))
+    // {
+      // LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
+    //   _exit(127);
+    // }
     
-    std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
+    // std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
+    std::string inner_run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
     if (chdir(inner_run_dir.c_str()) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
       _exit(127);
     }
+
+    // LOG_DEBUG_USER(user_id, "Changed directory to run directory inside sandbox: " + inner_run_dir + " : " +general_utilities::syscall_to_string("ls"));
     
-    if (setgid(pw.pw_gid) != 0)
-    {
-      LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
-      _exit(127);
-    }
+    // if (setgid(pw.pw_gid) != 0)
+    // {
+      // LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
+    //   _exit(127);
+    // }
     
-    if (setuid(pw.pw_uid) != 0)
-    {
-      LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
-      _exit(127);
-    }
+    // if (setuid(pw.pw_uid) != 0)
+    // {
+      // LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
+    //   _exit(127);
+    // }
 
 
         int null_fd = open("/dev/null", O_RDONLY);
@@ -147,10 +146,12 @@ struct passwd pw_struct;
             LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
             _exit(127);
         }
-
+        LOG_DEBUG_USER(user_id, "Compiler has reached exec");
         execv(compile_command.c_str(), argv);
+        LOG_ERROR_USER(user_id, "Failed to execute compile command");
         _exit(127);
     }
+    pthread_mutex_unlock(&Logger::mtx);
 
     setpgid(pid, pid);
 
@@ -186,17 +187,23 @@ struct passwd pw_struct;
 
     if (WIFSIGNALED(status))
     {
+        LOG_ERROR_USER(user_id, "Compiler process was killed by signal: " + std::to_string(WTERMSIG(status)));
         return result_enum::CPE;
     }
 
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
     {
+        LOG_DEBUG_USER(user_id, "Compiler process exited with non-zero status: " + std::to_string(WEXITSTATUS(status)));
+        if (WEXITSTATUS(status) == 127){
+          return result_enum::FAIL;
+        }
         return result_enum::CPE;
     }
 
     struct stat st;
     if (stat(output_run_path.c_str(), &st) != 0)
     {
+        LOG_DEBUG_USER(user_id, "Failed to stat compiled output file");
         return result_enum::CPE;
     }
     if ((long)st.st_size > exec_size_limit)
@@ -205,16 +212,6 @@ struct passwd pw_struct;
         return result_enum::CPE;
     }
 
-    if (rename(output_run_path.c_str(), output_host_path.c_str()) != 0)
-    {
-        if (!general_utilities::copy_file(output_run_path, output_host_path, 0755))
-        {
-            return result_enum::FAIL;
-        }
-        unlink(output_run_path.c_str());
-    }
-
-    chmod(output_host_path.c_str(), 0755);
     LOG_INFO_USER(user_id, "Compilation completed for submission " + submission_id + " with result " + general_utilities::enum_to_string(result_enum::OK) + " in " + std::to_string(compile_time_ms) + "ms, time_limit: " + std::to_string((long long)time_limit) + "ms");
     return result_enum::OK;
 }

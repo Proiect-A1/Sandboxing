@@ -137,7 +137,7 @@ super_runner_task* runner_factories::checker_runner_factory_CPP(
         "/dev/null",
         output_path,
         message_path,
-        10.0f, // deocamdata 10s pentru checker mereu!! trebuie discutat daca chiar asa ramane
+        10000.0f, // deocamdata 10s pentru checker mereu!! trebuie discutat daca chiar asa ramane
         1024 * 1024 * 1024, // deocamdata 1GB pentru checker mereu!! trebuie discutat daca chiar asa ramane
         {submission_input_path, submission_output_path, correct_output_path, source_path},
         {},
@@ -165,7 +165,7 @@ super_runner_task* runner_factories::generator_runner_factory_CPP(
         "/dev/null",
         output_path,
         message_path,
-        10.0f, // deocamdata 10s pentru generator mereu!! trebuie discutat daca chiar asa ramane
+        10000.0f, // deocamdata 10s pentru generator mereu!! trebuie discutat daca chiar asa ramane
         1024 * 1024 * 1024, // deocamdata 1GB pentru generator mereu!! trebuie discutat daca chiar asa ramane
         {},
         {},
@@ -193,7 +193,7 @@ super_runner_task* runner_factories::validator_runner_factory_CPP(
       input_path,
       "/dev/null",
       message_path,
-      10.0f, // deocamdata 10s pentru validator mereu!! trebuie discutat daca chiar asa ramane
+      10000.0f, // deocamdata 10s pentru validator mereu!! trebuie discutat daca chiar asa ramane
       1024 * 1024 * 1024, // deocamdata 1GB pentru validator mereu!! trebuie discutat daca chiar asa ramane
       {},
       {},

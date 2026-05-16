@@ -1,7 +1,5 @@
 #include <Singletoni/task_queue.h>
 
-pthread_mutex_t task_queue::mtx = PTHREAD_MUTEX_INITIALIZER;
-
 task_queue& task_queue::get_instance(){
   static task_queue instance;
   return instance;

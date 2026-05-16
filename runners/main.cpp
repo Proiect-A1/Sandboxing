@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <Server/tests.hpp>
 
+#include <Tasks/problem_compiler_task.hpp>
 #include <Tasks/evaluator_task.h>
 #include <Tasks/stdio_grader_task.h>
 #include <iostream>
@@ -94,7 +95,7 @@ void *worker_thread(void *arg){
   int user_id = user_queue::get_instance().pop();
   LOG_INFO_USER(user_id, "Starting task execution");
   const result_enum task_result = current_task->execute(thread_id, user_id);
-  LOG_INFO_USER(user_id, "Finished task execution with result " + general_utilities::enum_to_string(task_result));
+  LOG_INFO_USER(user_id, "Finished task execution with result " + general_utilities::enum_to_string(task_result) + " " + to_string(task_queue::get_instance().size()) + " tasks remaining in queue");
   user_queue::get_instance().push(user_id);
 
   delete current_task;
@@ -110,6 +111,22 @@ void *main_thread(void *arg)
     while (true){
       task* next_task = task_queue::get_instance().pop();
         LOG_DEBUG("Task starting to execute");
+
+      if (dynamic_cast<generator_task*>(next_task)){
+        LOG_DEBUG("Generator task popped from queue");
+      }
+      else if (dynamic_cast<evaluator_task*>(next_task)){
+        LOG_DEBUG("Evaluator task popped from queue");
+      }
+      else if (dynamic_cast<problem_compiler_task*>(next_task)){
+        LOG_DEBUG("Problem compiler task popped from queue");
+      }
+      else if (dynamic_cast<stdio_grader_task*>(next_task)){
+        LOG_DEBUG("Stdio grader task popped from queue");
+      }
+      else {
+        LOG_DEBUG("Unknown task type popped from queue");
+      }
 
       worker_thread_struct* wts = new worker_thread_struct;
       wts->current_task = next_task;
@@ -205,16 +222,19 @@ void debug_worker_threads(){
 }
 
 void debug_user_queue_size(){
-  string message = "USER_QUEUE_SIZE = " + user_queue::get_instance().size();
+  string message = "USER_QUEUE_SIZE = " + std::to_string(user_queue::get_instance().size());
   LOG_DEBUG(message.c_str());
 }
 
 void debug_task_queue_size(){
-  string message = "TASK_QUEUE_SIZE = " + task_queue::get_instance().size();
+  string message = "TASK_QUEUE_SIZE = " + std::to_string(task_queue::get_instance().size());
   LOG_DEBUG(message.c_str());
 }
 
-
+void print_swapsort_status(){
+  string message = "SWAPSORT STATUS: " + general_utilities::enum_to_string(problem_manager::get_instance().get_problem_status("05ba3116-b99c-4499-856b-866b41a0f627", 1));
+  LOG_DEBUG(message.c_str());
+}
 
 map < string , void (*)() > debug_command = {
   {"workers" , debug_workers},
@@ -223,6 +243,7 @@ map < string , void (*)() > debug_command = {
   {"worker_threads", debug_worker_threads},
   {"user_queue_size", debug_user_queue_size},
   {"task_queue_size", debug_task_queue_size},
+  {"swapsort_status", print_swapsort_status},
   };
 
 void execute_debug()
@@ -254,14 +275,20 @@ int main(int argc , char *argv[])
     init_users();
 
     //problema hardcodata de test
-    tests::register_problem_expresie_hardcodata();
+  //  tests::register_problem_expresie_hardcodata();
 
     LOG_INFO("Epoll set");
     epoll_event ev[EVENTS_BUFF_SIZE];
     int num_events;
 
-    while((num_events = epoll_wait(epollfd , ev , EVENTS_BUFF_SIZE , -1)) > 0)
+
+    while(1)
     {
+        num_events = epoll_wait(epollfd , ev , EVENTS_BUFF_SIZE , -1);
+
+        if(num_events <= 0)
+            continue;
+
         for(int i = 0 ; i < num_events ; i++)
         {
             int events_mask = ev[i].events;
@@ -289,6 +316,7 @@ int main(int argc , char *argv[])
     
     handle_error(1 , "epoll_wait()");  
     close(epollfd);
+    while(1);
 
     return 0;
 }

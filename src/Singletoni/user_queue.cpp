@@ -14,7 +14,6 @@ int user_queue::size(){
 }
 
 void user_queue::push(const int& item){
-  LOG_INFO(std::to_string(item) + " added to user queue");
   queue.push(item);
 }
 

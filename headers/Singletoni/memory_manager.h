@@ -8,7 +8,7 @@ class memory_manager {
   static pthread_mutex_t mtx;
   
   unsigned long long memory_used = 0; // in bytes
-  unsigned long long memory_limit = 1024ll * 1024 * 1024 * 15; // in bytes, default 15GB
+  unsigned long long memory_limit = 1024ll * 1024 * 1024 * 1; // in bytes, default 6GB
   pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
   memory_manager() = default;
   public:
