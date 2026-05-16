@@ -63,7 +63,7 @@ jobs:
 
       - name: Prep
         run: |
-          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER2 }}@${{ secrets.SERVER_IP }} << 'EOF'
+          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER2 }}@${{ secrets.SERVER_IP2 }} << 'EOF'
           echo "Starting deployment..."
           set -e
           cd ~/sandbox/Sandbox
