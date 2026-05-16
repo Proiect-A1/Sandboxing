@@ -63,14 +63,17 @@ struct passwd pw_struct;
   struct passwd pw = pw_struct;
     
     pid_t pid = fork();
+    pthread_mutex_lock(&Logger::mtx);
     if (pid < 0)
     {
+        pthread_mutex_unlock(&Logger::mtx);
         LOG_ERROR_USER(user_id, "Couldn't fork");
         return result_enum::FAIL;
     }
 
     if (pid == 0)
     {
+        pthread_mutex_unlock(&Logger::mtx);
         setpgid(0, 0);
 
         //daca vrem chroot trebe sa includem niste librarii in plus aduse aici, eventual mutam chroot in wrapperu de la comanda, dar again nu e necesar ca runneru oricum e jailed. adica e problema de user experience
@@ -79,13 +82,13 @@ struct passwd pw_struct;
        //ROBERT ITI DAI FORMAT SINGUR LA COD
         if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
         {
-        // LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
+        LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
         _exit(127);
         }
     
     // if (!(architecture_utilities::change_root_to_sandbox()))
     // {
-    //   LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
     //   _exit(127);
     // }
     
@@ -93,7 +96,7 @@ struct passwd pw_struct;
     std::string inner_run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
     if (chdir(inner_run_dir.c_str()) != 0)
     {
-      // LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
+      LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
       _exit(127);
     }
 
@@ -101,13 +104,13 @@ struct passwd pw_struct;
     
     // if (setgid(pw.pw_gid) != 0)
     // {
-    //   LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
     //   _exit(127);
     // }
     
     // if (setuid(pw.pw_uid) != 0)
     // {
-    //   LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
+      // LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
     //   _exit(127);
     // }
 
@@ -138,13 +141,15 @@ struct passwd pw_struct;
         cpu_rl.rlim_max = (rlim_t)sec;
         if (setrlimit(RLIMIT_CPU, &cpu_rl) != 0)
         {
-            // LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
+            LOG_ERROR_USER(user_id, "Failed to set CPU time limit");
             _exit(127);
         }
 
         execv(compile_command.c_str(), argv);
+        LOG_ERROR_USER(user_id, "Failed to execute compile command");
         _exit(127);
     }
+    pthread_mutex_unlock(&Logger::mtx);
 
     setpgid(pid, pid);
 

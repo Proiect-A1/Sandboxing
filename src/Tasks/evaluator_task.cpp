@@ -40,7 +40,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       // ev -> priority++;
       ev->priority = -100;
       sleep(2);
-      task_queue::get_instance().push(ev);
+      // task_queue::get_instance().push(ev);
       return result_enum::NONE;
     }
     else if(pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE)
@@ -51,7 +51,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       // ev -> priority++; //ar trebui pe puteri de 2 
       ev->priority = -100;
       sleep(2);
-     task_queue::get_instance().push(ev);
+    //  task_queue::get_instance().push(ev);
       return result_enum::NONE;
   } 
 

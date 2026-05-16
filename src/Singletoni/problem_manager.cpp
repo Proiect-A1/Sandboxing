@@ -179,7 +179,7 @@ void problem_manager::add_compiled_source(std::string problem_id, int rev_id){
       problems[problem_id][rev_id].problem_status = problem_status_enum::GENERATING;
       LOG_INFO(std::string("All sources compiled for problem ") + problem_id + " rev " + std::to_string(rev_id) + ". Problem is now GENERATING.");
       task_queue::get_instance().push(new generator_task(problem_id, rev_id));
-      // LOG_INFO(std::string("Pushed generator task for problem ") + problem_id + " rev " + std::to_string(rev_id) + " to task queue.");
+      LOG_INFO(std::string("Pushed generator task for problem ") + problem_id + " rev " + std::to_string(rev_id) + " to task queue.");
     }
   }
   else {
