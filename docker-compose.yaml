@@ -1,8 +1,10 @@
 services:
-  sandbox:
+  sandbox-sandbox:
     build: .
     ports:
       - "6000:6000"
+    volumes:
+      - ./logs:/app/logs
     cap_add:
       - NET_ADMIN
       - NET_RAW

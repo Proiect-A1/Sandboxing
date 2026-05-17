@@ -81,6 +81,16 @@ setfacl -m g:marati:--- ./tmp
 
 num=$1
 
+for i in $(seq 1 $num) 
+do 
+    #amarat
+    name_amarat=abcd$i
+    useradd $name_amarat 2> /dev/null
+   
+    name_marat=sabcd$i
+    useradd $name_marat 2> /dev/null
+done
+
 
 for i in $(seq 1 $num) 
 do 

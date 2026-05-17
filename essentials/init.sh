@@ -16,7 +16,7 @@ rm -r sandbox 2> /dev/null
 mkdir sandbox 2> /dev/null
 
 debootstrap --variant=minbase questing ./sandbox http://archive.ubuntu.com/ubuntu/
-chroot ./sandbox apt install g++ rustc golang dotnet-sdk-8.0 zlib1g-dev python3 -y
+chroot ./sandbox apt install unzip g++ rustc golang zlib1g-dev python3 -y
 
 cp essentials/init_sandbox.sh ./sandbox
 cp essentials/get_dependencies.sh ./sandbox
