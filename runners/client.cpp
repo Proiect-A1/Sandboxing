@@ -92,8 +92,43 @@ int read_consistent(int fd , void *data , int len)
     return total_read;
 }
 
+void generate_unique(string path)
+{
+    ifstream f(path);
+    if(f.bad() == true) handle_error(1 , path + " doesn't exist");
+
+    json j; f >> j;
+    string s = j["submissionId"].get < string >();
+    ofstream g(path);
+
+    for(int i = s.size() - 1 ; i >= 0 ; i--)
+    {
+        if(s[i] == 'z')
+        {
+            s[i] = '0';
+        }
+        else 
+        {
+            s[i]++;
+            j["submissionId"] = s;
+            g << j.dump();
+            g.close();
+            f.close();
+            return;
+        }
+    }
+
+
+    s = '0' + s;
+    j["submissionId"] = s;
+    g << j.dump();
+    f.close();
+    g.close();
+}
+
 void test_submission_protocol()
 {
+    generate_unique("testing_data/evaluate_request.json");
     send_file("testing_data/evaluate_request.json");
     send_file("testing_data/submission_swapsort.cpp");
 
@@ -113,6 +148,7 @@ void test_submission_protocol()
 
 void test_submission_protocol_expresie_hardcodata()
 {
+    generate_unique("testing_data/evaluate_request2.json");
     send_file("testing_data/evaluate_request2.json");
     send_file("testing_data/submission_swapsort.cpp");
 

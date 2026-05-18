@@ -1,9 +1,1 @@
-{
-    "request": "evaluate" , 
-    "submissionId": "123425" , 
-    "problemId": "05ba3116-b99c-4499-856b-866b41a0f627" , 
-    "revId": 1 , 
-    "priority": 32 , 
-    "language" : "cpp" , 
-    "downloadLink" : "https://127.0.0.1/testing_data/swapsort.1"
-}
+{"downloadLink":"https://127.0.0.1/testing_data/swapsort.1","language":"cpp","priority":32,"problemId":"05ba3116-b99c-4499-856b-866b41a0f627","request":"evaluate","revId":1,"submissionId":"00007","uploadLink":"https://127.0.0.1/testing_data/swapsort.2"}

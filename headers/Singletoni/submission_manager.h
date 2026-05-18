@@ -17,7 +17,7 @@ public:
     size_t size();
     std::map<std::string, submission_data> get_submission_table(); // creeaza o copie a submission_table
     submission_data get_submission(std::string submission_id); /// returneaza o copie a submission_data-ului, sau un submission_data gol daca nu exista
-    void insert(std::string submission_id, language_enum language, std::string problem_id, int rev_id, std::string download_link , int socket_fd); /// aduaga submisia in map; PE VIITOR TREBUIE BAGATA SI IN problem_manager
+    void insert(std::string submission_id, language_enum language, std::string problem_id, int rev_id, std::string download_link , std::string upload_link , int socket_fd); /// aduaga submisia in map; PE VIITOR TREBUIE BAGATA SI IN problem_manager
     void erase(std::string submission_id); /// sterge o sursa din map
     void unsafe_erase(std::string submission_id); /// sterge o sursa din map FARA LOCK
     bool count(std::string submission_id); /// verifica daca exista sursa in map

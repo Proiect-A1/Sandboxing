@@ -374,7 +374,7 @@ namespace tests
         // }
 
         submission_manager& sm = submission_manager::get_instance();
-        sm.insert(submission_id_real, lang, problem_id , rev_id , "" ,  1);
+        sm.insert(submission_id_real, lang, problem_id , rev_id , "" , "" ,  1);
 
         submission_data submission = sm.get_submission(submission_id_real);
 
