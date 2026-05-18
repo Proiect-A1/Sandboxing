@@ -11,31 +11,31 @@ static int install_seccomp_whitelist(const std::string& exec_path)
   };
 
   int syscalls[] = {
-      SCMP_SYS(access), SCMP_SYS(arch_prctl), SCMP_SYS(bind), SCMP_SYS(brk),
+      SCMP_SYS(access), SCMP_SYS(arch_prctl), /*SCMP_SYS(bind),*/ SCMP_SYS(brk),
       SCMP_SYS(clock_getres), SCMP_SYS(clock_gettime), SCMP_SYS(clock_nanosleep), SCMP_SYS(clone),
-      SCMP_SYS(clone3), SCMP_SYS(close), SCMP_SYS(connect), SCMP_SYS(dup),
+      SCMP_SYS(clone3), SCMP_SYS(close), /*SCMP_SYS(connect),*/ SCMP_SYS(dup),
       SCMP_SYS(dup2), SCMP_SYS(dup3), SCMP_SYS(epoll_create1), SCMP_SYS(epoll_ctl),
       SCMP_SYS(epoll_pwait), SCMP_SYS(epoll_pwait2), SCMP_SYS(epoll_wait), SCMP_SYS(eventfd2),
       SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(faccessat),
-      SCMP_SYS(fchownat), SCMP_SYS(fcntl), SCMP_SYS(fstat), SCMP_SYS(fstatfs),
+      /*SCMP_SYS(fchownat),*/ SCMP_SYS(fcntl), SCMP_SYS(fstat), SCMP_SYS(fstatfs),
       SCMP_SYS(futex), SCMP_SYS(get_mempolicy), SCMP_SYS(getcpu), SCMP_SYS(getcwd),
       SCMP_SYS(getdents64), SCMP_SYS(getegid), SCMP_SYS(geteuid), SCMP_SYS(getgid),
       SCMP_SYS(getgroups), SCMP_SYS(getpgid), SCMP_SYS(getpid), SCMP_SYS(getppid),
       SCMP_SYS(getpriority), SCMP_SYS(getrandom), SCMP_SYS(getresgid), SCMP_SYS(getresuid),
-      SCMP_SYS(getrlimit), SCMP_SYS(getrusage), SCMP_SYS(getsid), SCMP_SYS(getsockname),
+      SCMP_SYS(getrlimit), SCMP_SYS(getrusage), SCMP_SYS(getsid), /*SCMP_SYS(getsockname),*/
       SCMP_SYS(gettid), SCMP_SYS(getuid), SCMP_SYS(ioctl), SCMP_SYS(lseek),
       SCMP_SYS(lstat), SCMP_SYS(madvise), SCMP_SYS(mbind), SCMP_SYS(membarrier),
       SCMP_SYS(mincore), SCMP_SYS(mmap), SCMP_SYS(mprotect), SCMP_SYS(mremap),
       SCMP_SYS(munmap), SCMP_SYS(nanosleep), SCMP_SYS(newfstatat), SCMP_SYS(open),
       SCMP_SYS(openat), SCMP_SYS(pipe), SCMP_SYS(pipe2), SCMP_SYS(poll),
       SCMP_SYS(ppoll), SCMP_SYS(prctl), SCMP_SYS(pread64), SCMP_SYS(prlimit64),
-      SCMP_SYS(read), SCMP_SYS(readlink), SCMP_SYS(readlinkat), SCMP_SYS(recvfrom),
-      SCMP_SYS(recvmsg), SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask),
+      SCMP_SYS(read), SCMP_SYS(readlink), SCMP_SYS(readlinkat), /*SCMP_SYS(recvfrom),*/
+      /*SCMP_SYS(recvmsg),*/ SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask),
       SCMP_SYS(rt_sigreturn), SCMP_SYS(sched_getaffinity), SCMP_SYS(sched_getparam), SCMP_SYS(sched_getscheduler),
-      SCMP_SYS(sched_setaffinity), SCMP_SYS(sched_yield), SCMP_SYS(sendto), SCMP_SYS(set_mempolicy),
-      SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), SCMP_SYS(setgid), SCMP_SYS(setgroups),
-      SCMP_SYS(setpriority), SCMP_SYS(setresgid), SCMP_SYS(setresuid), SCMP_SYS(setrlimit),
-      SCMP_SYS(sigaltstack), SCMP_SYS(socket), SCMP_SYS(socketpair), SCMP_SYS(stat),
+      SCMP_SYS(sched_setaffinity), SCMP_SYS(sched_yield), /*SCMP_SYS(sendto),*/ SCMP_SYS(set_mempolicy),
+      SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), /*SCMP_SYS(setgid), SCMP_SYS(setgroups),*/
+      SCMP_SYS(setpriority), /*SCMP_SYS(setresgid), SCMP_SYS(setresuid),*/ SCMP_SYS(setrlimit),
+      SCMP_SYS(sigaltstack), /*SCMP_SYS(socket),*/ SCMP_SYS(socketpair), SCMP_SYS(stat),
       SCMP_SYS(statfs), SCMP_SYS(statx), SCMP_SYS(sysinfo), SCMP_SYS(tgkill),
       SCMP_SYS(tkill), SCMP_SYS(umask), SCMP_SYS(uname), SCMP_SYS(write),
       SCMP_SYS(writev)
@@ -200,12 +200,19 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
   }
   struct passwd pw = pw_struct;
 
+  int padding_multiplier = 1;
+  if (std::filesystem::exists(architecture_utilities::get_submission_dir(submission_id) + "/main.go")) {
+    padding_multiplier = 12; // strict pentru Go, mai putin gen 10 da RTE in loc de MLE pe 502_memorie.rs, iar peste vreo 16 nu-i place la memory manager
+  }
+
   LOG_INFO_USER(user_id, "Waiting for memory allocation of " + std::to_string(memory_limit) + " B");
   memory_manager &memory = memory_manager::get_instance();
-  const unsigned long long requested_memory = memory_limit;
+  const unsigned long long requested_memory = (unsigned long long)memory_limit + 64ULL * 1024 * 1024 * padding_multiplier;
   memory.blocking_request_memory(requested_memory);
-  LOG_INFO_USER(user_id, "Memory allocated " + std::to_string(memory_limit) + " B");
+  LOG_INFO_USER(user_id, "Memory allocated " + std::to_string(requested_memory) + " B");
   
+  usleep(100000 + rand() % 100000); // a zis robert cica
+
   pthread_mutex_lock(&Logger::mtx);
   pid_t pid = fork();
 
@@ -303,7 +310,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     
     struct rlimit memory_rl;
-    rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
+    rlim_t mem_limit_padded = (rlim_t)requested_memory;
     memory_rl.rlim_cur = mem_limit_padded;
     memory_rl.rlim_max = mem_limit_padded;
     if (setrlimit(RLIMIT_AS, &memory_rl) != 0){
