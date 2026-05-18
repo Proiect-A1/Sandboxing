@@ -176,15 +176,18 @@ void IO::done_submission_request(string submissionId , float score , float maxSc
     send(request.dump().c_str() , sockfd);
 }
 
-void IO::upload_tests_request(string problemId , int revId , vector < test_metadata > tests , int sockfd)
+void IO::upload_tests_request(string problemId , int revId , vector < test_metadata > tests , vector < group_metadata > groups , int sockfd)
 {
     json request;
     request["request"] = "uploadTests";
     request["problemId"] = problemId;
     request["revId"] = revId;
     vector < vector < int > > tests_transformed;
+    vector < float > groups_transformed;
     for(auto v : tests) tests_transformed.push_back(v.groups);
-    request["groups"] = tests_transformed;
+    for(auto g : groups) groups_transformed.push_back(g.total_points);
+    request["tests"] = tests_transformed;
+    request["groups"] = groups_transformed;
     send(request.dump().c_str() , sockfd);
 }
 

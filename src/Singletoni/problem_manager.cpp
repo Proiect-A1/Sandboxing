@@ -158,11 +158,13 @@ void problem_manager::add_generated_test(std::string problem_id, int rev_id){
     if (problems[problem_id][rev_id].tests_to_generate_count <= 0){
       problems[problem_id][rev_id].problem_status = problem_status_enum::DONE;
       LOG_INFO(std::string("All tests generated for problem ") + problem_id + " rev " + std::to_string(rev_id) + ". Problem is now DONE.");
-      
-      submission_data founding_submission_data = submission_manager::get_instance().get_submission(problems[problem_id][rev_id].founding_submission_id);
+
+      problem_metadata requested_problem_metadata = problems[problem_id][rev_id];
+      submission_data founding_submission_data = submission_manager::get_instance().get_submission(requested_problem_metadata.founding_submission_id);
       upload_task *upl = new upload_task(founding_submission_data.upload_link , problem_id , rev_id);
       task_queue::get_instance().push(upl);
-      IO::upload_tests_request(problem_id , rev_id , problems[problem_id][rev_id].tests , founding_submission_data.socket_fd);
+
+      IO::upload_tests_request(problem_id , rev_id , requested_problem_metadata.tests , requested_problem_metadata.groups , founding_submission_data.socket_fd);
     }
   }
   else {
