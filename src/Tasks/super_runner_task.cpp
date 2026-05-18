@@ -119,7 +119,12 @@ bool super_runner_task::check_permissions(int user_id)
   }
 
   // context checks
-  for (const std::string& input_file : input_files) {
+  for (const std::string& iter : input_files) {
+    std::string input_file = architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + iter;
+     if (input_file.find("..") != std::string::npos) {
+      LOG_ERROR_USER(user_id, "Input file path contains '..' which is not allowed: " + input_file);
+      return false;
+    }
     if (!std::filesystem::exists(input_file)) {
       LOG_ERROR_USER(user_id, "Input file does not exist: " + input_file);
       return false;
@@ -134,7 +139,8 @@ bool super_runner_task::check_permissions(int user_id)
     }
   }
 
-  for (const std::string& output_file : output_files) {
+  for (const std::string& iter : output_files) {
+    std::string output_file = architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + iter;
     if (std::filesystem::exists(output_file)) {
       if (!std::filesystem::is_regular_file(output_file)) {
         LOG_ERROR_USER(user_id, "Output file exists but is not a regular file: " + output_file);
@@ -264,12 +270,6 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
     
-    std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
-    if (chdir(inner_run_dir.c_str()) != 0)
-    {
-      LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
-      _exit(127);
-    }
     
     if (setgid(pw.pw_gid) != 0)
     {
@@ -284,6 +284,17 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     
     
+    // if (!check_permissions(user_id)){
+    //   LOG_ERROR_USER(user_id, "Permission check failed AFTER SANDBOXING");
+    //   _exit(127);
+    // }
+    
+    std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
+    if (chdir(inner_run_dir.c_str()) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
+      _exit(127);
+    }
     
     if (dup2(in_fd, STDIN_FILENO) < 0 || dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0)
     {
@@ -298,10 +309,6 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     close(out_fd);
     close(err_fd);
 
-    if (!check_permissions(user_id)){
-      LOG_ERROR_USER(user_id, "Permission check failed AFTER SANDBOXING");
-      _exit(127);
-    }
     
     struct rlimit memory_rl;
     rlim_t mem_limit_padded = (rlim_t)memory_limit + 64 * 1024 * 1024;
@@ -336,6 +343,12 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     argv[arguments.size()] = nullptr;
 
+    std::cerr << "USER : " << user_id << " Executing command: " << exec_path << " with arguments: ";
+    for (size_t i = 0; i < arguments.size(); ++i)
+    {
+        std::cerr << argv[i] << " ";
+    }
+    std::cerr << std::endl;
     execv(exec_path.c_str(), const_cast<char *const *>(argv));
     execv(exec_path.c_str(), const_cast<char *const *>(argv));
     execv(exec_path.c_str(), const_cast<char *const *>(argv));
@@ -390,7 +403,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
 
   memory.release_memory(requested_memory);
   
-  exit_code = status;
+  exit_code = WEXITSTATUS(status);
 
   if (time_limit_exceeded)
   {
@@ -432,6 +445,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       return result_enum::TLE;
     }
     
+    LOG_DEBUG_USER(user_id, "Process terminated by signal: " + std::to_string(sig));
     return result_enum::RTE;
   }
       
@@ -444,11 +458,12 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     if (code == 127)
     {
-      LOG_ERROR_USER(user_id, std::string("Execution failed inside sandbox"));
+      LOG_ERROR_USER(user_id, std::string("Execution failed inside sandbox with code: " + std::to_string(code)));
       return result_enum::FAIL;
     }
     return result_enum::RTE;
   }
 
+  LOG_DEBUG_USER(user_id, "Unexpected process termination. Status: " + std::to_string(status));
   return result_enum::RTE;
 }

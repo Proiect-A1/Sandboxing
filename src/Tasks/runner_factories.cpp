@@ -131,6 +131,11 @@ super_runner_task* runner_factories::checker_runner_factory_CPP(
 
     std::vector<std::string> checker_arguments = {exec_path, submission_input_path, submission_output_path, correct_output_path, source_path};
     checker_arguments.insert(checker_arguments.end(), arguments.begin() + 1, arguments.end());
+    std::string checker_args_str;
+    for (const std::string& arg : checker_arguments) {
+      checker_args_str += arg + " ";
+    }
+    LOG_DEBUG("Checker arguments: " + checker_args_str);
     super_runner_task* created = new super_runner_task(
         submission_id,
         exec_path,
@@ -138,7 +143,7 @@ super_runner_task* runner_factories::checker_runner_factory_CPP(
         output_path,
         message_path,
         10000.0f, // deocamdata 10s pentru checker mereu!! trebuie discutat daca chiar asa ramane
-        1024 * 1024 * 1024, // deocamdata 1GB pentru checker mereu!! trebuie discutat daca chiar asa ramane
+        1024ll * 1024 * 1024, // deocamdata 1GB pentru checker mereu!! trebuie discutat daca chiar asa ramane
         {submission_input_path, submission_output_path, correct_output_path, source_path},
         {},
         checker_arguments,
