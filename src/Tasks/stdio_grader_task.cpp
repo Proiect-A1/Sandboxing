@@ -164,19 +164,64 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     return result_enum::FAIL;
   }
   
+  /*
+  enum verdict_t{
+      OK, WA, PE, PA, SUPER, FAIL
+  };
+  */
+  helper.test.result = result_enum(checker.get_exit_code());
 
-  LOG_DEBUG_USER(user_id, "Contestant output" + general_utilities::syscall_to_string("cat " + output_path));
+  std::string str_aux = architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + "checker_output_path";
+  int fd = open(str_aux.c_str(), O_RDONLY);
 
-  if (checker.get_exit_code() == 0){
-    helper.test.points = 1;
-    helper.test.message = "OK";
-    helper.test.result = result_enum::OK;
-  } else {
+  
+  if (fd < 0){
+    LOG_ERROR_USER(user_id, "Error opening checker output file to read points");
+    helper.test.result = result_enum::FAIL;
+    return result_enum::FAIL;
+  }
+  char buffer[1024];
+  if (read(fd, buffer, sizeof(buffer) - 1) < 0){
+    LOG_ERROR_USER(user_id, "Error reading checker output file for points");
     helper.test.points = 0;
-    helper.test.message = "Wrong answer";
-    helper.test.result = result_enum::WA;
+  }
+  else{
+    buffer[1023] = '\0';
+    std::string points_str(buffer);
+    try {
+      helper.test.points = std::stof(points_str);
+    } catch (const std::exception& e) {
+      LOG_ERROR_USER(user_id, "Error parsing points from checker output: " + points_str);
+      helper.test.points = 0;
+    }
+  }
+  close(fd);
+  
+  str_aux =architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + "checker_message_path";
+  fd = open(str_aux.c_str(), O_RDONLY);
+  if (fd < 0){
+    LOG_ERROR_USER(user_id, "Error opening checker output file to read points");
+    helper.test.result = result_enum::FAIL;
+    return result_enum::FAIL;
   }
 
+  str_aux = "";
+  while (true) {
+    ssize_t bytes_read = read(fd, buffer, sizeof(buffer) - 1);
+    if (bytes_read < 0) {
+      LOG_ERROR_USER(user_id, "Error reading checker message file");
+      break;
+    } else if (bytes_read == 0) {
+      // End of file
+      break;
+    }
+    buffer[bytes_read] = '\0'; // Null-terminate the buffer
+    str_aux += buffer; // Append to the result string
+  }
+
+  helper.test.message = str_aux;
+
+  close(fd);
 
   // if (checker.get_point_percentage() == 1){
   //   helper.test.points = 1;

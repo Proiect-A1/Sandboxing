@@ -158,6 +158,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
 
   
   if (!validator_exec_name.empty()){
+    LOG_DEBUG_USER(user_id, "Running validator on generator output");
     general_utilities::copy_file(validator_exec_path, run_dir + "/" + validator_exec_name, 0755);
     auto validator_task_ptr = runner_factories::validator_runner_factory[language_enum::COMPILED](
       fake_submission_id,
@@ -176,6 +177,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     delete validator_task_ptr;
     result_enum aux_rez = validator_task.execute(thread_id, user_id);
 
+    LOG_DEBUG_USER(user_id, "Validator finished execution. Result: " + general_utilities::enum_to_string(aux_rez) + ", Exit code: " + std::to_string(validator_task.get_exit_code()) + ", Time used: " + std::to_string(validator_task.get_time_consumed()) + " ms, Memory used: " + std::to_string(validator_task.get_memory_consumed()) + " B");
     if (aux_rez != result_enum::OK && aux_rez != result_enum::RTE){
       helper.result = aux_rez;
       LOG_ERROR_USER(user_id, "Validator finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
@@ -183,7 +185,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     }
     if (aux_rez == result_enum::RTE){
       switch(validator_task.get_exit_code()){
-        case 1:
+        case 0:
         break;
 
 
@@ -219,21 +221,42 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     return aux_rez;
   }
 
-  auto checker = checker_task(
+  auto checker_ptr = runner_factories::checker_runner_factory[language_enum::CPP](
     fake_submission_id,
-    generator_output_1_path,
-    correct_output_path,
+    checker_exec_name,
+    checker_output_path,
+    checker_message_path,
+    "generator_output_1",
     "correct_output",
-    source_name
+    "correct_output",
+    main_exec_name + ".cpp",
+    test_meta.checker_args,
+    1
   );
+  if (checker_ptr == nullptr){
+    LOG_ERROR_USER(user_id, "Failed to create checker task");
+    return result_enum::FAIL;
+  }
+  auto checker = *checker_ptr;
+  delete checker_ptr;
+
+  auto checker_result = checker.execute(thread_id, user_id);
+  
+  LOG_INFO_USER(user_id, "Checker task finished. Result: " + general_utilities::enum_to_string(checker_result) + ", Exit code: " + std::to_string(checker.get_exit_code()) + ", Time used: " + std::to_string(checker.get_time_consumed()) + " ms, Memory used: " + std::to_string(checker.get_memory_consumed()) + " B");
 
   aux_rez = checker.execute(thread_id, user_id);
 
+
   if (aux_rez != result_enum::OK){
-    helper.result = aux_rez;
-    LOG_ERROR_USER(user_id, "Checker finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
-    return aux_rez;
+    helper.result = result_enum::OK;
+  } else {
+    helper.result = result_enum::FAIL;
+    LOG_ERROR_USER(user_id, "Checker task execution failed");
+    LOG_ERROR_USER(user_id, "Checker output: " + general_utilities::syscall_to_string("cat " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + "checker_output_path"));
+    LOG_ERROR_USER(user_id, "Checker message: " + general_utilities::syscall_to_string("cat " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + "checker_message_path"));
+    return result_enum::FAIL;
   }
+
 
   if (!general_utilities::copy_file(generator_output_1_path, architecture_utilities::get_problem_input_path(problem_id, rev_id, test_id), 0755)){
     LOG_ERROR_USER(user_id, "Failed to copy generator output to problem input path");

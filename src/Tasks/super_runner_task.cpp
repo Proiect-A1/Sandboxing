@@ -73,8 +73,7 @@ static int install_seccomp_whitelist(const std::string& exec_path)
   return 0;
 }
 
-bool super_runner_task::check_permissions(int user_id)
-{
+bool super_runner_task::check_permissions(int user_id, bool abso){
   // internal consistency checks
   if (time_limit <= 0 || memory_limit <= 0)
   {
@@ -120,7 +119,7 @@ bool super_runner_task::check_permissions(int user_id)
 
   // context checks
   for (const std::string& iter : input_files) {
-    std::string input_file = architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + iter;
+    std::string input_file = (abso ? architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + iter : iter);
      if (input_file.find("..") != std::string::npos) {
       LOG_ERROR_USER(user_id, "Input file path contains '..' which is not allowed: " + input_file);
       return false;
@@ -140,7 +139,7 @@ bool super_runner_task::check_permissions(int user_id)
   }
 
   for (const std::string& iter : output_files) {
-    std::string output_file = architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + iter;
+    std::string output_file = (abso ? architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + iter : iter);
     if (std::filesystem::exists(output_file)) {
       if (!std::filesystem::is_regular_file(output_file)) {
         LOG_ERROR_USER(user_id, "Output file exists but is not a regular file: " + output_file);
@@ -166,6 +165,14 @@ bool super_runner_task::check_permissions(int user_id)
   return true;
 }
 
+bool super_runner_task::check_permissions_before_sandboxing(int user_id){
+  return check_permissions(user_id, true);
+}
+
+bool super_runner_task::check_permissions_after_sandboxing(int user_id){
+  return check_permissions(user_id, false);
+
+}
 result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
 {
   (void)thread_id;
@@ -173,7 +180,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
   time_consumed = 0;
   memory_consumed = 0;
 
-  if (!check_permissions(user_id))
+  if (!check_permissions_before_sandboxing(user_id))
   {
     LOG_ERROR_USER(user_id, "Permission check failed BEFORE SANDBOXING");
     return result_enum::FAIL;
@@ -284,15 +291,16 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     
     
-    // if (!check_permissions(user_id)){
-    //   LOG_ERROR_USER(user_id, "Permission check failed AFTER SANDBOXING");
-    //   _exit(127);
-    // }
     
     std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
     if (chdir(inner_run_dir.c_str()) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
+      _exit(127);
+    }
+
+    if (!check_permissions_after_sandboxing(user_id)){
+      LOG_ERROR_USER(user_id, "Permission check failed AFTER SANDBOXING");
       _exit(127);
     }
     
