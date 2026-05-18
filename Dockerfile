@@ -11,4 +11,4 @@ COPY . .
 EXPOSE 6000
 
 #Si aici tre sa fie pe run_server.sh
-CMD ["/bin/bash", "-c", "sudo bash init_server.sh && sudo bash run_server.sh vps"]
+CMD ["/bin/bash", "-c", "sudo bash init_server.sh && sudo bash run_server.sh"]
