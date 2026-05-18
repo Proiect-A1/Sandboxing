@@ -60,6 +60,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
      task_queue::get_instance().push(ev);
       return result_enum::NONE;
   } 
+
   submission_manager::get_instance().insert(submission_id, language, problem_id , rev_id , "" ,  "" , submission_manager::get_instance().get_submission(submission_id).socket_fd);
 
   LOG_DEBUG("problem downloaded");
