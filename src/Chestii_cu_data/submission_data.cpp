@@ -3,7 +3,7 @@
 #include <Singletoni/logger.h>
 #include <Server/IO.hpp>
 
-submission_data::submission_data(std::string submission_id , language_enum language, std::string problem_id, int rev_id, std::string download_link, int socket_fd){
+submission_data::submission_data(std::string submission_id , language_enum language, std::string problem_id, int rev_id, std::string download_link, std::string upload_link , int socket_fd){
     problem_metadata pmd=problem_manager::get_instance().get_metadata(problem_id,rev_id);
     points = 0;
     time_used = 0;
@@ -16,6 +16,7 @@ submission_data::submission_data(std::string submission_id , language_enum langu
     this->rev_id=rev_id;
     this->socket_fd=socket_fd; /// stdout by default
     this -> download_link = download_link;
+    this -> upload_link = upload_link;
     this->language=language;
     this -> submission_id = submission_id;
     for(const group_metadata& gmd : pmd.groups){

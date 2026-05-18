@@ -176,28 +176,16 @@ void IO::done_submission_request(string submissionId , float score , float maxSc
     send(request.dump().c_str() , sockfd);
 }
 
-void IO::upload_tests_request(string problemId , int revId , string archiveType , vector < vector < int > > groups , int archive_fd , int sockfd)
+void IO::upload_tests_request(string problemId , int revId , vector < test_metadata > tests , int sockfd)
 {
     json request;
     request["request"] = "uploadTests";
     request["problemId"] = problemId;
     request["revId"] = revId;
-    request["archiveType"] = archiveType;
-    request["groups"] = groups;
+    vector < vector < int > > tests_transformed;
+    for(auto v : tests) tests_transformed.push_back(v.groups);
+    request["groups"] = tests_transformed;
     send(request.dump().c_str() , sockfd);
-
-    int archive_length = lseek(archive_fd , 0 , SEEK_END); if(archive_length == -1) handle_error(1 , "lseek() upload_tests_request()");
-    if(lseek(archive_fd , 0 , SEEK_SET) == -1) handle_error(1 , "lseek() upload_tests_request()");;
-
-    if(write(sockfd , &archive_length , sizeof(archive_length)) != sizeof(archive_length)) handle_error(1 , "write() upload_tests()");
-
-    int length_read = 0;
-
-    while((length_read = read(archive_fd , buff , BUFF_SIZE)) != 0)
-    {
-        if(length_read == -1) handle_error(1 , "read() upload_tests()");
-        if(write(sockfd , buff , length_read) != length_read) handle_error(1 , "write() upload_tests");
-    }
 }
 
 void IO::pull_problem_request(string problemId , int revId , int sockfd)
@@ -217,7 +205,8 @@ void IO::evaluate_request(json request , int fd)
         int rev_id = request["revId"].get < int > ();
         string problem_id = request["problemId"].get < string > ();
         language_enum language = general_utilities::string_to_language(request["language"].get < string > ());
-        string url = request["downloadLink"].get < string > ();
+        string url_download = request["downloadLink"].get < string > ();
+        string url_upload = request["uploadLink"].get < string > ();
 
         char path[PATH_MAX];
         sprintf(path , "%s/submissions/%s" , getenv("SANDBOX_PATH") , submission_id.c_str());
@@ -242,7 +231,7 @@ void IO::evaluate_request(json request , int fd)
 
         submission_manager& sm = submission_manager::get_instance();
 
-        sm.insert(submission_id, language, problem_id , rev_id , url , fd);
+        sm.insert(submission_id, language, problem_id , rev_id , url_download , url_upload , fd);
 
         submission_data submission = sm.get_submission(submission_id);
 

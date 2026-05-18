@@ -1,6 +1,7 @@
 #include <Singletoni/problem_manager.h>
 #include <Singletoni/logger.h>
 #include <Tasks/upload.h>
+#include <Server/IO.hpp>
 
 pthread_mutex_t problem_manager::mtx = PTHREAD_MUTEX_INITIALIZER;
 
@@ -158,9 +159,10 @@ void problem_manager::add_generated_test(std::string problem_id, int rev_id){
       problems[problem_id][rev_id].problem_status = problem_status_enum::DONE;
       LOG_INFO(std::string("All tests generated for problem ") + problem_id + " rev " + std::to_string(rev_id) + ". Problem is now DONE.");
       
-      std::cerr << "founding submission id: " << problems[problem_id][rev_id].founding_submission_id << "   problem_id  " << problems[problem_id][rev_id].problem_id << "   " << problems[problem_id][rev_id].rev_id << std::endl;
-      upload_task *upl = new upload_task(submission_manager::get_instance().get_submission(problems[problem_id][rev_id].founding_submission_id).download_link , problem_id , rev_id);
+      submission_data founding_submission_data = submission_manager::get_instance().get_submission(problems[problem_id][rev_id].founding_submission_id);
+      upload_task *upl = new upload_task(founding_submission_data.upload_link , problem_id , rev_id);
       task_queue::get_instance().push(upl);
+      IO::upload_tests_request(problem_id , rev_id , problems[problem_id][rev_id].tests , founding_submission_data.socket_fd);
     }
   }
   else {

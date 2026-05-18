@@ -5,6 +5,7 @@
 #include "header_helper.hpp"
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <Chestii_cu_data/test_metadata.h>
 #define BUFF_SIZE 4096
 
 using namespace std;
@@ -32,7 +33,7 @@ class IO
         static void done_test_request(string submissionId , int testId , int verdict , string message, float scorePercent , long long memory , float time , int sockfd);
         static void done_subtask_request(string submissionId , int subtaskId , float score , float maScore , float scorePercent , long long max_memory , float max_time , int sockfd);
         static void done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long max_memory , float max_time , int sockfd);
-        void upload_tests_request(string problemId , int revId , string archiveType , vector < vector < int > > groups , int archive_fd , int sockfd);
+        static void upload_tests_request(string problemId , int revId , vector < test_metadata > groups , int sockfd);  
         static void pull_problem_request(string problemId , int revId , int sockfd);
 
         void evaluate_request(json request , int fd);
