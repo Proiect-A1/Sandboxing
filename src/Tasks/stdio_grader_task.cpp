@@ -60,7 +60,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   std::string input_path = architecture_utilities::get_run_dir_absolute_path(user_id) + "/input";
   std::string output_path = architecture_utilities::get_run_dir_absolute_path(user_id) + "/output";
   std::string exec_path = "main_exec";
-  std::string correct_output_path = "correct_output";
+  std::string correct_output_path = architecture_utilities::get_run_dir_absolute_path(user_id) + "/correct_output";
   std::string username = architecture_utilities::get_weak_user(user_id);
 
   
@@ -114,31 +114,82 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     return helper.test.result;
   }
 
-  if (!general_utilities::copy_file(problem_correct_output_path, ::architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + correct_output_path, 0644)){
+  //correct output
+  if (!general_utilities::copy_file(problem_correct_output_path, correct_output_path, 0644)){
     LOG_ERROR_USER(user_id, "Couldn't copy problem correct output to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id));
     return result_enum::FAIL;
   }
   
-  checker_task checker(submission_id, input_path, output_path, correct_output_path, "");
+  //sursa concurentului
+  if (!general_utilities::copy_file(architecture_utilities::get_submission_source_path(submission_id, submission.language), architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + architecture_utilities::get_submission_source_name(submission.language), 0644)){
+    LOG_ERROR_USER(user_id, "Couldn't copy submission source code to run directory. Submission ID: " + submission_id + ", Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id));
+    return result_enum::FAIL;
+  }
+
+  //checker_exec
+  std::string checker_exec_name = problem.tests[test_id].checker_args[0];
+  if (!general_utilities::copy_file(architecture_utilities::get_problem_checker_exec_path(problem_id, rev_id, checker_exec_name), architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + checker_exec_name, 0755)){
+    LOG_ERROR_USER(user_id, "Couldn't copy checker executable to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id));
+    return result_enum::FAIL;
+  }
+
+  LOG_DEBUG_USER(user_id, "Files prepared for checker execution. Run directory contents:\n" + general_utilities::syscall_to_string("ls -l " + architecture_utilities::get_run_dir_absolute_path(user_id)) + "\nChecker exec path: " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + checker_exec_name);
+
+  auto checker_ptr = runner_factories::checker_runner_factory[submission.language](
+    submission_id,
+    checker_exec_name,
+    architecture_utilities::get_run_dir_absolute_path(user_id) + "/checker_output_path",
+    architecture_utilities::get_run_dir_absolute_path(user_id) + "/checker_message_path",
+    "input",
+    "output",
+    "correct_output",
+    architecture_utilities::get_submission_source_name(submission.language),
+    problem.tests[test_id].checker_args,
+    1);
+  if (checker_ptr == nullptr){
+    LOG_ERROR_USER(user_id, "Failed to create checker task");
+    return result_enum::FAIL;
+  }
+  auto checker = *checker_ptr;
+  delete checker_ptr;
+
+  auto checker_result = checker.execute(thread_id, user_id);
   
-  
-  if (checker.execute(thread_id, user_id) != result_enum::OK){
+  LOG_INFO_USER(user_id, "Checker task finished. Result: " + general_utilities::enum_to_string(checker_result) + ", Exit code: " + std::to_string(checker.get_exit_code()) + ", Time used: " + std::to_string(checker.get_time_consumed()) + " ms, Memory used: " + std::to_string(checker.get_memory_consumed()) + " B");
+
+  if ((checker.get_exit_code() == 0 || checker_result != result_enum::RTE) && checker_result != result_enum::OK){
     LOG_ERROR_USER(user_id, "Checker task execution failed");
+    LOG_ERROR_USER(user_id, "Checker output: " + general_utilities::syscall_to_string("cat " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + "checker_output_path"));
+    LOG_ERROR_USER(user_id, "Checker message: " + general_utilities::syscall_to_string("cat " + architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + "checker_message_path"));
     return result_enum::FAIL;
   }
   
-  if (checker.get_point_percentage() == 1){
+
+  LOG_DEBUG_USER(user_id, "Contestant output" + general_utilities::syscall_to_string("cat " + output_path));
+
+  if (checker.get_exit_code() == 0){
     helper.test.points = 1;
+    helper.test.message = "OK";
     helper.test.result = result_enum::OK;
-  } else if (checker.get_point_percentage() > 0){
-    helper.test.points = 0.5;
-    helper.test.result = result_enum::PA;
   } else {
     helper.test.points = 0;
+    helper.test.message = "Wrong answer";
     helper.test.result = result_enum::WA;
   }
+
+
+  // if (checker.get_point_percentage() == 1){
+  //   helper.test.points = 1;
+  //   helper.test.result = result_enum::OK;
+  // } else if (checker.get_point_percentage() > 0){
+  //   helper.test.points = 0.5;
+  //   helper.test.result = result_enum::PA;
+  // } else {
+  //   helper.test.points = 0;
+  //   helper.test.result = result_enum::WA;
+  // }
   
-  helper.test.message = checker.get_message();
+  // helper.test.message = checker.get_message();
   
   return helper.test.result;
 }
