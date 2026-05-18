@@ -153,7 +153,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     }
 
     //de inlocuit cu un hashsum, care trebuie retinut undeva ca sa verificam teste duplicate
-    LOG_ERROR_USER(user_id, "ROBERT BAGA HASHSUM NU FI LENES (not actual error dar sa sara in ochi)");
+    LOG_WARNING_USER(user_id, "ROBERT BAGA HASHSUM NU FI LENES");
   }
 
   

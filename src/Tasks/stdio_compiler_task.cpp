@@ -75,6 +75,7 @@ struct passwd pw_struct;
 
     if (pid == 0)
     {
+      for (int i = 4; i <= 1024; i++) close(i);
         pthread_mutex_unlock(&Logger::mtx);
         setpgid(0, 0);
 
@@ -147,6 +148,10 @@ struct passwd pw_struct;
             _exit(127);
         }
         LOG_DEBUG_USER(user_id, "Compiler has reached exec");
+        execv(compile_command.c_str(), argv);
+        execv(compile_command.c_str(), argv);
+        execv(compile_command.c_str(), argv);
+        execv(compile_command.c_str(), argv);
         execv(compile_command.c_str(), argv);
         LOG_ERROR_USER(user_id, "Failed to execute compile command");
         _exit(127);
