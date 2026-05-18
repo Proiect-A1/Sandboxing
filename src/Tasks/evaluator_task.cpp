@@ -46,6 +46,13 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
     }
     else if(pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE)
     {
+      if (pm.get_problem_status(problem_id, rev_id) == problem_status_enum::FAILED) {
+        LOG_ERROR_USER(user_id, "Problem " + problem_id + " revision " + std::to_string(rev_id) + " failed to be generated");
+        submission_manager::get_instance().set_verdict(submission_id, result_enum::FAIL, 0, 0.0, 0);
+        return result_enum::FAIL;
+      }
+       LOG_DEBUG_USER(user_id , "problem not done yet");
+       evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
       //sleep(2);
       LOG_DEBUG_USER(user_id , "still not done");
       evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
