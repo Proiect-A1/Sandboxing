@@ -126,7 +126,7 @@ public:
     }
 };
 enum verdict_t{
-    OK, WA, PE, PA, SUPER, FAIL
+    OK, WA, PE, SUPER, PA, FAIL
 };
 class validator{
 protected:

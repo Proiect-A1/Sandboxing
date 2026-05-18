@@ -35,7 +35,7 @@ class super_runner_task : public task
   float time_limit;     // in milliseconds
   long memory_limit;    // in bytes
   float time_consumed;  // in milliseconds
-  long memory_consumed; // in bytes
+  long long memory_consumed; // in bytes
   bool strong_user; // if true, atunci esti marat, if false, atunci esti amarat
   int exit_code;
 
@@ -58,7 +58,10 @@ public:
       arguments(arguments),
       strong_user(strong_user) {}
 
-  bool check_permissions(int user_id) override;
+  bool check_permissions(int user_id) override {return true;};
+  bool check_permissions(int user_id, bool abso);
+  bool check_permissions_before_sandboxing(int user_id);
+  bool check_permissions_after_sandboxing(int user_id);
   result_enum execute(pthread_t thread_id, int user_id) override;
 
   float get_time_consumed() const { return time_consumed; }
