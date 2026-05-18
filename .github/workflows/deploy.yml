@@ -7,50 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install OpenVPN
-        run: sudo apt-get install -y openvpn
-
-      - name: Connect to VPN
-        run: |
-          echo "${{ secrets.VPN_CONFIG }}" > vpn_config.ovpn
-          sudo openvpn --config vpn_config.ovpn --daemon
-          echo "Waiting for VPN connection..."
-          sleep 15
-          ip a
-
-      - name: Configure SSH Key
-        run: |
-          mkdir -p ~/.ssh/
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
-
-      - name: Prep
-        run: |
-          ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          echo "Starting deployment..."
-          set -e
-          cd ~/sandbox
-          git fetch --all
-          git checkout dev
-          git pull sandbox dev
-          git reset --hard sandbox/dev
-          git clean -fd
-          sudo docker compose down && sudo docker compose up --build -d
-          echo "Deployment successful!"
-          EOF
-
-      - name: Cleanup VPN
-        if: always()
-        run: sudo killall openvpn
-
   deploy2:
     runs-on: ubuntu-latest
 
@@ -76,6 +32,6 @@ jobs:
           git pull sandbox dev
           git reset --hard sandbox/dev
           git clean -fd
-          docker compose down sandbox-sandbox && docker compose up --build sandbox-sandbox
+          docker compose down sandbox-sandbox && docker compose up --build -d sandbox-sandbox
           echo "Deployment successful!"
           EOF
