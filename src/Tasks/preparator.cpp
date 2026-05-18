@@ -23,7 +23,7 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
 
     // wait(&pid);
 
-    system((std::string("unzip -d ") + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + path + " 2>&1 > /dev/null").c_str());
+    system((std::string("unzip -d ") + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + "-u " + path + " 2>&1 > /dev/null").c_str());
     LOG_DEBUG("Unzip finished");
     // trebe verificat daca o venit cu testele
     
