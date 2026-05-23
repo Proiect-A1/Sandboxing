@@ -1,7 +1,12 @@
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt full-upgrade -y && apt-get install -y unzip zip git iptables vim openssl acl sudo g++ rustc golang clang zlib1g-dev libseccomp-dev libwebsockets-dev debootstrap python3 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		iptables acl openssl sudo \
+		g++ zlib1g-dev libseccomp-dev libwebsockets-dev \
+		debootstrap \
+	&& rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 #RUN cd /tmp && dotnet new console -n Warmup && cd Warmup && dotnet publish -c Release -r linux-x64 -p:PublishAot=true && cd / && rm -rf /tmp/Warmup
 
