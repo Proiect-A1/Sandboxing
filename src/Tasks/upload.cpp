@@ -18,8 +18,8 @@ int upload_task::callback_http(struct lws *wsi, enum lws_callback_reasons reason
             unsigned char **p = (unsigned char **)in;
             unsigned char *end = (*p) + len;
 
-            if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
-                                             (unsigned char *)"application/zip", 15, p, end)) {
+           if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
+                                 (unsigned char *)"application/octet-stream", 24, p, end)) {
                 return -1;
             }
 
