@@ -264,7 +264,6 @@ void execute_debug()
 
 int main(int argc , char *argv[])
 {
-    LOG_INFO("Server starting up (this log is made to set the log file to fd = 3");
     if(argc != 4) handle_error(1 , "Provide IP PORT number of threads");
 
     read_args(argc , argv);

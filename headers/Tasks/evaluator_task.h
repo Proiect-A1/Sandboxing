@@ -7,12 +7,10 @@
 #include <Singletoni/problem_manager.h>
 #include <Singletoni/submission_manager.h>
 #include <Singletoni/task_queue.h>
-#include <Singletoni/pending_submissions_manager.h>
 #include <vector>
 #include <map>
 #include <iostream>
 #include <Server/IO.hpp>
-#include <Tasks/download.h>
 class evaluator_task : public task {
   std::string submission_id;
   std::string problem_id;

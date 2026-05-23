@@ -9,9 +9,6 @@
 #include <sys/mman.h>
 #include <string.h>
 #include <unordered_map>
-#include <Singletoni/logger.h>
-#include <Tasks/upload.h>
-#include <Server/IO.hpp>
 
 class problem_manager {
   //Singleton

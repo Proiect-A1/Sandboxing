@@ -125,15 +125,15 @@ bool super_runner_task::check_permissions(int user_id, bool abso){
       return false;
     }
     if (!std::filesystem::exists(input_file)) {
-      LOG_ERROR_USER(user_id, "Input file does not exist: " + input_file + general_utilities::syscall_to_string("ls -l " + architecture_utilities::get_run_dir_absolute_path(user_id)));
+      LOG_ERROR_USER(user_id, "Input file does not exist: " + input_file);
       return false;
     }
     if (!std::filesystem::is_regular_file(input_file)) {
-      LOG_ERROR_USER(user_id, "Input file is not a regular file: " + input_file + general_utilities::syscall_to_string("ls -l " + architecture_utilities::get_run_dir_absolute_path(user_id)));
+      LOG_ERROR_USER(user_id, "Input file is not a regular file: " + input_file);
       return false;
     }
     if (access(input_file.c_str(), R_OK) != 0) {
-      LOG_ERROR_USER(user_id, "Input file is not readable: " + input_file + general_utilities::syscall_to_string("ls -l " + architecture_utilities::get_run_dir_absolute_path(user_id)));
+      LOG_ERROR_USER(user_id, "Input file is not readable: " + input_file);
       return false;
     }
   }
@@ -142,18 +142,18 @@ bool super_runner_task::check_permissions(int user_id, bool abso){
     std::string output_file = (abso ? architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + iter : iter);
     if (std::filesystem::exists(output_file)) {
       if (!std::filesystem::is_regular_file(output_file)) {
-        LOG_ERROR_USER(user_id, "Output file exists but is not a regular file: " + output_file + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)));
+        LOG_ERROR_USER(user_id, "Output file exists but is not a regular file: " + output_file);
         return false;
       }
       if (access(output_file.c_str(), W_OK) != 0) {
-        LOG_ERROR_USER(user_id, "Output file exists but is not writable: " + output_file + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)));
+        LOG_ERROR_USER(user_id, "Output file exists but is not writable: " + output_file);
         return false;
       }
     } else {
       // check if we can create the file
       std::ofstream ofs(output_file);
       if (!ofs) {
-        LOG_ERROR_USER(user_id, "Output file does not exist and cannot be created: " + output_file + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)));
+        LOG_ERROR_USER(user_id, "Output file does not exist and cannot be created: " + output_file);
         return false;
       }
       ofs.close();
@@ -234,10 +234,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
   if (pid == 0)
   {
     pthread_mutex_unlock(&Logger::mtx);
-    if (close_range(4, ~0U, 0) == -1) {
-      LOG_ERROR_USER(user_id, "Failed to close file descriptors in child process");
-      exit(EXIT_FAILURE);
-    }
+    for (int i = 4; i <= 1024; i++) close(i);
     setpgid(0, 0);
 
     
@@ -361,9 +358,10 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     std::cerr << std::endl;
     execv(exec_path.c_str(), const_cast<char *const *>(argv));
-    while (errno == ETXTBSY || errno == EAGAIN) {
-      execv(exec_path.c_str(), const_cast<char *const *>(argv));
-    }
+    execv(exec_path.c_str(), const_cast<char *const *>(argv));
+    execv(exec_path.c_str(), const_cast<char *const *>(argv));
+    execv(exec_path.c_str(), const_cast<char *const *>(argv));
+    execv(exec_path.c_str(), const_cast<char *const *>(argv));
     LOG_ERROR_USER(user_id, "Failed to execute the program inside sandbox");
 
     _exit(127);
