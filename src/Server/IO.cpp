@@ -10,6 +10,7 @@
 #include <Tasks/evaluator_task.h>
 #include <Tasks/preparator.h>
 #include <Utilities/architecture_utilities.h>
+#include <Utilities/general_utilities.h>
 
 using namespace std;
 
@@ -132,14 +133,14 @@ string IO::recv(int fd)
     
 }
 
-void IO::done_test_request(string submissionId , int testId , int verdict , string message, float scorePercent , long long memory , float time , int sockfd)
+void IO::done_test_request(string submissionId , int testId , result_enum verdict , string message, float scorePercent , long long memory , float time , int sockfd)
 {   
     if(sockfd == 1) return;
     json request;
     request["request"] = "doneTest";
     request["submissionId"] = submissionId;
     request["testId"] = testId;
-    request["verdict"] = verdict;
+    request["verdict"] = general_utilities::enum_to_string(verdict);
     request["message"] = message;
     request["score%"] = scorePercent;
     request["memory"] = memory;

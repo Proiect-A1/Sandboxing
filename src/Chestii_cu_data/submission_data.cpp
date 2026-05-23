@@ -82,7 +82,7 @@ void submission_data::send_completed_test_packet(int test_id, const submission_t
     //            " points, time used: " + std::to_string(time_used) + " ms, memory used: " +
     //            std::to_string(memory_used) + " B\n" + "Completed " + std::to_string(tests_completed) + "/" + std::to_string(test_count) + " tests");
     //TREBUIE MODIFICAT CU TOTI PARAMETRII BUNI
-    IO::done_test_request(submission_id , test_id , (int)completed_test.result, completed_test.message, points, memory_used , time_used , socket_fd);
+    IO::done_test_request(submission_id , test_id , completed_test.result, completed_test.message, points, memory_used , time_used , socket_fd);
 }
 void submission_data::send_completed_subtask_packet(int group_id, const submission_group& completed_group){
     // de trimis packet cu subtask terminat
