@@ -6,6 +6,7 @@ RUN apt-get update \
 		iptables acl openssl sudo \
 		g++ zlib1g-dev libseccomp-dev libwebsockets-dev \
 		debootstrap \
+		unzip zip \
 	&& rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 #RUN cd /tmp && dotnet new console -n Warmup && cd Warmup && dotnet publish -c Release -r linux-x64 -p:PublishAot=true && cd / && rm -rf /tmp/Warmup

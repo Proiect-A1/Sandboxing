@@ -46,5 +46,5 @@ context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 context.load_cert_chain(certfile="./runners/cert.pem", keyfile="./runners/key.pem")
 httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
-print(f"Serving securely on https://localhost:{port}")
+print(f"Serving securely on https://0.0.0.0:{port}")
 httpd.serve_forever()
