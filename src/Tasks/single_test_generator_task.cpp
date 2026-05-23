@@ -35,8 +35,6 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   std::cerr << "before the stgt helper line time time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
   stgt_helper helper(user_id, problem_id, rev_id, test_id);
   std::cerr << "in the stgt helper line time time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
-    
-  helper.result = result_enum::FAIL;
 
   if (architecture_utilities::clean_run_dir(user_id) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory");
@@ -63,7 +61,8 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   // generam testu, validam rezultatul, checker-uieste rezultatul, mutam testu generat in locul potrivit
   std::string run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
 
-  std::string source_name = test_meta.source_path;
+  // std::string source_name = test_meta.source_path;
+  std::string source_name = test_meta.main_path + ".cpp";
   std::string main_exec_name = test_meta.main_path;
   std::string generator_exec_name = test_meta.generator_args[0];
 
@@ -84,7 +83,7 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   std::string validator_exec_path = architecture_utilities::get_problem_validator_exec_path(problem_id, rev_id, validator_exec_name);
   std::string validator_message_path = run_dir + "/validator_message";
 
-  std::string checker_exec_path   = architecture_utilities::get_problem_validator_exec_path(problem_id, rev_id, checker_exec_name);
+  std::string checker_exec_path   = architecture_utilities::get_problem_checker_exec_path(problem_id, rev_id, checker_exec_name);
   std::string checker_output_path = run_dir + "/checker_output";
   std::string checker_message_path = run_dir + "/checker_message";
 
@@ -196,7 +195,6 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   }
 
   general_utilities::copy_file(main_exec_path, run_dir + "/" + main_exec_name, 0755);
-
   auto source_task_ptr = runner_factories::stdio_submission_runner_factory[language_enum::COMPILED](
     fake_submission_id,
     main_exec_name,
@@ -213,14 +211,23 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   }
   auto source_task = *source_task_ptr;
   delete source_task_ptr;
-
+  
   result_enum aux_rez = source_task.execute(thread_id, user_id);
   if (aux_rez != result_enum::OK){
     helper.result = aux_rez;
     LOG_ERROR_USER(user_id, "Main source finished with NON-OK result: " + general_utilities::enum_to_string(aux_rez));
     return aux_rez;
   }
-
+  
+  if (!general_utilities::copy_file(source_path, run_dir + "/" + main_exec_name + ".cpp", 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy source file " + source_path + " to " + run_dir + "/" + main_exec_name + ".cpp\n " + source_name + " " + main_exec_name + " " + std::to_string(test_meta.source_path.size()));
+    return result_enum::FAIL;
+  }
+  if (!general_utilities::copy_file(checker_exec_path, run_dir + "/" + checker_exec_name, 0755)){
+    LOG_ERROR_USER(user_id, "Failed to copy checker executable");
+    return result_enum::FAIL;
+  }
+  LOG_WARNING_USER(user_id, "DACA VREM SA PERMITEM PREGATIRE IN ALTE LIMBAJE TREBE ATENTIE AICI");
   auto checker_ptr = runner_factories::checker_runner_factory[language_enum::CPP](
     fake_submission_id,
     checker_exec_name,
@@ -240,14 +247,13 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   auto checker = *checker_ptr;
   delete checker_ptr;
 
-  auto checker_result = checker.execute(thread_id, user_id);
   
-  LOG_INFO_USER(user_id, "Checker task finished. Result: " + general_utilities::enum_to_string(checker_result) + ", Exit code: " + std::to_string(checker.get_exit_code()) + ", Time used: " + std::to_string(checker.get_time_consumed()) + " ms, Memory used: " + std::to_string(checker.get_memory_consumed()) + " B");
-
+  
   aux_rez = checker.execute(thread_id, user_id);
+  
+  LOG_INFO_USER(user_id, "Checker task finished. Result: " + general_utilities::enum_to_string(aux_rez) + ", Exit code: " + std::to_string(checker.get_exit_code()) + ", Time used: " + std::to_string(checker.get_time_consumed()) + " ms, Memory used: " + std::to_string(checker.get_memory_consumed()) + " B");
 
-
-  if (aux_rez != result_enum::OK){
+  if (aux_rez == result_enum::OK){
     helper.result = result_enum::OK;
   } else {
     helper.result = result_enum::FAIL;
