@@ -35,8 +35,6 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   std::cerr << "before the stgt helper line time time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
   stgt_helper helper(user_id, problem_id, rev_id, test_id);
   std::cerr << "in the stgt helper line time time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
-    
-  helper.result = result_enum::FAIL;
 
   if (architecture_utilities::clean_run_dir(user_id) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory");
