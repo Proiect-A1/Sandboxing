@@ -32,6 +32,7 @@ jobs:
           git pull sandbox dev
           git reset --hard sandbox/dev
           git clean -fd
+          cd ../
           docker compose down sandbox-sandbox && docker compose up --build -d sandbox-sandbox
           echo "Deployment successful!"
           EOF
