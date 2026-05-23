@@ -16,7 +16,8 @@ rm -r sandbox 2> /dev/null
 mkdir sandbox 2> /dev/null
 
 debootstrap --variant=minbase questing ./sandbox http://archive.ubuntu.com/ubuntu/
-chroot ./sandbox apt install unzip g++ rustc golang zlib1g-dev python3 -y
+chroot ./sandbox apt-get install -y --no-install-recommends unzip g++ rustc golang zlib1g-dev python3
+chroot ./sandbox rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 cp essentials/init_sandbox.sh ./sandbox
 cp essentials/get_dependencies.sh ./sandbox
@@ -33,12 +34,6 @@ int main(){ zlibVersion(); std::thread t([](){}); t.join(); dlopen(NULL, RTLD_NO
 
 g++ main.cpp -lz -lpthread -ldl -lrt -o main && bash get_dependencies.sh main
 rm main.cpp main
-
-mkdir -p usr/bin
-cp /usr/bin/python3 usr/bin/
-bash get_dependencies.sh /usr/bin/python3
-mkdir -p usr/lib/
-cp -r /usr/lib/python3* usr/lib/ 2>/dev/null
 
 rm get_dependencies.sh init_sandbox.sh
 #rm fix_g++.sh 
