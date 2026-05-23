@@ -1,6 +1,7 @@
 #include <Tasks/download.h>
 #include <Tasks/preparator.h>
 #include <Singletoni/task_queue.h>
+#include <Singletoni/problem_manager.h>
 
 download_task::download_task(std::string url , std::string problem_id , int rev_id)
 {
@@ -21,6 +22,8 @@ int download_task::callback_http(struct lws *wsi, enum lws_callback_reasons reas
             unsigned char *end = (*p) + len;
             if (lws_add_http_header_by_token(wsi, WSI_TOKEN_CONNECTION,
                                              (unsigned char *)"close", 5, p, end)) {
+                problem_manager::get_instance().update_problem_status(data -> problem_id , data -> rev_id , problem_status_enum::FAILED);
+                data -> fail = 1;  
                 return -1;
             }
             break;
@@ -31,6 +34,8 @@ int download_task::callback_http(struct lws *wsi, enum lws_callback_reasons reas
             printf(">>> HTTP Status: %d\n", status);
             if (status != 200) {
                 fprintf(stderr, ">>> Download rejected by server.%d\n" , status);
+                problem_manager::get_instance().update_problem_status(data -> problem_id , data -> rev_id , problem_status_enum::FAILED);
+                data -> fail = 1;  
                 return -1; 
             }
             break;
@@ -42,6 +47,8 @@ int download_task::callback_http(struct lws *wsi, enum lws_callback_reasons reas
             int lenx = sizeof(buffer) - LWS_PRE;
 
             if (lws_http_client_read(wsi, &px, &lenx) < 0) {
+                problem_manager::get_instance().update_problem_status(data -> problem_id , data -> rev_id , problem_status_enum::FAILED);
+                data -> fail = 1;  
                 return -1;
             }
             return 0; 
@@ -52,6 +59,8 @@ int download_task::callback_http(struct lws *wsi, enum lws_callback_reasons reas
                 ssize_t bytes_written = write(data->fd, in, len);
                 if (bytes_written < 0) {
                     fprintf(stderr, ">>> Error writing to fd\n");
+                    problem_manager::get_instance().update_problem_status(data -> problem_id , data -> rev_id , problem_status_enum::FAILED);
+                    data -> fail = 1;  
                     return -1; 
                 }
                 printf(">>> Downloaded chunk of %zu bytes...\n", len); 
@@ -60,6 +69,8 @@ int download_task::callback_http(struct lws *wsi, enum lws_callback_reasons reas
             
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
             fprintf(stderr, ">>> CLIENT_CONNECTION_ERROR\n");
+            problem_manager::get_instance().update_problem_status(data -> problem_id , data -> rev_id , problem_status_enum::FAILED);
+            data -> fail = 1;    
             data -> interrupted = 1;
             break;
 
@@ -84,15 +95,16 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     struct lws_client_connect_info i;
     struct lws_context *context;
     bool interrupted;
-
+    bool fail;
     lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_USER, NULL);
 
     char zip_path[PATH_MAX];
     sprintf(zip_path , "%s/tmp/%s.%d" , getenv("SANDBOX_PATH") , problem_id.c_str() , rev_id);    
 
-    download_data client_data = {open(zip_path , O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0600) , interrupted};
+    download_data client_data = {open(zip_path , O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0600) , interrupted , problem_id , rev_id , fail};
 
     if (client_data.fd < 0) {
+        problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
         perror("Failed to open file");
         return result_enum::FAIL;
     }
@@ -116,6 +128,7 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
 
     if (lws_parse_uri((char *) url_cp.c_str(), &protocol, &address, &port, &path)) {
         LOG_ERROR("Failed to parse URL\n");
+        problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
         return result_enum::FAIL;
     }
 
@@ -141,6 +154,7 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     if (!lws_client_connect_via_info(&i)) {
         LOG_ERROR("Failed to initiate connection\n");
         lws_context_destroy(context);
+        problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
         close(client_data.fd);
         return result_enum::FAIL;
     }
@@ -152,6 +166,12 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     close(client_data.fd);
     lws_context_destroy(context);
     
+    if(fail == 1)
+    {
+        problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
+        return result_enum::FAIL;
+    }
+
     preparator *prep = new preparator(problem_id , rev_id);
     prep -> priority = 1000000;
     task_queue::get_instance().push(prep);

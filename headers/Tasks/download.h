@@ -30,5 +30,8 @@ struct download_data
 {
     int fd;
     bool &interrupted;
+    std::string problem_id;
+    int rev_id;
+    bool &fail;
 };
 #endif // DOWNLOAD_H

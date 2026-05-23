@@ -16,7 +16,7 @@ rm -r sandbox 2> /dev/null
 mkdir sandbox 2> /dev/null
 
 debootstrap --variant=minbase questing ./sandbox http://archive.ubuntu.com/ubuntu/
-chroot ./sandbox apt-get install -y --no-install-recommends unzip g++ rustc golang zlib1g-dev python3
+chroot ./sandbox apt-get install -y --no-install-recommends unzip zip g++ rustc golang zlib1g-dev python3
 chroot ./sandbox rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 cp essentials/init_sandbox.sh ./sandbox
