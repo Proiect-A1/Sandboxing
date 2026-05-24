@@ -22,11 +22,14 @@ result_enum generator_task::execute(pthread_t thread_id, int user_id){
 
   if (aux_result != result_enum::OK){
     LOG_ERROR_USER(user_id, "Test generation script compilation failed with result: " + general_utilities::enum_to_string(aux_result));
+    //cine nu a bagat merita perna calda toata viata
+    problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);     //insane pull bug
     return aux_result;
   }
 
   if (script_compiler.get_failed()){
     LOG_ERROR_USER(user_id, "Test generation script compilation failed with message: " + script_compiler.get_compilation_message(100));
+    problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);     //insane pull bug
     return result_enum::FAIL;
   }
 
