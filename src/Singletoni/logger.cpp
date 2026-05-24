@@ -94,6 +94,8 @@ void Logger::open_log_file() {
     if (log_file != nullptr) {
         setvbuf(log_file, NULL, _IONBF, 0);
     }
+    log(LogLevel::INFO, __FILE__, __LINE__, "Opened log file: " + filename + " linked to file descriptor: " + std::to_string(fileno(log_file)));
+
 }
 
 void Logger::check_rotation() {

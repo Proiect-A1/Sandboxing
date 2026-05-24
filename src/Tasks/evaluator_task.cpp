@@ -1,5 +1,4 @@
 #include <Tasks/evaluator_task.h> 
-#include <Tasks/download.h>
 
 result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   LOG_DEBUG_USER(user_id, "YOOOOOO A INCEPUT GENERATOROAREA");
@@ -19,8 +18,7 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
   language_enum language = submission_manager::get_instance().get_submission(submission_id).language;
   problem_manager& pm = problem_manager::get_instance();
 
-  if(pm.exists_revision(problem_id , rev_id) == 0)
-  {
+  if(pm.exists_revision(problem_id , rev_id) == 0){
       problem_metadata meta;
       meta.founding_submission_id = submission_id;
       meta.problem_id = problem_id;
@@ -36,30 +34,15 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       dt -> priority = 1000; //prioritate mare
       task_queue::get_instance().push(dt);
 
-      LOG_DEBUG_USER(user_id , "problem needs download");
-      evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
-      // ev -> priority++;
-      ev->priority = -100;
-      sleep(2);
-      task_queue::get_instance().push(ev);
+      LOG_DEBUG_USER(user_id , problem_id + " problem needs download");
+      pending_submissions_manager::get_instance().push(problem_id, rev_id, submission_id);
       return result_enum::NONE;
     }
-    else if(pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE)
-    {
-      if (pm.get_problem_status(problem_id, rev_id) == problem_status_enum::FAILED) {
-        LOG_ERROR_USER(user_id, "Problem " + problem_id + " revision " + std::to_string(rev_id) + " failed to be generated");
-        submission_manager::get_instance().set_verdict(submission_id, result_enum::FAIL, 0, 0.0, 0);
-        return result_enum::FAIL;
-      }
-      //sleep(2);
-      LOG_DEBUG_USER(user_id , "still not done");
-      evaluator_task *ev = new evaluator_task(submission_id , problem_id , rev_id);
-      // ev -> priority++; //ar trebui pe puteri de 2 
-      ev->priority = -100;
-      sleep(2);
-     task_queue::get_instance().push(ev);
+    else if (pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE){
+      LOG_DEBUG_USER(user_id , problem_id + " problem is not ready yet");
+      pending_submissions_manager::get_instance().push(problem_id, rev_id, submission_id);
       return result_enum::NONE;
-  } 
+    }
 
   submission_manager::get_instance().insert(submission_id, language, problem_id , rev_id , "" ,  "" , submission_manager::get_instance().get_submission(submission_id).socket_fd);
 
