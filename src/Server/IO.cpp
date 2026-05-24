@@ -189,6 +189,7 @@ void IO::upload_tests_request(string problemId , int revId , vector < test_metad
     for(auto g : groups) groups_transformed.push_back(g.total_points);
     request["tests"] = tests_transformed;
     request["groups"] = groups_transformed;
+    LOG_DEBUG(std::string("tests sent: ") + request.dump().c_str());
     send(request.dump().c_str() , sockfd);
 }
 
