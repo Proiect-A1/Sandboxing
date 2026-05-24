@@ -1,26 +1,37 @@
-#include<bits/stdc++.h>
-
+#include <bits/stdc++.h>
 using namespace std;
-typedef long long ll;
-typedef pair<ll,ll> pll;
-const ll NMAX=105;
-ll p[NMAX];
-void tc(){
-    vector<pll> ans;
-    ll n; cin>>n;
-    for(ll i=1;i<=n;i++)
-        cin>>p[i];
-    for(ll i=0;i<n;i++){
-        while(p[i]!=i){
-            ans.push_back({i, p[i]});
-            swap(p[i], p[p[i]]);
+
+const int WAVES = 100;
+const int ELM_COUNT = 20'000'000;
+
+int main() {
+    mt19937 rng(33);
+    
+    int x;  cin >> x;
+    ofstream gunoi("gunoi");
+    
+    for (int wave = 0; wave < WAVES/2; ++wave) {
+        vector<char> v(ELM_COUNT);
+        for (int i = 0; i < ELM_COUNT; i += 100) {
+            v[i] = rng();
+        }
+        
+        for (int g = 0; g < 20; ++g) {
+            gunoi << v[rng() % ELM_COUNT];
         }
     }
-    cout<<ans.size()<<'\n';
-    for(auto it : ans) cout<<it.first<<' '<<it.second<<'\n';
+    for (int wave = WAVES/2; wave < WAVES; ++wave) {
+        char* v = new char[ELM_COUNT];
+        for (int i = 0; i < ELM_COUNT; i += 100) {
+            v[i] = rng();
+        }
+        
+        for (int g = 0; g < 20; ++g) {
+            gunoi << v[rng() % ELM_COUNT];
+        }
+        delete[] v;
+    }
+    
+    cout << x << '\n';
+    gunoi.close();
 }
-int main(){
-    ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);
-    ll t; cin>>t; while(t--)
-        tc();
-}               

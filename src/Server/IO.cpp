@@ -140,7 +140,7 @@ void IO::done_test_request(string submissionId , int testId , result_enum verdic
     request["request"] = "doneTest";
     request["submissionId"] = submissionId;
     request["testId"] = testId;
-    request["verdict"] = general_utilities::enum_to_string(verdict);
+    request["verdict"] = (general_utilities::enum_to_string(verdict) == "TROLLEZI" ? "OK" : general_utilities::enum_to_string(verdict));
     request["message"] = message;
     request["score%"] = scorePercent;
     request["memory"] = memory;
