@@ -69,6 +69,7 @@ int download_task::callback_http(struct lws *wsi, enum lws_callback_reasons reas
             
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
             fprintf(stderr, ">>> CLIENT_CONNECTION_ERROR\n");
+            fprintf(stderr, ">>> CCE: %s\n", in ? (char*)in : "(null)");
             problem_manager::get_instance().update_problem_status(data -> problem_id , data -> rev_id , problem_status_enum::FAILED);
             data -> fail = 1;    
             data -> interrupted = 1;
