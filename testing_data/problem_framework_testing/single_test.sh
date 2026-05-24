@@ -39,4 +39,12 @@ fi
 
 ./checker in.txt out.txt ok.txt $partpath 100 100 10000
 
+echo $?
+
+rm checker
+rm gen
+rm val
+rm $mainexec
+rm $partexec
+
     
