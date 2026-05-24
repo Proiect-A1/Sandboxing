@@ -8,6 +8,14 @@
 #include <filesystem>
 #include <Singletoni/problem_manager.h>
 class problem_compiler_task : public task {
+  struct pct_helper {
+    std::string problem_id;
+    int rev_id;
+    result_enum result;
+    int user_id;
+    pct_helper(int user_id, const std::string& problem_id, int rev_id) : user_id(user_id), problem_id(problem_id), rev_id(rev_id), result(result_enum::FAIL) {}
+    ~pct_helper();
+  };
   std::string problem_id;
   int rev_id;
   std::string source_path;
