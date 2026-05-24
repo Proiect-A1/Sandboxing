@@ -38,6 +38,10 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
       pending_submissions_manager::get_instance().push(problem_id, rev_id, submission_id);
       return result_enum::NONE;
     }
+    else if (pm.get_problem_status(problem_id, rev_id)  == problem_status_enum::FAILED){
+      submission_manager::get_instance().set_verdict(submission_id, result_enum::FAIL, 0, 0, 0);
+      return result_enum::NONE;
+    }
     else if (pm.get_problem_status(problem_id , rev_id) != problem_status_enum::DONE){
       LOG_DEBUG_USER(user_id , problem_id + " problem is not ready yet");
       pending_submissions_manager::get_instance().push(problem_id, rev_id, submission_id);
