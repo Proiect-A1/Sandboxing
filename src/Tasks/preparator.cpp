@@ -22,7 +22,7 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
     // }
 
     // wait(&pid);
-    if(system((std::string("unzip -d ") + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + "-u " + path + " 2>&1 > /dev/null").c_str()))
+    if(system((std::string("unzip -d ") + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + "-o " + "-u " + path + " 2>&1 > /dev/null").c_str()))
     {
         LOG_ERROR("unzip error");
         problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
