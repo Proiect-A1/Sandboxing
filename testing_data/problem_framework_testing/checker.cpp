@@ -37,6 +37,7 @@ int main(int argc, char** argv){
     int maxt = atoi(argv[CHECKER_FIRST_ARG]);
     int maxn = atoi(argv[CHECKER_FIRST_ARG+1]);
     maxign = atoi(argv[CHECKER_FIRST_ARG+2]);
+    c.out.quitf(WA, "lmao");
     int t=c.in.readInt(1, maxt, 1);
     float points = 1.0;
     bool found_better_ans = false;
