@@ -50,7 +50,6 @@ public:
     }
     char get(){
         char c=in->peek();
-        //std::cerr<<"[parser::get()] "<<(int)c<<' '<<c<<'\n';
         if(c==(char)EOF) return c;
         if(c=='\n') line_no++;
         return in->get();
@@ -62,23 +61,19 @@ public:
         }
         while(true){
             char c=peek();
-            //std::cout<<c;
             if(c==(char)EOF || isspace(c)){
                 if(s.empty()){
                     s.push_back(c);
                     get();
                 }
-                //std::cerr<<"[parser::readToken()] "<<s<<'\n';
                 return s;
             }
             s.push_back(c);
             get();
         }
-        //std::cerr<<"[parser::readToken()] "<<s<<'\n';
-        return s; // teoretic nenecesar
+        return s;
     }
     static std::pair<parse_error, uint64_t> parseUint(const std::string& s){
-        //std::cerr<<"[parser::parseUint()] "<<s<<'\n';
         if(s.empty()) return std::make_pair(parse_error::OTHER, 0);
         uint64_t result=0;  
         bool first=0;
@@ -153,7 +148,7 @@ public:
         this->eof=false;
     }
     virtual void vpquitf(verdict_t verdict, float points, const char* fmt, va_list args){
-        if(verdict!=verdict_t::OK) /// validatoarele default pot returna doar OK sau FAIL
+        if(verdict!=verdict_t::OK) /// validators must return OK or FAIL
             verdict=verdict_t::FAIL;
         fprintf(stdout, "%.2f", points);
         vfprintf(stderr, fmt, args);
@@ -161,16 +156,12 @@ public:
         exit(verdict);
     }
     virtual void vquitf(verdict_t verdict, const char* fmt, va_list args){
-        if(verdict!=verdict_t::OK) /// validatoarele default pot returna doar OK sau FAIL
+        if(verdict!=verdict_t::OK) /// validators must return OK or FAIL
             verdict=verdict_t::FAIL;
         vfprintf(stderr, fmt, args);
         fflush(stderr);
         exit(verdict);
     }
-    /// mesajul de validator trebuie scris in stderr
-    /// numarul de puncte (un float de regula intre 0 si 1) trebuie scris in stdout
-    /// verdictul final (un int) este returnat
-    /// quitf() merge doar cu FAIL, quitf(OK) poate fi apelat doar din readEof();
     virtual void pquitf(verdict_t verdict, float points, const char* fmt, ...){
         if(require_eof && verdict==verdict_t::OK && !eof){
             pquitf(verdict_t::FAIL, 0.0, "validator::readEof() was not called");
@@ -189,7 +180,7 @@ public:
         va_end(args);
         exit(-1);
     } 
-    /// returneaza FAIL daca conditia este adevarata cu mesajul adecvat
+    /// returns FAIL if condition is true
     virtual void failIf(bool condition, const char* fmt, ...){
         if(condition){
             va_list args; va_start(args, fmt);
@@ -201,7 +192,6 @@ public:
     int line(){
         return p.line();
     }
-    /// verifica daca a ajuns la finalul stdin
     void readEof(){
         if(peek_eof()){
             eof=1;
@@ -215,8 +205,7 @@ public:
         if(isprint(c)) quitf(translate_pe,"Expected EOF, found '%c' (line %d)", c, line());
         quitf(translate_pe,"Expected EOF, found ascii character %d (line %d)", c, line());
     }
-    /// citeste un caracter din charset
-    char readChar(const char* charset){ /// daca charset = NULL, atunci se accepta orice caracter
+    char readChar(const char* charset){ /// if charset = NULL, then all characters are accepted
         if(peek_eof()) quitf(translate_pe, "Expected character from charset \"%s\", found EOF (line %d)", charset, line());
         char c=p.get();
         if(charset!=NULL && !strchr(charset, c)){
@@ -228,7 +217,7 @@ public:
         }
         return c;
     }
-    /// se citeste un spatiu
+
     char readSpace(){
         if(peek_eof()) quitf(translate_pe, "Expected space, found EOF (line %d)", line());
         char c=p.get();
@@ -241,7 +230,7 @@ public:
         }
         return c;
     }
-    /// se citeste Eoln
+
     char readEoln(){
         if(peek_eof()) quitf(translate_pe, "Expected EOLN, found EOF (line %d)", line());
         char c=p.get();
@@ -258,8 +247,8 @@ public:
     std::string readToken(bool ignore_whitespace = false){
         return p.readToken(ignore_whitespace);
     }
-    /// citeste un ll
-    int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = false){
+
+    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = false){
         std::string word=p.readToken(ignore_whitespace);
         std::pair<parser::parse_error, int64_t> token=parser::parseInt(word);
         using pe=parser::parse_error;
@@ -278,8 +267,10 @@ public:
         }
         return result;
     }
-    // citeste un ull
-    uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = false){
+    virtual int64_t readInt(bool ignore_whitespace = false){
+        return readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = false){
         std::string word=p.readToken(ignore_whitespace);
         std::pair<parser::parse_error, uint64_t> token=parser::parseUint(word);
         using pe=parser::parse_error;
@@ -298,6 +289,9 @@ public:
             quitf(translate_pe,"Number %llu is not inside the range [%llu, %llu] (line %d)", result, Min, Max, line());
         }
         return result;
+    }
+    virtual uint64_t readUnsigned(bool ignore_whitespace = false){
+        return readUnsigned(0, UINT64_MAX, ignore_whitespace);
     }
     ~validator(){
         if(this->require_eof)
@@ -331,6 +325,10 @@ public:
     virtual void vquitf(verdict_t verdict, const char* fmt, va_list args){
         if(verdict!=verdict_t::OK)
             verdict=verdict_t::FAIL;
+        if(verdict==verdict_t::OK)
+            fprintf(stdout,"1.0");
+        else 
+            fprintf(stdout,"0.0");
         vfprintf(stderr, fmt, args);
         fflush(stderr);
         exit(verdict);
@@ -346,6 +344,18 @@ public:
         vquitf(verdict, fmt, args);
         va_end(args);
         exit(-1);
+    }
+    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = true){
+        return validator::readInt(Min, Max, ignore_whitespace);
+    }
+    virtual int64_t readInt(bool ignore_whitespace = true){
+        return validator::readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = true){
+        return validator::readUnsigned(Min, Max, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(bool ignore_whitespace = true){
+        return validator::readUnsigned(0, UINT64_MAX, ignore_whitespace);
     }
 };
 class out_validator : public validator{
@@ -371,6 +381,10 @@ public:
     }
     virtual void vquitf(verdict_t verdict, const char* fmt, va_list args){
         vfprintf(stderr, fmt, args);
+        if(verdict==verdict_t::OK || verdict == verdict_t::SUPER)
+            fprintf(stdout,"1.0");
+        else 
+            fprintf(stdout,"0.0");
         fflush(stderr);
         exit(verdict);
     }
@@ -402,6 +416,18 @@ public:
         this->translate_wa=verdict_t::FAIL;
         this->require_eof=false;
     }
+    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = false){
+        return validator::readInt(Min, Max, ignore_whitespace);
+    }
+    virtual int64_t readInt(bool ignore_whitespace = false){
+        return validator::readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = false){
+        return validator::readUnsigned(Min, Max, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(bool ignore_whitespace = false){
+        return validator::readUnsigned(0, UINT64_MAX, ignore_whitespace);
+    }
 protected:
 };
 class checker{
@@ -430,6 +456,10 @@ public:
     }
     virtual void vquitf(verdict_t verdict, const char* fmt, va_list args){
         vfprintf(stderr, fmt, args);
+        if(verdict==verdict_t::OK || verdict == verdict_t::SUPER)
+            fprintf(stdout,"1.0");
+        else 
+            fprintf(stdout,"0.0");
         fflush(stderr);
         exit(verdict);
     }
