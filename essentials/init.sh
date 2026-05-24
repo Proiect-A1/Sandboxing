@@ -12,6 +12,14 @@ then
     exit 1
 fi
 
+ apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		iptables acl openssl sudo \
+		g++ zlib1g-dev libseccomp-dev libwebsockets-dev \
+		debootstrap \
+		unzip zip \
+		ca-certificates \
+        
 rm -r sandbox 2> /dev/null
 mkdir sandbox 2> /dev/null
 
