@@ -97,8 +97,8 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     struct lws_context *context;
     bool interrupted;
     bool fail;
-    lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_USER, NULL);
-
+    lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_INFO | LLL_DEBUG | LLL_CLIENT | LLL_HEADER, NULL);
+    
     char zip_path[PATH_MAX];
     sprintf(zip_path , "%s/tmp/%s.%d" , getenv("SANDBOX_PATH") , problem_id.c_str() , rev_id);    
 
