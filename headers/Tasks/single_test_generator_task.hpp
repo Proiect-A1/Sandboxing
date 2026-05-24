@@ -9,6 +9,7 @@
 #include <Tasks/runner_factories.hpp>
 #include <Tasks/checker_task.h>
 #include <Singletoni/problem_manager.h>
+#include <Singletoni/pending_submissions_manager.h>
 #include <Singletoni/logger.h>
 #include <Utilities/architecture_utilities.h>
 class single_test_generator_task : public task {

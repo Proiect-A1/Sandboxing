@@ -75,28 +75,32 @@ struct passwd pw_struct;
 
     if (pid == 0)
     {
-      for (int i = 4; i <= 1024; i++) close(i);
-        pthread_mutex_unlock(&Logger::mtx);
-        setpgid(0, 0);
+      pthread_mutex_unlock(&Logger::mtx);
+      if (close_range(4, ~0U, 0) == -1) {
+        LOG_ERROR_USER(user_id, "Failed to close file descriptors in child process");
+        exit(EXIT_FAILURE);
+      }
+      
+      setpgid(0, 0);
 
-        //daca vrem chroot trebe sa includem niste librarii in plus aduse aici, eventual mutam chroot in wrapperu de la comanda, dar again nu e necesar ca runneru oricum e jailed. adica e problema de user experience
-        // g++: fatal error: cannot execute 'cc1plus': posix_spawnp: No such file or directory
-       
-       //ROBERT ITI DAI FORMAT SINGUR LA COD
-        if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
-        {
-        LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
-        _exit(127);
-        }
+      //daca vrem chroot trebe sa includem niste librarii in plus aduse aici, eventual mutam chroot in wrapperu de la comanda, dar again nu e necesar ca runneru oricum e jailed. adica e problema de user experience
+      // g++: fatal error: cannot execute 'cc1plus': posix_spawnp: No such file or directory
+      
+      //ROBERT ITI DAI FORMAT SINGUR LA COD
+      if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
+      {
+      LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");
+      _exit(127);
+      }
     
-    // if (!(architecture_utilities::change_root_to_sandbox()))
-    // {
-      // LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
-    //   _exit(127);
-    // }
+    if (!(architecture_utilities::change_root_to_sandbox()))
+    {
+      LOG_ERROR_USER(user_id, "Failed to change root to sandbox");
+      _exit(127);
+    }
     
-    // std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
-    std::string inner_run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
+    std::string inner_run_dir = architecture_utilities::get_run_dir_relative_to_sandbox_path(user_id);
+    // std::string inner_run_dir = architecture_utilities::get_run_dir_absolute_path(user_id);
     if (chdir(inner_run_dir.c_str()) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to change directory to run directory inside sandbox");
@@ -105,17 +109,17 @@ struct passwd pw_struct;
 
     // LOG_DEBUG_USER(user_id, "Changed directory to run directory inside sandbox: " + inner_run_dir + " : " +general_utilities::syscall_to_string("ls"));
     
-    // if (setgid(pw.pw_gid) != 0)
-    // {
-      // LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
-    //   _exit(127);
-    // }
+    if (setgid(pw.pw_gid) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to set group ID inside sandbox");
+      _exit(127);
+    }
     
-    // if (setuid(pw.pw_uid) != 0)
-    // {
-      // LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
-    //   _exit(127);
-    // }
+    if (setuid(pw.pw_uid) != 0)
+    {
+      LOG_ERROR_USER(user_id, "Failed to set user ID inside sandbox");
+      _exit(127);
+    }
 
 
         int null_fd = open("/dev/null", O_RDONLY);
@@ -149,10 +153,9 @@ struct passwd pw_struct;
         }
         LOG_DEBUG_USER(user_id, "Compiler has reached exec");
         execv(compile_command.c_str(), argv);
-        execv(compile_command.c_str(), argv);
-        execv(compile_command.c_str(), argv);
-        execv(compile_command.c_str(), argv);
-        execv(compile_command.c_str(), argv);
+        while (errno == ETXTBSY || errno == EAGAIN) {
+          execv(compile_command.c_str(), argv);
+        }
         LOG_ERROR_USER(user_id, "Failed to execute compile command");
         _exit(127);
     }

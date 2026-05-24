@@ -7,7 +7,6 @@
 #include <arpa/inet.h>
 #include <Chestii_cu_data/test_metadata.h>
 #include <Chestii_cu_data/group_metadata.h>
-#include <Enums/result_enum.h>
 
 #define BUFF_SIZE 4096
 
@@ -33,7 +32,7 @@ class IO
         static sockaddr_in prepare_ip(const char *ip , short port);
         static int create_socket();
 
-        static void done_test_request(string submissionId , int testId , result_enum verdict , string message, float scorePercent , long long memory , float time , int sockfd);
+        static void done_test_request(string submissionId , int testId , int verdict , string message, float scorePercent , long long memory , float time , int sockfd);
         static void done_subtask_request(string submissionId , int subtaskId , float score , float maScore , float scorePercent , long long max_memory , float max_time , int sockfd);
         static void done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long max_memory , float max_time , int sockfd);
         static void upload_tests_request(string problemId , int revId , vector < test_metadata > tests , vector < group_metadata > groups , int sockfd);  
