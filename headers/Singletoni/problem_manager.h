@@ -3,6 +3,7 @@
 
 #include <Chestii_cu_data/problem_metadata.h>
 #include <Singletoni/task_queue.h>
+#include <Singletoni/pending_submissions_manager.h>
 #include <Tasks/generator_task.hpp>
 #include <map>
 #include <pthread.h>
