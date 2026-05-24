@@ -1,5 +1,4 @@
 #include <Tasks/preparator.h>
-#include <Singletoni/problem_manager.h>
 
 preparator::preparator(std::string problem_id , int rev_id)
 {
@@ -24,13 +23,7 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
 
     // wait(&pid);
 
-    if(system((std::string("unzip -d ") + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + "-u " + path + " 2>&1 > /dev/null").c_str()))
-    {
-        LOG_ERROR("unzip error");
-        problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
-        return result_enum::FAIL;
-    }
-
+    system((std::string("unzip -d ") + architecture_utilities::get_problem_data_folder(problem_id , rev_id) + " " + "-u " + path + " 2>&1 > /dev/null").c_str());
     LOG_DEBUG("Unzip finished");
     // trebe verificat daca o venit cu testele
     
@@ -59,7 +52,6 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
     folders_to_search.push_back(architecture_utilities::get_problem_interactors_folder(problem_id, rev_id));
 
     for (auto folder : folders_to_search){
-        LOG_WARNING(std::string("bla bla") + folder);
 
         if (std::filesystem::exists(folder)) {
             for (const auto& entry : std::filesystem::directory_iterator(folder)) {
@@ -74,7 +66,6 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
 
     for (auto source : sources_to_compile){
         task_queue::get_instance().push(new problem_compiler_task(problem_id, rev_id, source));
-        LOG_WARNING(std::string("HERERHERHEREHRHERHERHERHEHREHREHRE        ") + source);
     }
 
     
