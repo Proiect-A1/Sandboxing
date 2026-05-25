@@ -36,6 +36,7 @@ std::string general_utilities::enum_to_string(result_enum result){
   switch(result) {
       case result_enum::OK: return "OK";
       case result_enum::WA: return "WA";
+      case result_enum::PE: return "PE";
       case result_enum::PA: return "PA";
       case result_enum::TLE: return "TLE";
       case result_enum::MLE: return "MLE";
