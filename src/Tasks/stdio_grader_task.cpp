@@ -184,6 +184,8 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   if (read(fd, buffer, sizeof(buffer) - 1) < 0){
     LOG_ERROR_USER(user_id, "Error reading checker output file for points");
     helper.test.points = 0;
+    helper.test.result = result_enum::FAIL;
+    return result_enum::FAIL;
   }
   else{
     buffer[1023] = '\0';
@@ -193,6 +195,8 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     } catch (const std::exception& e) {
       LOG_ERROR_USER(user_id, "Error parsing points from checker output: " + points_str);
       helper.test.points = 0;
+      helper.test.result = result_enum::FAIL;
+      return result_enum::FAIL;
     }
   }
   close(fd);
@@ -210,6 +214,8 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     ssize_t bytes_read = read(fd, buffer, sizeof(buffer) - 1);
     if (bytes_read < 0) {
       LOG_ERROR_USER(user_id, "Error reading checker message file");
+      helper.test.result = result_enum::FAIL;
+      return result_enum::FAIL;
       break;
     } else if (bytes_read == 0) {
       // End of file
