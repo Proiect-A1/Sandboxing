@@ -51,7 +51,6 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
   }
   if (test_meta.validator_args.empty()){
     LOG_WARNING_USER(user_id, "Validator not set");
-    return result_enum::FAIL;
   }
   if (test_meta.checker_args.empty()){
     LOG_ERROR_USER(user_id, "Checker arguments not set");
