@@ -10,6 +10,8 @@ stdio_grader_task::stdio_grader_helper::~stdio_grader_helper() {
   else {
     LOG_INFO_USER(user_id, "Successfully cleaned up run directory from helper");
   }
+  if (test.result == result_enum::FAIL)
+    test.points = 0;
   sm.add_completed_test(submission_id, test_id, test);
   LOG_INFO_USER(user_id, "Submission " + submission_id + "Test " + std::to_string(test_id) + " completed with result " + test.message + ", points: " + std::to_string(test.points) + ", time used: " + std::to_string(test.time_used) + " ms, memory used: " + std::to_string(test.memory_used) + " B");
 }
@@ -204,7 +206,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   str_aux =architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + "checker_message_path";
   fd = open(str_aux.c_str(), O_RDONLY);
   if (fd < 0){
-    LOG_ERROR_USER(user_id, "Error opening checker output file to read points");
+    LOG_ERROR_USER(user_id, "Error opening checker output file to read message");
     helper.test.result = result_enum::FAIL;
     return result_enum::FAIL;
   }
