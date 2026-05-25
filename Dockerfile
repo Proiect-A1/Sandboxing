@@ -10,8 +10,6 @@ RUN apt-get update \
 		ca-certificates \
 	&& rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-#RUN cd /tmp && dotnet new console -n Warmup && cd Warmup && dotnet publish -c Release -r linux-x64 -p:PublishAot=true && cd / && rm -rf /tmp/Warmup
-
 WORKDIR /app
 COPY . . 
 

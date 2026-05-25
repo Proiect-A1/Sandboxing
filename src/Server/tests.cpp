@@ -132,18 +132,6 @@ namespace tests
         // test_submission("1005", "expresie", 1, language_enum::C);
         // test_submission("502", "abcde", 12, language_enum::C);
 
-    // test_submission("12345_1", "abcde", 12, language_enum::CSHARP);
-    // test_submission("12345_2", "abcde", 12, language_enum::CSHARP);
-    // test_submission("12345_3", "abcde", 12, language_enum::CSHARP);
-    // test_submission("1005", "expresie", 1, language_enum::CSHARP);
-    // test_submission("502", "abcde", 12, language_enum::CSHARP);
-
-        // test_submission("12345_1", "abcde", 12, language_enum::GO);
-        // test_submission("12345_2", "abcde", 12, language_enum::GO);
-        // test_submission("12345_3", "abcde", 12, language_enum::GO);
-        // test_submission("1005", "expresie", 1, language_enum::GO);
-        // test_submission("502", "abcde", 12, language_enum::GO);
-
     // test_submission("12345_1", "abcde", 12, language_enum::PYTHON);
     // test_submission("12345_2", "abcde", 12, language_enum::PYTHON);
     // test_submission("12345_3", "abcde", 12, language_enum::PYTHON);
@@ -358,8 +346,6 @@ namespace tests
         string lang_folder = "cpp";
         if (lang == language_enum::RUST) { ext = "rs"; lang_folder = "rs"; }
         else if (lang == language_enum::C) { ext = "c"; lang_folder = "c"; }
-        else if (lang == language_enum::CSHARP) { ext = "cs"; lang_folder = "cs"; }
-        else if (lang == language_enum::GO) { ext = "go"; lang_folder = "go"; }
         else if (lang == language_enum::PYTHON) { ext = "py"; lang_folder = "py"; }
 
         system((

@@ -7,8 +7,6 @@ enum class language_enum
     COMPILED,
     RUST,
     C,
-    CSHARP,
-    GO,
     PYTHON,
 };
 

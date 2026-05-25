@@ -14,8 +14,6 @@ std::string general_utilities::left_zero_pad (int number, int width) {
 language_enum general_utilities::string_to_language(const std::string& lang) {
   if (lang == "rs") return language_enum::RUST;
   if (lang == "c") return language_enum::C;
-  if (lang == "cs") return language_enum::CSHARP;
-  if (lang == "go") return language_enum::GO;
   if (lang == "py") return language_enum::PYTHON;
   return language_enum::CPP;
 }
