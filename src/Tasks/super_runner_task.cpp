@@ -248,7 +248,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     int in_fd = open(stdin_redirection_path.c_str(), O_RDONLY);
     if (in_fd < 0)
     {
-      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + " " + stdin_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami"));
+      LOG_ERROR_USER(user_id, "Failed to open input file inside sandbox " + run_username + " " + stdin_redirection_path + " " + general_utilities::syscall_to_string("ls") + general_utilities::syscall_to_string("whoami") + general_utilities::syscall_to_string("pwd"));
       _exit(127);
     }
     
@@ -268,6 +268,10 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     // Trebuie ori reconfigurat runner-u ca sa poata rula si checkere, asta inseamna sa aiba pe langa input si output, sa aiba correct output, si de asemenea sa poata rula ca strong user(marat)
     // ORIIIII, sandboxingu asta sa fie mutat in utilities. Up to cine are chef
     
+
+
+
+
     if (initgroups(run_username.c_str(), pw.pw_gid) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to initialize group access inside sandbox");

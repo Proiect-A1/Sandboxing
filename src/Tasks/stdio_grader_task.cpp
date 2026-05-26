@@ -57,7 +57,9 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   
   std::string submission_exec_path = architecture_utilities::get_submission_exec_path(submission_id);
   std::string problem_input_path = architecture_utilities::get_problem_input_path(problem_id, rev_id, test_id);
+  std::string problem_input_relative_path = architecture_utilities::get_problem_input_relative_path(problem_id, rev_id, test_id);
   std::string problem_correct_output_path = architecture_utilities::get_problem_correct_output_path(problem_id, rev_id, test_id);
+  std::string problem_correct_output_relative_path = architecture_utilities::get_problem_correct_output_relative_path(problem_id, rev_id, test_id);
   
   std::string input_path = architecture_utilities::get_run_dir_absolute_path(user_id) + "/input";
   std::string output_path = architecture_utilities::get_run_dir_absolute_path(user_id) + "/output";
@@ -72,13 +74,13 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     return result_enum::FAIL;
   }
 
-  if (!general_utilities::copy_file(problem_input_path, input_path, 0644)){
-    LOG_ERROR_USER(user_id, "Couldn't copy problem input to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " +  std::to_string(test_id) + ", Problem_input_path:" + problem_input_path + ", " + ", Destination_input_path: " + (architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + input_path) + general_utilities::syscall_to_string("pwd") + general_utilities::syscall_to_string("whoami"));
+  if (!general_utilities::create_symlink(problem_input_path, input_path)){
+    LOG_ERROR_USER(user_id, "Couldn't create symlink problem input to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " +  std::to_string(test_id) + ", Problem_input_path:" + problem_input_path + ", " + ", Destination_input_path: " + (architecture_utilities::get_run_dir_absolute_path(user_id) + "/" + input_path) + general_utilities::syscall_to_string("pwd") + general_utilities::syscall_to_string("whoami"));
     return result_enum::FAIL;
   }
 
   LOG_INFO_USER(user_id, "Current status: " + general_utilities::syscall_to_string("whoami") + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)) + general_utilities::syscall_to_string("pwd"));
-
+ 
   auto runner_task_ptr = runner_factories::stdio_submission_runner_factory[submission.language](
     submission_id,
     exec_path,
@@ -117,8 +119,8 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
   }
 
   //correct output
-  if (!general_utilities::copy_file(problem_correct_output_path, correct_output_path, 0644)){
-    LOG_ERROR_USER(user_id, "Couldn't copy problem correct output to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id));
+  if (!general_utilities::create_symlink(problem_correct_output_path, correct_output_path)){
+    LOG_ERROR_USER(user_id, "Couldn't create symlink problem correct output to run directory. Problem ID: " + problem_id + ", Rev ID: "+ std::to_string(rev_id) + ", Test ID: " + std::to_string(test_id));
     return result_enum::FAIL;
   }
   

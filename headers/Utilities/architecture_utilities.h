@@ -45,7 +45,8 @@ namespace architecture_utilities {
   std::string get_problem_checker_exec_path(const std::string& problem_id, int rev_id, const std::string& check_exec_name);
   std::string get_problem_generator_exec_path(const std::string& problem_id, int rev_id, const std::string& gen_exec_name);
   std::string get_problem_interactor_exec_path(const std::string& problem_id, int rev_id, const std::string& interactor_exec_name);
-  
+  std::string get_problem_input_relative_path(std::string problem_id, int rev_id, int test);
+  std::string get_problem_correct_output_relative_path(std::string problem_id, int rev_id, int test);
   std::string get_problem_data_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_tests_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_tests_inputs_folder(const std::string& problem_id, int rev_id);

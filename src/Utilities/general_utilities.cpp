@@ -32,6 +32,14 @@ bool general_utilities::copy_file(const std::string &from, const std::string &to
   return chmod(to.c_str(), mode) == 0;
 }
 
+bool general_utilities::create_symlink(const std::string &from, const std::string &to)
+{
+  std::error_code ec;
+  std::filesystem::create_hard_link(from, to, ec);
+  return !ec;
+}
+
+
 std::string general_utilities::enum_to_string(result_enum result){
   switch(result) {
       case result_enum::OK: return "OK";

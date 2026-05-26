@@ -28,6 +28,14 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
         problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
         return result_enum::FAIL;
     }
+
+    // if(system((std::string("setfacl -m m::rwx ") + architecture_utilities::get_problem_data_folder(problem_id , rev_id)).c_str()))
+    // {
+    //     LOG_ERROR("setfacl error");
+    //     problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
+    //     return result_enum::FAIL;
+    // }
+
     // trebe verificat daca o venit cu testele
     
     std::string tests_path = architecture_utilities::get_problem_tests_folder(problem_id , rev_id);
@@ -35,11 +43,11 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
     std::string correct_outputs_path = architecture_utilities::get_problem_tests_correct_outputs_folder(problem_id , rev_id);
     std::string problem_inputs_path = architecture_utilities::get_sandbox_path() + "/inputs/" + problem_id + "." + std::to_string(rev_id);
     std::string problem_correct_outputs_path = architecture_utilities::get_sandbox_path() + "/correct_outputs/" + problem_id + "." + std::to_string(rev_id);
-    mkdir(tests_path.c_str(), 0700);
-    mkdir(inputs_path.c_str(), 0700);
-    mkdir(correct_outputs_path.c_str(), 0700);
-    mkdir(problem_inputs_path.c_str(), 0700);
-    mkdir(problem_correct_outputs_path.c_str(), 0700);
+    mkdir(tests_path.c_str(), 0770);
+    mkdir(inputs_path.c_str(), 0770);
+    mkdir(correct_outputs_path.c_str(), 0770);
+    mkdir(problem_inputs_path.c_str(), 0770);
+    mkdir(problem_correct_outputs_path.c_str(), 0770);
 
     problem_manager &pm = problem_manager::get_instance();
     pm.update_problem_status(problem_id , rev_id , problem_status_enum::DOWNLOADED); //add generator

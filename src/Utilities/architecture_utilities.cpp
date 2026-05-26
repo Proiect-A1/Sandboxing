@@ -194,6 +194,16 @@ std::string architecture_utilities::get_problem_zip(const std::string& problem_i
   return architecture_utilities::get_sandbox_path() + "/tmp/" + problem_id + "." + std::to_string(rev_id);
 }
 
+std::string architecture_utilities::get_problem_input_relative_path(std::string problem_id, int rev_id, int test)
+{
+  return std::string("/inputs/") + problem_id + "." + std::to_string(rev_id) + "/" + general_utilities::left_zero_pad(test, 3) + ".in";
+}
+
+std::string architecture_utilities::get_problem_correct_output_relative_path(std::string problem_id, int rev_id, int test)
+{
+  return std::string("/correct_outputs/") + problem_id + "." + std::to_string(rev_id) + "/" + general_utilities::left_zero_pad(test, 3) + ".ok";
+}
+
 int architecture_utilities::get_sandbox_workers()
 {
   static const char* workers = getenv("SANDBOX_WORKERS");
