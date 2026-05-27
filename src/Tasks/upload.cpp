@@ -230,5 +230,11 @@ result_enum upload_task::execute(pthread_t thread_id, int user_id)
     lws_context_destroy(context);
 
     LOG_DEBUG("Uploaded successfully");
+
+    if(system((std::string("rm ") + architecture_utilities::get_problem_zip(problem_id , rev_id)).c_str()))
+    {
+        LOG_ERROR("couldn't delete zip");
+    }
+
     return result_enum::OK;
 }

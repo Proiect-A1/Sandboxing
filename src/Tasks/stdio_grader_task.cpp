@@ -79,7 +79,7 @@ result_enum stdio_grader_task::execute(pthread_t thread_id, int user_id){
     return result_enum::FAIL;
   }
 
-  LOG_INFO_USER(user_id, "Current status: " + general_utilities::syscall_to_string("whoami") + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)) + general_utilities::syscall_to_string("pwd"));
+  //LOG_INFO_USER(user_id, "Current status: " + general_utilities::syscall_to_string("whoami") + general_utilities::syscall_to_string("ls " + architecture_utilities::get_run_dir_absolute_path(user_id)) + general_utilities::syscall_to_string("pwd"));
  
   auto runner_task_ptr = runner_factories::stdio_submission_runner_factory[submission.language](
     submission_id,

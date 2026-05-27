@@ -89,16 +89,16 @@ bool general_utilities::is_executable(const std::string& path){
 }
 
 std::string general_utilities::syscall_to_string(std::string syscall){
-  FILE* f = popen(syscall.c_str(), "r");
-  std::string result = "\n | (" + syscall + ")\n";
-  if (f){
-    char buffer[256];
-    while (fgets(buffer, sizeof(buffer), f)) {
-      result += buffer;
-    }
-    pclose(f);
-  }
-  else
-    result += "FAIL";
-  return result;
+  // FILE* f = popen(syscall.c_str(), "r");
+  // std::string result = "\n | (" + syscall + ")\n";
+  // if (f){
+  //   char buffer[256];
+  //   while (fgets(buffer, sizeof(buffer), f)) {
+  //     result += buffer;
+  //   }
+  //   pclose(f);
+  // }
+  // else
+  //   result += "FAIL";
+  return "";
 }
