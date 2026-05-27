@@ -27,5 +27,5 @@ elif [ $# -eq 1 -a $1 == 'vps' ]
 then
     ./runners/main 10.0.0.240 6000 15
 else
-    ./runners/main 0.0.0.0 6000 8
+    ./runners/main 0.0.0.0 6000 4
 fi

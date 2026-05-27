@@ -6,7 +6,7 @@ then
     exit 2
 fi
 
-bash ./essentials/init.sh 8
+bash ./essentials/init.sh 16
 
 if [ $# -eq 1 -a $1 == 'debug' ] 
 then 
