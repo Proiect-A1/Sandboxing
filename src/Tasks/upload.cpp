@@ -123,12 +123,6 @@ bool upload_task::prepare()
     std::string pdf = architecture_utilities::get_problem_data_folder(problem_id , rev_id);
     std::string pza = architecture_utilities::get_problem_zip(problem_id , rev_id);
 
-    if(!general_utilities::is_file(pza))
-    {
-        LOG_ERROR("Trying to upload file: not existent archive");
-        return false;
-    }
-
     if(!general_utilities::is_folder(pdf))
     {
         LOG_ERROR("Trying to upload file: not existent problem folder");
