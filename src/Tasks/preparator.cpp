@@ -29,13 +29,13 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
         return result_enum::FAIL;
     }
 
-    // if(system((std::string("setfacl -m m::rwx ") + architecture_utilities::get_problem_data_folder(problem_id , rev_id)).c_str()))
-    // {
-    //     LOG_ERROR("setfacl error");
-    //     problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
-    //     return result_enum::FAIL;
-    // }
-
+    if(system((std::string("rm -rf ") + path).c_str()))
+    {
+        LOG_ERROR("couldn't delete old archive");
+        problem_manager::get_instance().update_problem_status(problem_id , rev_id , problem_status_enum::FAILED);
+        return result_enum::FAIL;
+    }
+   
     // trebe verificat daca o venit cu testele
     
     std::string tests_path = architecture_utilities::get_problem_tests_folder(problem_id , rev_id);
