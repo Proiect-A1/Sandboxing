@@ -129,8 +129,13 @@ bool upload_task::prepare()
         return false;
     }
 
-    int status_code = system((std::string("zip -r ") + pza + " " + pdf).c_str());
+    
+    chdir(pdf.c_str());
 
+    int status_code = system((std::string("zip -r ") + pza + " " + ".").c_str());
+
+    chdir(architecture_utilities::get_sandbox_path().c_str());
+    
     if(status_code != 0)
     {
         LOG_ERROR("Zip failed");
