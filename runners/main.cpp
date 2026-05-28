@@ -19,6 +19,8 @@
 #include <Singletoni/task_queue.h>
 #include <Server/header_helper.hpp>
 #include <pthread.h>
+#include <Server/state.h>
+#include <Server/json_length_state.h>
 
 #define EVENTS_BUFF_SIZE 4096
 
@@ -30,6 +32,7 @@ short num_of_threads;
 std::atomic<short> worker_thread_count = 0;
 int sockfd;
 int epollfd;
+unordered_map < int , state* > request_state_table;
 
 void read_args(int argc , char *argv[])
 {
@@ -66,6 +69,13 @@ void set_socket()
     LOG_INFO(std::string("Listening socket on ") + inet_ntoa(socket_address.sin_addr) + ":" + std::to_string(ntohs(socket_address.sin_port)));
 }
 
+  void set_nonblocking(int fd) 
+  {
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1) handle_error(1, "fcntl(F_GETFL)");
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) handle_error(1, "fcntl(F_SETFL)");
+}
+
 void create_epoll()
 {
     epollfd = epoll_create1(0); if(epollfd == -1) handle_error(1 , "epoll_create1()");
@@ -78,6 +88,8 @@ int accept_new_connection()
     int fd;
     if((fd = accept(sockfd , (sockaddr *) &client_address , &len_client_address)) == -1) handle_error(1 , "accept()");
     LOG_INFO(std::string("Connection received from ") + inet_ntoa(client_address.sin_addr) + ":" + std::to_string(ntohs(client_address.sin_port)));
+    request_state_table[fd] = nullptr;
+    request_state_table[fd] = new json_length_state(sizeof(int) , &request_state_table[fd] , fd);
     return fd;
 }
 
@@ -155,40 +167,13 @@ IO helper;
 
 void receive_request(int client_fd)
 {
-    try 
+    request_state_table[client_fd] -> add();
+
+    if(request_state_table[client_fd] == nullptr)
     {
-        int len_read;
-        int length; if((len_read = helper.read_consistent_w_buffer(client_fd , &length , sizeof(length))) == -1) handle_error(1 , "read_consistent()");
-        if(len_read == 0) {rem_fd(client_fd); return;}
-
-        string request_string;
-
-        for(int i = 0 ; i < length ; i++)
-        {
-            char ch = helper.get_char_fd(client_fd);
-            request_string += ch;
-        }
-        
-        json j = json::parse(request_string);
-        LOG_DEBUG(std::string("Request string: ") + j.dump());
-
-        if(!j.contains("request"))
-        {
-            LOG_ERROR("Invalid request received");
-        }
-        else 
-        {
-            string request_name = j["request"].get < string > ();
-            helper.execute(request_name , j , client_fd);
-        }
-    }
-    catch(exception &e)
-    {
-        LOG_ERROR(std::string("Invalid request received: ") + e.what());
-        helper.reset();
         rem_fd(client_fd);
-    }   
-       
+        request_state_table.erase(client_fd);
+    }  
 }
 
 void init_users()
@@ -246,6 +231,7 @@ map < string , void (*)() > debug_command = {
   {"swapsort_status", print_swapsort_status},
   };
 
+
 void execute_debug()
 {
     char comm[100];
@@ -299,6 +285,7 @@ int main(int argc , char *argv[])
                 if(fd == sockfd)
                 {
                     int fd_client = accept_new_connection();
+                    set_nonblocking(fd_client);
                     add_fd(fd_client , EPOLLIN | EPOLLET);
                 }   
                 else if(fd != 0)
