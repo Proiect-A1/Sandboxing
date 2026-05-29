@@ -3,7 +3,7 @@ name: VPN Deploy and Run Script
 on:
   push:
     branches:
-      - dev
+      - main
   workflow_dispatch:
 
 jobs:
@@ -26,13 +26,13 @@ jobs:
           ssh -T -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER2 }}@${{ secrets.SERVER_IP2 }} << 'EOF'
           echo "Starting deployment..."
           set -e
-          cd ~/fiicoder/dev/Sandbox
+          cd ~/fiicoder/prod/Sandbox
           git fetch --all
-          git checkout dev
-          git pull sandbox dev
-          git reset --hard sandbox/dev
+          git checkout main
+          git pull prod-sandbox main
+          git reset --hard prod-sandbox/main
           git clean -fd
           cd ../
-          docker compose down dev-sandbox-sandbox && docker compose up --build -d dev-sandbox-sandbox
+          docker compose down sandbox-sandbox && docker compose up --build -d sandbox-sandbox
           echo "Deployment successful!"
           EOF
