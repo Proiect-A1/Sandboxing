@@ -18,6 +18,13 @@ void src_state::add()
         {
             handle_error(1 , "src_state add()");
         }
+        else if(rd == 0)
+        {
+            LOG_ERROR(std::string("Invalid request received: "));
+            *founding_ptr = nullptr;
+            delete this;
+            return;
+        }
 
         if(write(submission_fd , buff , rd) != rd) handle_error(1 , "src_state write()");
 

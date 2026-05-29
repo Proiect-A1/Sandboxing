@@ -14,8 +14,8 @@
 
 using namespace std;
 
-const char *bd_ip = "10.8.0.9";
-const short bd_port = 6767;
+const char *bd_ip = "";
+const short bd_port = 0;
 
 IO::IO()
 {

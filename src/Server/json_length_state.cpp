@@ -17,6 +17,13 @@ void json_length_state::add()
         {
             handle_error(1 , "json_length_state add()");
         }
+        else if(rd == 0)
+        {
+            LOG_ERROR(std::string("Invalid request received: "));
+            *founding_ptr = nullptr;
+            delete this;
+            return;
+        }
 
         completed += rd;
 
