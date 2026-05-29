@@ -32,7 +32,7 @@ short num_of_threads;
 std::atomic<short> worker_thread_count = 0;
 int sockfd;
 int epollfd;
-unordered_map < int , state* > request_state_table;
+map < int , state* > request_state_table;
 
 void read_args(int argc , char *argv[])
 {
@@ -167,6 +167,9 @@ IO helper;
 
 void receive_request(int client_fd)
 {
+    if(request_state_table.count(client_fd) == 0)
+        return;
+
     request_state_table[client_fd] -> add();
 
     if(request_state_table[client_fd] == nullptr)
