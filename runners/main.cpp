@@ -32,7 +32,7 @@ short num_of_threads;
 std::atomic<short> worker_thread_count = 0;
 int sockfd;
 int epollfd;
-map < int , state* > request_state_table;
+unordered_map < int , state** > request_state_table;
 
 void read_args(int argc , char *argv[])
 {
@@ -88,8 +88,8 @@ int accept_new_connection()
     int fd;
     if((fd = accept(sockfd , (sockaddr *) &client_address , &len_client_address)) == -1) handle_error(1 , "accept()");
     LOG_INFO(std::string("Connection received from ") + inet_ntoa(client_address.sin_addr) + ":" + std::to_string(ntohs(client_address.sin_port)));
-    request_state_table[fd] = nullptr;
-    request_state_table[fd] = new json_length_state(sizeof(int) , &request_state_table[fd] , fd);
+    request_state_table[fd]= new state*;
+    *request_state_table[fd] = new json_length_state(sizeof(int) , request_state_table[fd] , fd);
     return fd;
 }
 
@@ -170,9 +170,9 @@ void receive_request(int client_fd)
     if(request_state_table.count(client_fd) == 0)
         return;
 
-    request_state_table[client_fd] -> add();
+    (*request_state_table[client_fd]) -> add();
 
-    if(request_state_table[client_fd] == nullptr)
+    if(*request_state_table[client_fd] == nullptr)
     {
         rem_fd(client_fd);
         request_state_table.erase(client_fd);

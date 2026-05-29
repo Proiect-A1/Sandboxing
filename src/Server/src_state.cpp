@@ -65,5 +65,6 @@ void src_state::execute()
 void src_state::next_state()
 {
     *founding_ptr = nullptr;
+    LOG_DEBUG("                         SRC STATE ");
     delete this;
 }
