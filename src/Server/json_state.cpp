@@ -6,6 +6,9 @@ void json_state::add()
 {
     if(completed == expected_length)
     {
+        LOG_ERROR(std::string("Invalid request received: "));
+        *founding_ptr = nullptr;
+        delete this;
         return;
     }
 
