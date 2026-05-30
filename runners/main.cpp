@@ -55,7 +55,7 @@ void rem_fd(int fd)
     if(epoll_ctl(epollfd , EPOLL_CTL_DEL , fd , nullptr) == -1) handle_error(1 , "epoll_ctl()");
     sockaddr_in client_address;
     socklen_t len_client_address = sizeof(client_address);
-    if(getpeername(fd , (sockaddr *) &client_address , &len_client_address) == -1) handle_error(1 , "getperrname()");
+    if(getpeername(fd , (sockaddr *) &client_address , &len_client_address) == -1) {LOG_ERROR("getpeername()"); return;}
     LOG_INFO(std::string("Connection closed by ") + inet_ntoa(client_address.sin_addr) + ":" + std::to_string(ntohs(client_address.sin_port)));
 }
 
@@ -283,7 +283,7 @@ int main(int argc , char *argv[])
             int events_mask = ev[i].events;
             int fd = ev[i].data.fd;
 
-            if(events_mask & EPOLLIN)
+            if(events_mask & (EPOLLIN | EPOLLHUP | EPOLLERR))
             {
                 if(fd == sockfd)
                 {
@@ -301,6 +301,7 @@ int main(int argc , char *argv[])
                    execute_debug();
                 }
             }
+            else LOG_ERROR("untreated even epoll()")
         }
     }
     
