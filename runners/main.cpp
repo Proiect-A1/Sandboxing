@@ -189,42 +189,48 @@ void init_users()
     }
 }
 
-void debug_workers(){
+void debug_workers(vector < string > args = vector < string> ()){
     string message = "WORKERS = " + to_string(architecture_utilities::get_sandbox_workers());
     LOG_DEBUG(message.c_str());
 }
 
-void debug_path(){
+void debug_path(vector < string > args = vector < string> ()){
     string message = "PATH = " + architecture_utilities::get_sandbox_path();
     LOG_DEBUG(message.c_str());
 }
 
-void debug_main_threads(){
+void debug_main_threads(vector < string > args = vector < string> ()){
   string message = "MAIN_THREAD_COUNT = " + std::to_string(num_of_threads);
   LOG_DEBUG(message.c_str());
 }
 
-void debug_worker_threads(){
+void debug_worker_threads(vector < string > args = vector < string> ()){
   string message = "WORKER_THREAD_COUNT = " + std::to_string(worker_thread_count);
   LOG_DEBUG(message.c_str());
 }
 
-void debug_user_queue_size(){
+void debug_user_queue_size(vector < string > args = vector < string> ()){
   string message = "USER_QUEUE_SIZE = " + std::to_string(user_queue::get_instance().size());
   LOG_DEBUG(message.c_str());
 }
 
-void debug_task_queue_size(){
+void debug_task_queue_size(vector < string > args = vector < string> ()){
   string message = "TASK_QUEUE_SIZE = " + std::to_string(task_queue::get_instance().size());
   LOG_DEBUG(message.c_str());
 }
 
-void print_swapsort_status(){
+void print_swapsort_status(vector < string > args = vector < string> ()){
   string message = "SWAPSORT STATUS: " + general_utilities::enum_to_string(problem_manager::get_instance().get_problem_status("05ba3116-b99c-4499-856b-866b41a0f627", 1));
   LOG_DEBUG(message.c_str());
 }
 
-map < string , void (*)() > debug_command = {
+void debug_args_test(vector < string > args = vector < string > ())
+{
+    for(int i = 0 ; i < args.size() ; i++)
+        cerr << args[i] << endl;
+}
+
+map < string , void (*)(vector < string > args) > debug_command = {
   {"workers" , debug_workers},
   {"path" , debug_path},
   {"main_threads", debug_main_threads},
@@ -232,24 +238,67 @@ map < string , void (*)() > debug_command = {
   {"user_queue_size", debug_user_queue_size},
   {"task_queue_size", debug_task_queue_size},
   {"swapsort_status", print_swapsort_status},
+  {"debug_args" , debug_args_test}
   };
 
+struct debug_helper 
+{
+    string name;
+    vector < string > args;
+    bool invalid;
+
+    debug_helper(const char *comm)
+    {
+        bool found = 0;
+        int len = strlen(comm);
+
+        for(int i = 0 ; comm && i < len - 2 ; i++)
+        {
+            if(found == 0)
+            {
+                if(comm[i] == '(')
+                {
+                    found = 1;
+                    args.push_back("");
+                }
+                else name += comm[i];
+            }
+            else 
+            {
+                if(comm[i] == ',')
+                {
+                    args.push_back("");
+                }
+                else args.back() += comm[i];
+            }
+        }
+
+        if(found == 0 || comm == nullptr || strlen(comm) <= 1 || comm[strlen(comm) - 2] != ')' || name.size() == 0)
+        {
+            invalid = 1;
+            cerr << "hello" << endl;
+        }
+    }
+};
 
 void execute_debug()
 {
-    char comm[100];
-    int len = read(0 , comm , 100);
-    comm[len - 1] = '\0';
+    string comm;
+    char ch;
 
-    if(debug_command.count(comm))
+    while(read(0 , &ch , sizeof(char)) == 1) comm += ch;
+    debug_helper helper(comm.c_str());
+    
+    if(helper.invalid == true || debug_command.count(helper.name) == 0)
     {
-        debug_command[comm]();
+         LOG_DEBUG("debug command ignored");
     }
     else 
     {
-        LOG_DEBUG("debug command ignored");
+        debug_command[helper.name](helper.args);
     }
 }
+
 
 int main(int argc , char *argv[])
 {
@@ -259,6 +308,7 @@ int main(int argc , char *argv[])
     set_socket();
     create_epoll();
     add_fd(sockfd , EPOLLIN);
+    set_nonblocking(0);
     add_fd(0 , EPOLLIN);
     create_threads();
     init_users();
