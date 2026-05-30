@@ -13,7 +13,7 @@ struct submission_test{
     std::string message; // message to be sent to the user after the test is completed
     float time_used; // in milliseconds
     long long memory_used; // in bytes
-    result_enum result; 
+    result_enum result = result_enum::NONE; // result of the test
     std::vector<int> groups;
     submission_data *parent_submission;
     submission_test(){}

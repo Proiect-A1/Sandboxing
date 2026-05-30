@@ -28,6 +28,14 @@ submission_data::submission_data(std::string submission_id , language_enum langu
 }
 
 void submission_data::add_completed_test(int test_id, result_enum result, float points, float time_used, long long memory_used){
+    if (test_id < 0 || test_id >= test_count) {
+        LOG_ERROR(std::string("Invalid test_id ") + std::to_string(test_id) + " for submission " + submission_id);
+        return;
+    }
+    if (tests[test_id].result != result_enum::NONE) {
+        LOG_WARNING(std::string("Test ") + std::to_string(test_id) + " for submission " + submission_id + " already has a result, skipping");
+        return;
+    }
     if(this->result==result_enum::OK && result!=result_enum::OK)
         this->result=result;
     tests[test_id].result=result;
@@ -73,7 +81,12 @@ void submission_data::set_verdict(result_enum result, float points, float time_u
     this->points=points;
     this->time_used=time_used;
     this->memory_used=memory_used;
-    send_completed_submission_packet();
+    for (int i = 0; i < this->test_count; i++){
+        if (tests[i].result == result_enum::NONE){
+            add_completed_test(i, result_enum::SKIP, 0, 0, 0);
+        }
+    }
+    // send_completed_submission_packet();
 }
 void submission_data::send_completed_test_packet(int test_id, const submission_test& completed_test){
     // de trimis packet cu test terminat

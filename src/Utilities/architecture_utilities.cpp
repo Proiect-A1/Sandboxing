@@ -117,11 +117,26 @@ std::string architecture_utilities::get_submission_exec_path(std::string submiss
   }
   return "";
 }
-std::string architecture_utilities::get_problem_input_path(std::string problem_id, int rev_id, int test) {
-  return get_sandbox_path() + "/inputs/" + problem_id + "." + std::to_string(rev_id) + "/" + general_utilities::left_zero_pad(test, 3) + ".in";
+
+std::string architecture_utilities::get_test_input_name (int test){
+  return general_utilities::left_zero_pad(test, 3) + ".in";
 }
-std::string architecture_utilities::get_problem_correct_output_path(std::string problem_id, int rev_id, int test) {
-  return get_sandbox_path() + "/correct_outputs/" + problem_id + "." + std::to_string(rev_id) + "/" + general_utilities::left_zero_pad(test, 3) + ".ok";
+std::string architecture_utilities::get_test_correct_output_name (int test){
+  return general_utilities::left_zero_pad(test, 3) + ".ok";
+}
+
+std::string architecture_utilities::get_problem_inputs_folder(const std::string &problem_id, int rev_id){
+  return get_sandbox_path() + "/inputs/" + problem_id + "." + std::to_string(rev_id);
+}
+std::string architecture_utilities::get_problem_correct_outputs_folder(const std::string &problem_id, int rev_id){
+  return get_sandbox_path() + "/correct_outputs/" + problem_id + "." + std::to_string(rev_id);
+}
+
+std::string architecture_utilities::get_problem_input_path(const std::string &problem_id, int rev_id, int test) {
+  return get_problem_inputs_folder(problem_id, rev_id) + "/" + get_test_input_name(test);
+}
+std::string architecture_utilities::get_problem_correct_output_path(const std::string &problem_id, int rev_id, int test) {
+  return get_problem_correct_outputs_folder(problem_id, rev_id) + "/" + get_test_correct_output_name(test);
 }
 
 
@@ -167,8 +182,14 @@ std::string architecture_utilities::get_problem_tests_folder(const std::string& 
 std::string architecture_utilities::get_problem_tests_inputs_folder(const std::string& problem_id, int rev_id){
   return get_problem_tests_folder(problem_id, rev_id) + "/inputs";
 }
+std::string architecture_utilities::get_problem_test_input_path (const std::string& problem_id, int rev_id, int test){
+  return get_problem_tests_inputs_folder(problem_id, rev_id) + "/" + get_test_input_name(test);
+}
 std::string architecture_utilities::get_problem_tests_correct_outputs_folder(const std::string& problem_id, int rev_id){
   return get_problem_tests_folder(problem_id, rev_id) + "/correct_outputs";
+}
+std::string architecture_utilities::get_problem_test_correct_output_path (const std::string& problem_id, int rev_id, int test){
+  return get_problem_tests_correct_outputs_folder(problem_id, rev_id) + "/" + get_test_correct_output_name(test);
 }
 std::string architecture_utilities::get_problem_raw_tests_folder(const std::string& problem_id, int rev_id){
   return get_problem_data_folder(problem_id, rev_id) + "/files/raw_tests";

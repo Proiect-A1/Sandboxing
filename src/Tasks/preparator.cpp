@@ -36,18 +36,7 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
         return result_enum::FAIL;
     }
    
-    // trebe verificat daca o venit cu testele
     
-    std::string tests_path = architecture_utilities::get_problem_tests_folder(problem_id , rev_id);
-    std::string inputs_path = architecture_utilities::get_problem_tests_inputs_folder(problem_id , rev_id);
-    std::string correct_outputs_path = architecture_utilities::get_problem_tests_correct_outputs_folder(problem_id , rev_id);
-    std::string problem_inputs_path = architecture_utilities::get_sandbox_path() + "/inputs/" + problem_id + "." + std::to_string(rev_id);
-    std::string problem_correct_outputs_path = architecture_utilities::get_sandbox_path() + "/correct_outputs/" + problem_id + "." + std::to_string(rev_id);
-    mkdir(tests_path.c_str(), 0770);
-    mkdir(inputs_path.c_str(), 0770);
-    mkdir(correct_outputs_path.c_str(), 0770);
-    mkdir(problem_inputs_path.c_str(), 0770);
-    mkdir(problem_correct_outputs_path.c_str(), 0770);
 
     problem_manager &pm = problem_manager::get_instance();
     pm.update_problem_status(problem_id , rev_id , problem_status_enum::DOWNLOADED); //add generator
@@ -73,14 +62,19 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
         }
       }
     
-    pm.start_compiling_sources(problem_id, rev_id, sources_to_compile.size());
+    if (!sources_to_compile.empty()){
+      pm.start_compiling_sources(problem_id, rev_id, sources_to_compile.size());
 
-    for (auto source : sources_to_compile){
-        task_queue::get_instance().push(new problem_compiler_task(problem_id, rev_id, source));
+      for (auto source : sources_to_compile){
+          task_queue::get_instance().push(new problem_compiler_task(problem_id, rev_id, source));
+      }
+    }
+    else{
+      task_queue::get_instance().push(new generator_task(problem_id, rev_id));
     }
 
     
-    return result_enum::OTHER; //n-ar trebui sa returneze nimic
+    return result_enum::OK; //returneaza ca a mers bine task-ul
 }
 
 bool preparator::check_permissions(int user_id) 
