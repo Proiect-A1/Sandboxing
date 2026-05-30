@@ -1,4 +1,4 @@
-#include <Tasks/generator_task.hpp>
+#include <Tasks/generator_task.h>
 
 result_enum generator_task::execute(pthread_t thread_id, int user_id){
   if (user_id <= 0){

@@ -14,7 +14,7 @@
 #include <Tasks/task.h>
 #include <Utilities/architecture_utilities.h>
 #include <Utilities/general_utilities.h>
-#include <Tasks/super_runner_task.hpp>
+#include <Tasks/super_runner_task.h>
 
 namespace runner_factories{
 

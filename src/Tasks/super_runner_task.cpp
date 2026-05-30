@@ -1,4 +1,4 @@
-#include <Tasks/super_runner_task.hpp>
+#include <Tasks/super_runner_task.h>
 
 static int install_seccomp_whitelist(const std::string& exec_path)
 {

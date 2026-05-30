@@ -2,8 +2,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
-#include <Server/json.hpp>
-#include <Server/header_helper.hpp>
+#include <Server/json.h>
+#include <Server/header_helper.h>
 #include <fcntl.h>
 using namespace std;
 

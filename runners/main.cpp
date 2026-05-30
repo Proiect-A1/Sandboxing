@@ -3,11 +3,11 @@
 #include <arpa/inet.h>
 #include <sys/epoll.h>
 #include <Server/json.hpp>
-#include <Server/IO.hpp>
+#include <Server/IO.h>
 #include <fcntl.h>
-#include <Server/tests.hpp>
+#include <Server/tests.h>
 
-#include <Tasks/problem_compiler_task.hpp>
+#include <Tasks/problem_compiler_task.h>
 #include <Tasks/evaluator_task.h>
 #include <Tasks/stdio_grader_task.h>
 #include <iostream>
@@ -17,7 +17,7 @@
 #include <vector>
 #include <Singletoni/user_queue.h>
 #include <Singletoni/task_queue.h>
-#include <Server/header_helper.hpp>
+#include <Server/header_helper.h>
 #include <pthread.h>
 #include <Server/state.h>
 #include <Server/json_length_state.h>
