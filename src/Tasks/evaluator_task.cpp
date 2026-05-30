@@ -30,12 +30,13 @@ result_enum evaluator_task::execute(pthread_t thread_id, int user_id) {
 
       submission_manager &sm = submission_manager::get_instance();
     //  IO::pull_problem_request(problem_id , rev_id , sm.get_submission(submission_id).socket_fd);
-     download_task *dt = new download_task(sm.get_submission(submission_id).download_link , problem_id , rev_id); 
+      pending_submissions_manager::get_instance().push(problem_id, rev_id, submission_id); 
+      download_task *dt = new download_task(sm.get_submission(submission_id).download_link , problem_id , rev_id); 
       dt -> priority = 1000; //prioritate mare
       task_queue::get_instance().push(dt);
 
       LOG_DEBUG_USER(user_id , problem_id + " problem needs download");
-      pending_submissions_manager::get_instance().push(problem_id, rev_id, submission_id);
+      
       return result_enum::NONE;
     }
     else if (pm.get_problem_status(problem_id, rev_id)  == problem_status_enum::FAILED){
