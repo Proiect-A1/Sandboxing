@@ -301,7 +301,7 @@ int main(int argc , char *argv[])
                    execute_debug();
                 }
             }
-            else LOG_ERROR("untreated even epoll()")
+            else LOG_ERROR("untreated even epoll()");
         }
     }
     
