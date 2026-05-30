@@ -35,8 +35,13 @@ namespace architecture_utilities {
   std::string get_submission_source_path(std::string submission_id, language_enum language = language_enum::CPP);
   std::string get_submission_source_name(language_enum language);
   std::string get_submission_exec_path(std::string submission_id, language_enum language = language_enum::CPP);
-  std::string get_problem_input_path(std::string problem_id, int rev_id, int test);
-  std::string get_problem_correct_output_path(std::string problem_id, int rev_id, int test);
+  std::string get_test_input_name(int test);
+  std::string get_test_correct_output_name(int test);
+  std::string get_problem_inputs_folder(const std::string &problem_id, int rev_id);
+  std::string get_problem_correct_outputs_folder(const std::string &problem_id, int rev_id);
+  std::string get_problem_input_path(const std::string &problem_id, int rev_id, int test);
+  std::string get_problem_correct_output_path(const std::string &problem_id, int rev_id, int test);
+
   std::string get_problem_script_path(const std::string& problem_id, int rev_id);
   std::string get_problem_metadata_path(const std::string& problem_id, int rev_id);
   std::string get_problem_raw_test_path(const std::string& problem_id, int rev_id, const std::string& raw_test_name);
@@ -50,7 +55,9 @@ namespace architecture_utilities {
   std::string get_problem_data_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_tests_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_tests_inputs_folder(const std::string& problem_id, int rev_id);
+  std::string get_problem_test_input_path(const std::string& problem_id, int rev_id, int test);
   std::string get_problem_tests_correct_outputs_folder(const std::string& problem_id, int rev_id);
+  std::string get_problem_test_correct_output_path(const std::string& problem_id, int rev_id, int test);
   std::string get_problem_raw_tests_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_sources_folder(const std::string& problem_id, int rev_id);
   std::string get_problem_validators_folder(const std::string& problem_id, int rev_id);
