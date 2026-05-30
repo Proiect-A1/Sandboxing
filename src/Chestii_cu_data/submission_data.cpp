@@ -83,11 +83,10 @@ void submission_data::set_verdict(result_enum result, float points, float time_u
     this->memory_used=memory_used;
     for (int i = 0; i < this->test_count; i++){
         if (tests[i].result == result_enum::NONE){
-            tests[i].result = result_enum::SKIP;
-            send_completed_test_packet(i, tests[i]);
+            add_completed_test(i, result_enum::SKIP, 0, 0, 0);
         }
     }
-    send_completed_submission_packet();
+    // send_completed_submission_packet();
 }
 void submission_data::send_completed_test_packet(int test_id, const submission_test& completed_test){
     // de trimis packet cu test terminat
