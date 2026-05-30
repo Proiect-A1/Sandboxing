@@ -283,25 +283,21 @@ int main(int argc , char *argv[])
             int events_mask = ev[i].events;
             int fd = ev[i].data.fd;
 
-            if(events_mask & (EPOLLIN | EPOLLHUP | EPOLLERR))
+            if(fd == sockfd)
             {
-                if(fd == sockfd)
-                {
-                    int fd_client = accept_new_connection();
-                    set_nonblocking(fd_client);
-                    add_fd(fd_client , EPOLLIN | EPOLLET);
-                }   
-                else if(fd != 0)
-                {
-                    LOG_INFO("Request received");
-                    receive_request(fd);
-                }
-                else if(fd == 0)
-                {
-                   execute_debug();
-                }
+                int fd_client = accept_new_connection();
+                set_nonblocking(fd_client);
+                add_fd(fd_client , EPOLLIN | EPOLLET);
+            }   
+            else if(fd != 0)
+            {
+                LOG_INFO("Request received");
+                receive_request(fd);
             }
-            else LOG_ERROR("untreated even epoll()");
+            else if(fd == 0)
+            {
+                execute_debug();
+            }
         }
     }
     
