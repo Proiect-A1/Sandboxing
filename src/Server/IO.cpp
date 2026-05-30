@@ -165,7 +165,7 @@ void IO::done_subtask_request(string submissionId , int subtaskId , float score 
     send(request.dump().c_str() , sockfd);
 }
 
-void IO::done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long maxMemory , float maxTime , int sockfd)
+void IO::done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long maxMemory , float maxTime , int sockfd , result_enum verdict)
 {
     if(sockfd == 1) return;
     json request;
@@ -176,6 +176,7 @@ void IO::done_submission_request(string submissionId , float score , float maxSc
     request["score%"] = scorePercent;
     request["maxMemory"] = maxMemory;
     request["maxTime"] = maxTime; 
+    request["verdict"] = general_utilities::enum_to_string(verdict);
     LOG_DEBUG(std::string("Request sent: ") + request.dump());
     send(request.dump().c_str() , sockfd);
 }

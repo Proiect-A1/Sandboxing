@@ -35,7 +35,7 @@ class IO
 
         static void done_test_request(string submissionId , int testId , result_enum verdict , string message, float scorePercent , long long memory , float time , int sockfd);
         static void done_subtask_request(string submissionId , int subtaskId , float score , float maScore , float scorePercent , long long max_memory , float max_time , int sockfd);
-        static void done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long max_memory , float max_time , int sockfd);
+        static void done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long max_memory , float max_time , int sockfd , result_enum verdict);
         static void upload_tests_request(string problemId , int revId , vector < test_metadata > tests , vector < group_metadata > groups , int sockfd);  
         static void pull_problem_request(string problemId , int revId , int sockfd);
 

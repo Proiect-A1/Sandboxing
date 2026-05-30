@@ -81,12 +81,7 @@ void submission_data::set_verdict(result_enum result, float points, float time_u
     this->points=points;
     this->time_used=time_used;
     this->memory_used=memory_used;
-    for (int i = 0; i < this->test_count; i++){
-        if (tests[i].result == result_enum::NONE){
-            add_completed_test(i, result_enum::SKIP, 0, 0, 0);
-        }
-    }
-    // send_completed_submission_packet();
+    send_completed_submission_packet();
 }
 void submission_data::send_completed_test_packet(int test_id, const submission_test& completed_test){
     // de trimis packet cu test terminat
@@ -118,7 +113,7 @@ void submission_data::send_completed_submission_packet(){
     std::to_string(this->memory_used) + " B");
     // de trimis packet cu sursa terminata
     float total_points=problem_manager::get_instance().get_metadata(problem_id, rev_id).total_points;
-    IO::done_submission_request(this->submission_id , this -> points, total_points, this->points/total_points*100 , this -> memory_used , this -> time_used , this -> socket_fd);
+    IO::done_submission_request(this->submission_id , this -> points, total_points, this->points/total_points*100 , this -> memory_used , this -> time_used , this -> socket_fd , this -> result);
     //std::cout << "Problem " << problem_id << " rev " << rev_id << " completed with " << points << " points, time used: " << time_used << " ms, memory used: " << memory_used << " B\n";
     submission_manager::get_instance().unsafe_erase(submission_id);
 }
