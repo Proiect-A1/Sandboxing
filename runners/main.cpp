@@ -278,7 +278,6 @@ struct debug_helper
         if(found == 0 || comm == nullptr || strlen(comm) <= 1 || comm[strlen(comm) - 2] != ')' || name.size() == 0)
         {
             invalid = 1;
-            LOG_DEBUG("hello");
         }
     }
 };
