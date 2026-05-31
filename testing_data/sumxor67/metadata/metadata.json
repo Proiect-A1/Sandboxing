@@ -1,0 +1,16 @@
+{
+    "problemId": "sumxor69",
+    "revId": 1,
+    "timeLimit": 1000.0,
+    "memoryLimit": 134217728,
+    "problemStyle": "IOI",
+    "problemType": "Batch",
+    "inputFile": "stdin",
+    "outputFile": "stdout",
+
+
+
+    "tags": [],
+    "difficulty": 0,
+    "authors": ["andrei_boaca"]
+}

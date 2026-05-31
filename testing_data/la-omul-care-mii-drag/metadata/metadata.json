@@ -1,0 +1,15 @@
+{
+    "problemId": "La omul care mi-i drag",
+    "revId": "1",
+    "timeLimit": 1500,
+    "memoryLimit": 1073741824,
+    
+    "problemStyle": "IOI",
+    "problemType": "Batch",
+    "inputFile": "stdin",
+    "outputFile": "stdout",
+    
+    "tags": ["Programare dinamica", "Programare dinamica pe stari exponentiale", "Teoria numerelor"],
+    "difficulty": 1214,
+    "authors": ["ezluci2", "gheal"]
+}

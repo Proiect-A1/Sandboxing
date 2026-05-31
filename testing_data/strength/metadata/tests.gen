@@ -1,0 +1,12 @@
+#MAIN solve
+#DEFGRP 100 full
+#VAL val
+#CHECK cheqer
+
+#IN full
+= 0.in
+= 1.in
+= 2.in
+= 3.in
+= 4.in
+= 5.in

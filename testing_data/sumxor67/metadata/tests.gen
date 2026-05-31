@@ -1,0 +1,74 @@
+#MAIN main
+#DEFGRP 16 subtask1
+#DEFGRP 16 subtask2
+#DEFGRP 23 subtask3
+#DEFGRP 45 subtask4
+
+#VAL val 1000000 // maxn
+#CHECK check
+
+#IN subtask1
+#GEN gen_subtask1 10 // maxn
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+#IN subtask2
+#GEN gen_subtask2 10 // maxn
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+#IN subtask3
+#GEN gen_subtask3
+1
+2
+3
+4
+5
+#GEN gen_subtask4
+1
+3
+4
+5
+6
+7
+8
+9
+#GEN gen_subtask5
+1
+
+#IN subtask4
+#GEN gen_subtask5
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
