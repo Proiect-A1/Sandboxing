@@ -33,7 +33,6 @@ int IO::read_consistent_w_buffer(int fd , void *data , int len)
     try 
     {
         int total_read = 0;
-        std::cerr << "here" << std::endl;
         while(len)
         {
             char byte = get_char_fd(fd); 
@@ -140,12 +139,14 @@ void IO::done_test_request(string submissionId , int testId , result_enum verdic
     request["request"] = "doneTest";
     request["submissionId"] = submissionId;
     request["testId"] = testId;
-    request["verdict"] = (general_utilities::enum_to_string(verdict) == "TROLLEZI" ? "WA" : general_utilities::enum_to_string(verdict));
+    request["verdict"] = general_utilities::enum_to_string(verdict);
     request["message"] = message;
     request["score%"] = scorePercent;
     request["memory"] = memory;
     request["time"] = time;
     LOG_DEBUG(std::string("Request sent: ") + request.dump());
+    if (request["verdict"] == "TROLLEZI")
+      request["verdict"] = "FAIL";
     IO::send(request.dump().c_str() , sockfd);
 }
 
@@ -178,6 +179,8 @@ void IO::done_submission_request(string submissionId , float score , float maxSc
     request["maxTime"] = maxTime; 
     request["verdict"] = general_utilities::enum_to_string(verdict);
     LOG_DEBUG(std::string("Request sent: ") + request.dump());
+    if (request["verdict"] == "TROLLEZI")
+      request["verdict"] = "FAIL";
     send(request.dump().c_str() , sockfd);
 }
 

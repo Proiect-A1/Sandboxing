@@ -45,15 +45,16 @@ std::string general_utilities::enum_to_string(result_enum result){
       case result_enum::OK: return "OK";
       case result_enum::WA: return "WA";
       case result_enum::PE: return "PE";
+      case result_enum::SUPER: return "SUPER";
       case result_enum::PA: return "PA";
+      case result_enum::FAIL: return "FAIL";
+      case result_enum::SKIP: return "SKIP";
+      case result_enum::NONE: return "NONE";
+      case result_enum::CPE: return "CPE";
       case result_enum::TLE: return "TLE";
       case result_enum::MLE: return "MLE";
       case result_enum::RTE: return "RTE";
-      case result_enum::CPE: return "CPE";
-      case result_enum::FAIL: return "FAIL";
-      case result_enum::SKIP: return "SKIP";
       case result_enum::ILE: return "ILE";
-      case result_enum::NONE: return "NONE";
       case result_enum::OTHER: return "OTHER";
     }
     return "TROLLEZI";

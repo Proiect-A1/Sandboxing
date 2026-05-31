@@ -136,7 +136,7 @@ result_enum download_task::execute(pthread_t thread_id , int user_id)
     char full_path[4096];
     snprintf(full_path, sizeof(full_path), "/%s", path);
 
-    std::cerr << full_path << std::endl << address << std::endl;
+    LOG_DEBUG(std::string(full_path) + " " + address);
 
     memset(&i, 0, sizeof i);
     i.context = context;

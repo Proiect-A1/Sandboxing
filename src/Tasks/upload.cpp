@@ -189,8 +189,6 @@ result_enum upload_task::execute(pthread_t thread_id, int user_id)
 
     const char *protocol, *address, *path;
     int port;
-
-    std::cerr << "beforeee " << url << std::endl;
     
     std::string url_cp = url;
 
@@ -204,8 +202,7 @@ result_enum upload_task::execute(pthread_t thread_id, int user_id)
     char full_path[4096];
     snprintf(full_path, sizeof(full_path), "/%s", path);
 
-    std::cerr << "Upload" << std::endl;
-    std::cerr << full_path << std::endl << address << std::endl << url << std::endl;
+    LOG_DEBUG("Upload: " + std::string(full_path) + " " + address + " " + url);
 
     memset(&i, 0, sizeof i);
     i.context = context;

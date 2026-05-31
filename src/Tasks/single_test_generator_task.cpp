@@ -9,7 +9,7 @@ single_test_generator_task::stgt_helper::~stgt_helper() {
   }
 
   problem_manager& pm = problem_manager::get_instance(); 
-  std::cerr << "in the stgt time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
+  LOG_DEBUG_USER(user_id, "in the stgt time: " + problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id + "   problem_id  " + problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id + "   " + std::to_string(problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id));
     
   if (result != result_enum::OK){
     LOG_ERROR_USER(user_id, "Test generation finished with NON-OK result: " + general_utilities::enum_to_string(result));
@@ -32,9 +32,9 @@ result_enum single_test_generator_task::execute(pthread_t thread_id, int user_id
     // de bagat in problem manager ca o dat fail
     return result_enum::FAIL;
   }
-  std::cerr << "before the stgt helper line time time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
+  LOG_DEBUG_USER(user_id, "before the stgt helper line time time: " + problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id + "   problem_id  " + problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id + "   " + std::to_string(problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id));
   stgt_helper helper(user_id, problem_id, rev_id, test_id);
-  std::cerr << "in the stgt helper line time time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
+  LOG_DEBUG_USER(user_id, "in the stgt helper line time time: " + problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id + "   problem_id  " + problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id + "   " + std::to_string(problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id));
 
   if (architecture_utilities::clean_run_dir(user_id) != 0){
     LOG_ERROR_USER(user_id, "Failed to clean up run directory");
