@@ -9,7 +9,6 @@ single_test_generator_task::stgt_helper::~stgt_helper() {
   }
 
   problem_manager& pm = problem_manager::get_instance(); 
-  LOG_DEBUG_USER(user_id, "in the stgt time: " + problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id + "   problem_id  " + problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id + "   " + std::to_string(problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id));
     
   if (result != result_enum::OK){
     LOG_ERROR_USER(user_id, "Test generation finished with NON-OK result: " + general_utilities::enum_to_string(result));
