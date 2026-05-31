@@ -12,10 +12,10 @@ function run(){
 
     cp ${1}/problem.h problem.h
     startWatch
-    g++ -std=c++14 -O2 -o gen gen.cpp
-    g++ -std=c++14 -O2 -o val val.cpp
-    g++ -std=c++14 -O2 -o checker checker.cpp
-    g++ -std=c++14 -O2 -o main main.cpp
+    g++ -std=c++17 -O2 -o gen gen.cpp
+    g++ -std=c++17 -O2 -o val val.cpp
+    g++ -std=c++17 -O2 -o checker checker.cpp
+    g++ -std=c++17 -O2 -o main main.cpp
     stopWatch "compilation"
 
     NMAX=1000000

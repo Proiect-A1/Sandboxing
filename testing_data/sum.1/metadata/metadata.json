@@ -1,0 +1,17 @@
+{
+    "problemId": "sum",
+    "revId": 1,
+    "timeLimit": 1000.0,
+    "memoryLimit": 268435456, 
+    "problemStyle": "IOI",
+    "problemType": "Batch",
+    "inputFile": "stdin",
+    "outputFile": "stdout",
+    
+
+
+
+    "tags": ["math"],
+    "difficulty": 1,
+    "authors": ["gheal"]
+}

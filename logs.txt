@@ -1,0 +1,23 @@
+run_server.sh: line 20: [: too many arguments
+run_server.sh: line 23: [: too many arguments
+run_server.sh: line 26: [: too many arguments
+here
+here
+founding submission id is: 123878925
+[2026/05/18 12:55:23:5948] N: lws_create_context: LWS: 4.3.3-unknown, NET CLI SRV H1 H2 WS ConMon IPV6-on
+[2026/05/18 12:55:23:5948] N: __lws_lc_tag:  ++ [wsi|0|pipe] (1)
+[2026/05/18 12:55:23:5949] N: __lws_lc_tag:  ++ [vh|0|netlink] (1)
+[2026/05/18 12:55:23:5955] N: __lws_lc_tag:  ++ [vh|1|default||-1] (2)
+/testing_data/sum.1.zip
+127.0.0.1
+[2026/05/18 12:55:23:6123] N: __lws_lc_tag:  ++ [wsicli|0|GET/h1/default/127.0.0.1] (1)
+[2026/05/18 12:55:23:6124] N: lws_gate_accepts: on = 0
+[2026/05/18 12:55:23:6137] N: accepting self-signed certificate (verify_callback)
+[2026/05/18 12:55:23:6138] N: lws_gate_accepts: on = 0
+[2026/05/18 12:55:23:6142] N: __lws_lc_untag:  -- [wsi|0|pipe] (0) 19.401ms
+[2026/05/18 12:55:23:6143] N: lws_gate_accepts: on = 0
+[2026/05/18 12:55:23:6147] N: __lws_lc_untag:  -- [vh|1|default||-1] (1) 19.176ms
+[2026/05/18 12:55:23:6147] N: __lws_lc_untag:  -- [wsicli|0|GET/h1/default/127.0.0.1] (0) 2.386ms
+[2026/05/18 12:55:23:6147] N: __lws_lc_untag:  -- [vh|0|netlink] (0) 19.838ms
+in the prep time: 123878925   problem_id  093116jj-b99c-4499-856b-866b41a0f627   1
+founding submission id: started compiling123878925   problem_id  093116jj-b99c-4499-856b-866b41a0f627   1
