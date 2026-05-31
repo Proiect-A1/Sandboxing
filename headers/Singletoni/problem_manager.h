@@ -4,7 +4,7 @@
 #include <Chestii_cu_data/problem_metadata.h>
 #include <Singletoni/task_queue.h>
 #include <Singletoni/pending_submissions_manager.h>
-#include <Tasks/generator_task.hpp>
+#include <Tasks/generator_task.h>
 #include <map>
 #include <pthread.h>
 #include <sys/mman.h>
@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <Singletoni/logger.h>
 #include <Tasks/upload.h>
-#include <Server/IO.hpp>
+#include <Server/IO.h>
 
 class problem_manager {
   //Singleton

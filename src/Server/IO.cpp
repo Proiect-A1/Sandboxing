@@ -1,9 +1,9 @@
-#include <Server/IO.hpp>
+#include <Server/IO.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <Server/exceptions.hpp>
+#include <Server/exceptions.h>
 #include <Singletoni/submission_manager.h>
 #include <Singletoni/task_queue.h>
 #include <Singletoni/user_queue.h>
@@ -145,6 +145,7 @@ void IO::done_test_request(string submissionId , int testId , result_enum verdic
     request["score%"] = scorePercent;
     request["memory"] = memory;
     request["time"] = time;
+    LOG_DEBUG(std::string("Request sent: ") + request.dump());
     IO::send(request.dump().c_str() , sockfd);
 }
 
@@ -160,10 +161,11 @@ void IO::done_subtask_request(string submissionId , int subtaskId , float score 
     request["score%"] = scorePercent;
     request["maxMemory"] = maxMemory;
     request["maxTime"] = maxTime; 
+    LOG_DEBUG(std::string("Request sent: ") + request.dump());
     send(request.dump().c_str() , sockfd);
 }
 
-void IO::done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long maxMemory , float maxTime , int sockfd)
+void IO::done_submission_request(string submissionId , float score , float maxScore , float scorePercent , long long maxMemory , float maxTime , int sockfd , result_enum verdict)
 {
     if(sockfd == 1) return;
     json request;
@@ -174,6 +176,8 @@ void IO::done_submission_request(string submissionId , float score , float maxSc
     request["score%"] = scorePercent;
     request["maxMemory"] = maxMemory;
     request["maxTime"] = maxTime; 
+    request["verdict"] = general_utilities::enum_to_string(verdict);
+    LOG_DEBUG(std::string("Request sent: ") + request.dump());
     send(request.dump().c_str() , sockfd);
 }
 
@@ -189,7 +193,7 @@ void IO::upload_tests_request(string problemId , int revId , vector < test_metad
     for(auto g : groups) groups_transformed.push_back(g.total_points);
     request["tests"] = tests_transformed;
     request["groups"] = groups_transformed;
-    LOG_DEBUG(std::string("tests sent: ") + request.dump().c_str());
+    LOG_DEBUG(std::string("Request sent: ") + request.dump().c_str());
     send(request.dump().c_str() , sockfd);
 }
 

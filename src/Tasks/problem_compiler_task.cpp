@@ -1,4 +1,4 @@
-#include <Tasks/problem_compiler_task.hpp>
+#include <Tasks/problem_compiler_task.h>
 
 problem_compiler_task::pct_helper::~pct_helper() {
   if (architecture_utilities::clean_run_dir(user_id) != 0){

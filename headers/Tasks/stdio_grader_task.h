@@ -5,8 +5,8 @@
 #include <Chestii_cu_data/submission_test.h>
 #include <Singletoni/problem_manager.h>
 #include <Singletoni/submission_manager.h>
-#include <Tasks/super_runner_task.hpp>
-#include <Tasks/runner_factories.hpp>
+#include <Tasks/super_runner_task.h>
+#include <Tasks/runner_factories.h>
 #include <Tasks/checker_task.h>
 #include <Utilities/architecture_utilities.h>
 #include <Utilities/general_utilities.h>

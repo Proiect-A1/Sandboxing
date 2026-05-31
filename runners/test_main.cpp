@@ -2,10 +2,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
-#include <Server/json.hpp>
-#include <Server/IO.hpp>
+#include <Server/json.h>
+#include <Server/IO.h>
 #include <fcntl.h>
-#include <Server/tests.hpp>
+#include <Server/tests.h>
 
 #include <Tasks/evaluator_task.h>
 #include <Tasks/preparator.h>
@@ -17,7 +17,7 @@
 #include <vector>
 #include <Singletoni/user_queue.h>
 #include <Singletoni/task_queue.h>
-#include <Server/header_helper.hpp>
+#include <Server/header_helper.h>
 #include <pthread.h>
 
 #define EVENTS_BUFF_SIZE 4096

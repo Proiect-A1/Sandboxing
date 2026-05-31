@@ -23,7 +23,10 @@ void json_state::add()
         }
         else if(rd == -1)
         {
-            handle_error(1 , "json_state add()");
+            LOG_ERROR(std::string("Connection lost"));
+            *founding_ptr = nullptr;
+            delete this;
+            return;
         }
         else if(rd == 0)
         {

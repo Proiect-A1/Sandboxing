@@ -1,4 +1,4 @@
-#include<Tasks/test_generation_script_compiler_task.hpp>
+#include<Tasks/test_generation_script_compiler_task.h>
 #include<Utilities/architecture_utilities.h>
 #include<Utilities/general_utilities.h>
 #include<fstream>
@@ -9,7 +9,7 @@
 #include<utility>
 #include<set>
 #include<vector>
-#include<Server/header_helper.hpp>
+#include<Server/header_helper.h>
 #include <Singletoni/problem_manager.h>
 
 static float parse_float(const std::string& s){

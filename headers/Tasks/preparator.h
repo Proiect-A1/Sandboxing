@@ -8,7 +8,7 @@
 #include <sys/wait.h>
 #include <filesystem>
 #include <Tasks/stdio_compiler_factory.h>
-#include <Tasks/problem_compiler_task.hpp>
+#include <Tasks/problem_compiler_task.h>
 
 class preparator : public task{
     std::string problem_id;

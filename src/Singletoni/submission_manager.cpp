@@ -80,7 +80,7 @@ bool submission_manager::add_completed_test(std::string submission_id, int test_
 
 bool submission_manager::set_verdict(std::string submission_id, result_enum result, float points, float time_used, long long memory_used){
     pthread_mutex_lock(&submission_manager::mtx);
-    std::cout << general_utilities::enum_to_string(result) << ' ' << points << std::endl;
+    // std::cout << general_utilities::enum_to_string(result) << ' ' << points << std::endl;
     auto it=submission_table.find(submission_id);
     if(it==submission_table.end()){
         pthread_mutex_unlock(&submission_manager::mtx);

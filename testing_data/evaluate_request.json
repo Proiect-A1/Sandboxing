@@ -1,9 +1,1 @@
-{
-    "request": "evaluate" , 
-    "submissionId": "123457" , 
-    "problemId": "d4b38281-fbe6-436f-bde6-112b3ff6e440" , 
-    "revId": 2 , 
-    "priority": 32 , 
-    "language" : "cpp" , 
-    "downloadLink" : "https://fiicoder-problems.d62e796877e6f4ccde1c6a8317ee1c3a.r2.cloudflarestorage.com/d4b38281-fbe6-436f-bde6-112b3ff6e440.2?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260511T113744Z&X-Amz-SignedHeaders=host&X-Amz-Credential=549915c4dfee00cbbaff02c8dbe7dbbd%2F20260511%2Fauto%2Fs3%2Faws4_request&X-Amz-Expires=120000&X-Amz-Signature=5c4a57cc462cceae58829f3cff82dbed43f476ab9ec7cf5cbc9614a993de9cd0"
-}
+{"downloadLink":"https://localhost/testing_data/la-omul-care-mii-drag.1","language":"cpp","priority":32,"problemId":"f031a2d8-3e37-40be-8e6f-7c6b2b8d3196","request":"evaluate","revId":1,"submissionId":"8e7b9407-10be-49e5-8722-5952c0c87f80","uploadLink":"","version":"17"}

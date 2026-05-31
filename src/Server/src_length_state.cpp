@@ -19,7 +19,10 @@ void src_length_state::add()
         }
         else if(rd == -1)
         {
-            handle_error(1 , "json_length_state add()");
+            LOG_ERROR(std::string("Connection lost"));
+            *founding_ptr = nullptr;
+            delete this;
+            return;
         }
         else if(rd == 0)
         {
@@ -33,6 +36,14 @@ void src_length_state::add()
 
         if(completed == expected_length)
         {
+            if(data <= 0)
+            {
+                LOG_ERROR(std::string("Invalid request received: "));
+                *founding_ptr = nullptr;
+                delete this;
+                return;
+            }
+        
             execute();
             break;
         }

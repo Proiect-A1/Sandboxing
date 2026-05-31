@@ -6,7 +6,7 @@
 #include <Chestii_cu_data/problem_metadata.h>
 #include <Chestii_cu_data/test_metadata.h>
 #include <Tasks/task.h>
-#include <Tasks/runner_factories.hpp>
+#include <Tasks/runner_factories.h>
 #include <Tasks/checker_task.h>
 #include <Singletoni/problem_manager.h>
 #include <Singletoni/logger.h>

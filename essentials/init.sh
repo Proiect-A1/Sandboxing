@@ -23,7 +23,8 @@ fi
 rm -r sandbox 2> /dev/null
 mkdir sandbox 2> /dev/null
 
-debootstrap --variant=minbase questing ./sandbox http://archive.ubuntu.com/ubuntu/
+debootstrap --variant=minbase resolute ./sandbox http://archive.ubuntu.com/ubuntu/
+chroot ./sandbox apt-get update
 chroot ./sandbox apt-get install -y --no-install-recommends g++ rustc golang zlib1g-dev python3
 chroot ./sandbox rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 

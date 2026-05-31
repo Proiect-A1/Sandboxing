@@ -1,4 +1,4 @@
-#include <Tasks/single_test_generator_task.hpp>
+#include <Tasks/single_test_generator_task.h>
 
 single_test_generator_task::stgt_helper::~stgt_helper() {
   if (architecture_utilities::clean_run_dir(user_id) != 0){

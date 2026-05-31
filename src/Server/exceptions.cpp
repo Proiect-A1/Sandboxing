@@ -1,4 +1,4 @@
-#include <Server/exceptions.hpp>
+#include <Server/exceptions.h>
 
 const char *unfinished_request_exception::what() const throw()
 {

@@ -53,6 +53,7 @@ std::string get_only_date();
     const char* level_to_string(LogLevel level);
     
     void open_log_file();
+    void open_log_file_unsafe();
     void check_rotation();
     
   public:
@@ -60,7 +61,9 @@ std::string get_only_date();
     static Logger& get_instance();
     ~Logger();
     void log(LogLevel level, const char* file, int line, const std::string& message);
+    void log_unsafe(LogLevel level, const char* file, int line, const std::string& message);
     void log(LogLevel level, const char* file, int line, long long user_id, const std::string& message);
+    void log_unsafe(LogLevel level, const char* file, int line, long long user_id, const std::string& message);
 };
 
 #define LOG_INFO(msg)    Logger::get_instance().log(LogLevel::INFO,    __FILE__, __LINE__, msg)

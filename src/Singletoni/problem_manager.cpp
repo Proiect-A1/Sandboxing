@@ -112,6 +112,9 @@ void problem_manager::update_problem_status(std::string problem_id , int rev_id 
         pending_submissions_manager::get_instance().problem_failed(problem_id, rev_id);
         problems[problem_id].erase(rev_id);
       }
+      else if (problem_status == problem_status_enum::DONE){
+        pending_submissions_manager::get_instance().problem_done(problem_id, rev_id);
+      }
       return;
     }
 

@@ -2,8 +2,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
-#include <Server/json.hpp>
-#include <Server/header_helper.hpp>
+#include <Server/json.h>
+#include <Server/header_helper.h>
 #include <fcntl.h>
 using namespace std;
 
@@ -148,9 +148,9 @@ void test_submission_protocol()
 
 void test_submission_protocol_expresie_hardcodata()
 {
-    generate_unique("testing_data/evaluate_request2.json");
-    send_file("testing_data/evaluate_request2.json");
-    send_file("testing_data/submission_swapsort.cpp");
+    generate_unique("testing_data/evaluate_request.json");
+    send_file("testing_data/evaluate_request.json");
+    send_file("testing_data/submission.cpp");
 
     while(1)
     {

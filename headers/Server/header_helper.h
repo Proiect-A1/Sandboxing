@@ -4,6 +4,6 @@
 
 #define handle_error(ret_code , ...) { LOG_FATAL(std::string(__VA_ARGS__)); exit(ret_code); }
 
-#include "json.hpp"
+#include <Server/json.h>
 using json = nlohmann::json;
 

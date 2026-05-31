@@ -1,7 +1,7 @@
 #include <Chestii_cu_data/submission_data.h>
 #include <Singletoni/submission_manager.h>
 #include <Singletoni/logger.h>
-#include <Server/IO.hpp>
+#include <Server/IO.h>
 
 submission_data::submission_data(std::string submission_id , language_enum language, std::string problem_id, int rev_id, std::string download_link, std::string upload_link , int socket_fd){
     problem_metadata pmd=problem_manager::get_instance().get_metadata(problem_id,rev_id);
@@ -28,6 +28,14 @@ submission_data::submission_data(std::string submission_id , language_enum langu
 }
 
 void submission_data::add_completed_test(int test_id, result_enum result, float points, float time_used, long long memory_used){
+    if (test_id < 0 || test_id >= test_count) {
+        LOG_ERROR(std::string("Invalid test_id ") + std::to_string(test_id) + " for submission " + submission_id);
+        return;
+    }
+    if (tests[test_id].result != result_enum::NONE) {
+        LOG_WARNING(std::string("Test ") + std::to_string(test_id) + " for submission " + submission_id + " already has a result, skipping");
+        return;
+    }
     if(this->result==result_enum::OK && result!=result_enum::OK)
         this->result=result;
     tests[test_id].result=result;
@@ -105,7 +113,7 @@ void submission_data::send_completed_submission_packet(){
     std::to_string(this->memory_used) + " B");
     // de trimis packet cu sursa terminata
     float total_points=problem_manager::get_instance().get_metadata(problem_id, rev_id).total_points;
-    IO::done_submission_request(this->submission_id , this -> points, total_points, this->points/total_points*100 , this -> memory_used , this -> time_used , this -> socket_fd);
+    IO::done_submission_request(this->submission_id , this -> points, total_points, this->points/total_points*100 , this -> memory_used , this -> time_used , this -> socket_fd , this -> result);
     //std::cout << "Problem " << problem_id << " rev " << rev_id << " completed with " << points << " points, time used: " << time_used << " ms, memory used: " << memory_used << " B\n";
     submission_manager::get_instance().unsafe_erase(submission_id);
 }

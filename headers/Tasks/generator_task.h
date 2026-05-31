@@ -9,11 +9,11 @@
 #include <Singletoni/submission_manager.h>
 #include <Singletoni/task_queue.h>
 #include <Tasks/task.h>
-#include <Tasks/super_runner_task.hpp>
-#include <Tasks/runner_factories.hpp>
+#include <Tasks/super_runner_task.h>
+#include <Tasks/runner_factories.h>
 #include <Tasks/checker_task.h>
-#include <Tasks/single_test_generator_task.hpp>
-#include <Tasks/test_generation_script_compiler_task.hpp>
+#include <Tasks/single_test_generator_task.h>
+#include <Tasks/test_generation_script_compiler_task.h>
 #include <Utilities/architecture_utilities.h>
 #include <Utilities/general_utilities.h>
 #include <string>
