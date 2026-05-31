@@ -1,0 +1,8 @@
+#MAIN main
+#VAL val
+#TEST 10 = exemplu.in
+#TEST 10 = exemplu1.in
+#TEST 20 < gen 69 420
+#TEST 20 < gen 1000 1000
+#TEST 20 < gen -2000000000 -2000000000
+#TEST 20 < gen 2000000000 2000000000

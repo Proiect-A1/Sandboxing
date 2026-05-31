@@ -400,6 +400,18 @@ public:
         va_end(args);
         exit(-1);
     }
+    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = true){
+        return validator::readInt(Min, Max, ignore_whitespace);
+    }
+    virtual int64_t readInt(bool ignore_whitespace = true){
+        return validator::readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = true){
+        return validator::readUnsigned(Min, Max, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(bool ignore_whitespace = true){
+        return validator::readUnsigned(0, UINT64_MAX, ignore_whitespace);
+    }
 };
 class ok_validator : public in_validator{
 public:
@@ -416,16 +428,16 @@ public:
         this->translate_wa=verdict_t::FAIL;
         this->require_eof=false;
     }
-    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = false){
+    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = true){
         return validator::readInt(Min, Max, ignore_whitespace);
     }
-    virtual int64_t readInt(bool ignore_whitespace = false){
+    virtual int64_t readInt(bool ignore_whitespace = true){
         return validator::readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
     }
-    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = false){
+    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = true){
         return validator::readUnsigned(Min, Max, ignore_whitespace);
     }
-    virtual uint64_t readUnsigned(bool ignore_whitespace = false){
+    virtual uint64_t readUnsigned(bool ignore_whitespace = true){
         return validator::readUnsigned(0, UINT64_MAX, ignore_whitespace);
     }
 protected:
