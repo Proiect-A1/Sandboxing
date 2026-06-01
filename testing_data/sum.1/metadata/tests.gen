@@ -1,0 +1,9 @@
+#MAIN main
+#VAL val
+#CHECK checker
+#TEST 10 = exemplu.in
+#TEST 10 = exemplu2.in
+#TEST 20 < gen 69 420
+#TEST 20 < gen 1000 1000
+#TEST 20 < gen -2000000000 -2000000000
+#TEST 20 < gen 2000000000 2000000000

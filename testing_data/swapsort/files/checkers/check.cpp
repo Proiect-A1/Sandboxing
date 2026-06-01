@@ -7,7 +7,7 @@ int maxign = 10'000;
 int n;
 int p[NMAX], tmp[NMAX];
 int readAndCheckAns(int tid, validator* in){
-    int ops = in->readInt(0, maxign, 1);
+    int ops = in->readInt(0, maxign);
 
     for(int i=1;i<=n;i++) tmp[i] = p[i];
 
