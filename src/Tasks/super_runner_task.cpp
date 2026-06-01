@@ -358,12 +358,6 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
     }
     argv[arguments.size()] = nullptr;
 
-    std::cerr << "USER : " << user_id << " Executing command: " << exec_path << " with arguments: ";
-    for (size_t i = 0; i < arguments.size(); ++i)
-    {
-        std::cerr << argv[i] << " ";
-    }
-    std::cerr << std::endl;
     execv(exec_path.c_str(), const_cast<char *const *>(argv));
     while (errno == ETXTBSY || errno == EAGAIN) {
       execv(exec_path.c_str(), const_cast<char *const *>(argv));

@@ -40,7 +40,6 @@ result_enum preparator::execute(pthread_t thread_id, int user_id)
 
     problem_manager &pm = problem_manager::get_instance();
     pm.update_problem_status(problem_id , rev_id , problem_status_enum::DOWNLOADED); //add generator
-    std::cerr << "in the prep time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
     
 
     std::vector<std::string> folders_to_search;

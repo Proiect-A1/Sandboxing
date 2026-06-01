@@ -226,8 +226,10 @@ void print_swapsort_status(vector < string > args = vector < string> ()){
 
 void debug_args_test(vector < string > args = vector < string > ())
 {
+  std::string message = "DEBUG ARGS: \n";
     for(int i = 0 ; i < args.size() ; i++)
-        cerr << args[i] << endl;
+        message += args[i] + "\n";
+  LOG_DEBUG(message.c_str());
 }
 
 map < string , void (*)(vector < string > args) > debug_command = {
@@ -276,7 +278,6 @@ struct debug_helper
         if(found == 0 || comm == nullptr || strlen(comm) <= 1 || comm[strlen(comm) - 2] != ')' || name.size() == 0)
         {
             invalid = 1;
-            cerr << "hello" << endl;
         }
     }
 };

@@ -8,7 +8,6 @@ problem_compiler_task::pct_helper::~pct_helper() {
     LOG_DEBUG_USER(user_id, "Successfully cleaned up run directory from helper");
   }
 
-  std::cerr << "in the pct time: " << problem_manager::get_instance().get_metadata(problem_id , rev_id).founding_submission_id << "   problem_id  " << problem_manager::get_instance().get_metadata(problem_id , rev_id).problem_id << "   " <<problem_manager::get_instance().get_metadata(problem_id , rev_id).rev_id << std::endl;
     
   if (result != result_enum::OK){
     LOG_ERROR_USER(user_id, "Problem compilation finished with NON-OK result: " + general_utilities::enum_to_string(result));
