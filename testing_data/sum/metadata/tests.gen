@@ -1,5 +1,6 @@
 #MAIN main
 #VAL val
+#CHECK checker
 #TEST 10 = exemplu.in
 #TEST 10 = exemplu1.in
 #TEST 20 < gen 69 420
