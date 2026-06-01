@@ -3,7 +3,7 @@
 using namespace std;
 typedef long long ll;
 typedef pair<ll,ll> pll;
-const ll NMAX=1e6+5;
+const ll NMAX=3e6+5;
 ll v[NMAX];
 int main(){
     ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);

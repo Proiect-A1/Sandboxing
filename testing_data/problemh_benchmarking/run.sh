@@ -18,7 +18,7 @@ function run(){
     g++ -std=c++17 -O2 -o main main.cpp
     stopWatch "compilation"
 
-    NMAX=1000000
+    NMAX=2000000
 
     startWatch
     ./gen $NMAX > in.txt
@@ -56,6 +56,8 @@ function run(){
     rm val
     rm main
     rm problem.h
+    rm in.txt
+    rm out.txt
     stopWatch "cleanup"
 }
 
