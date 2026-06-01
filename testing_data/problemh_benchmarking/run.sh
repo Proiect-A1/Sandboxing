@@ -59,7 +59,8 @@ function run(){
     stopWatch "cleanup"
 }
 
-run problemh-1.0
+# run problemh-1.0
 run problemh-2.0
+run problemh-3.0
 
     
