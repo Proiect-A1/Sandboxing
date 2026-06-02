@@ -25,6 +25,9 @@
 #include <seccomp.h>
 #include <errno.h>
 #include <fstream>
+#include <map>
+#include <vector>
+
 class super_runner_task : public task
 {
   std::string submission_id; // pentru debugging
@@ -42,6 +45,7 @@ class super_runner_task : public task
   std::vector<std::string> input_files; // fisiere pt care trebuie verificat daca exista in sandbox si daca se pot citi;
   std::vector<std::string> output_files; // fisiere pt care trebuie verificat daca exista in sandbox si daca se pot scrie;
   std::vector<std::string> arguments; // argumente cu care sa fie rulat programul, inclusiv numele executabilului
+
 public:
   super_runner_task(std::string submission_id, std::string exec_path, std::string stdin_redirection_path, std::string stdout_redirection_path, std::string stderr_redirection_path, float time_limit, long memory_limit, std::vector<std::string> input_files, std::vector<std::string> output_files, std::vector<std::string> arguments, bool strong_user = false):
       submission_id(submission_id),
