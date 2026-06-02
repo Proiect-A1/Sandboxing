@@ -1,6 +1,6 @@
-g++ -std=c++14 -o gen gen.cpp
-g++ -std=c++14 -o val val.cpp
-g++ -std=c++14 -o checker checker.cpp
+g++ -std=c++17 -o gen gen.cpp
+g++ -std=c++17 -o val val.cpp
+g++ -std=c++17 -o checker checker.cpp
 mainpath="$2"
 partpath="$1"
 mainexec="${mainpath%.*}"
@@ -46,5 +46,3 @@ rm gen
 rm val
 rm $mainexec
 rm $partexec
-
-    

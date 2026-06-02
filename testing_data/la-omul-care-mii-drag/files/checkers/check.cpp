@@ -36,7 +36,7 @@ bigInt readAndCheckAns(validator& v, checker &c){
     bigInt prod;
     prod.d[prod.Size++]=1;
     bool fnd[10]{};
-    string s=v.readToken(true);
+    string s=v.readToken();
     if(s.size()!=n*2-2)
         c.pquitf(WA, 0, "Invalid string length", s.size(), n);
     int x=0,y=0;

@@ -534,6 +534,10 @@ result_enum tgsct::execute(pthread_t thread_id, int user_id){
         output.total_points+=it.second;
     }
     output.test_count = output.tests.size();
+    if(output.test_count == 0){
+        add_error(line_no, "Problem doesn't have any tests");
+        return result_enum::FAIL;
+    }
     return this->failed ? result_enum::FAIL : result_enum::OK;
 }
 
