@@ -1,130 +1,6 @@
 #include <Tasks/super_runner_task.h>
-#include <Singletoni/submission_manager.h>
 
-std::map<language_enum, std::vector<int>> allowed_syscalls = {
-    {language_enum::C, {
-              SCMP_SYS(access), SCMP_SYS(arch_prctl), SCMP_SYS(bind), SCMP_SYS(brk),
-      SCMP_SYS(clock_getres), SCMP_SYS(clock_gettime), SCMP_SYS(clock_nanosleep), SCMP_SYS(clone),
-      SCMP_SYS(clone3), SCMP_SYS(close), SCMP_SYS(connect), SCMP_SYS(dup),
-      SCMP_SYS(dup2), SCMP_SYS(dup3), SCMP_SYS(epoll_create1), SCMP_SYS(epoll_ctl),
-      SCMP_SYS(epoll_pwait), SCMP_SYS(epoll_pwait2), SCMP_SYS(epoll_wait), SCMP_SYS(eventfd2),
-      SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(faccessat),
-      SCMP_SYS(fchownat), SCMP_SYS(fcntl), SCMP_SYS(fstat), SCMP_SYS(fstatfs),
-      SCMP_SYS(futex), SCMP_SYS(get_mempolicy), SCMP_SYS(getcpu), SCMP_SYS(getcwd),
-      SCMP_SYS(getdents64), SCMP_SYS(getegid), SCMP_SYS(geteuid), SCMP_SYS(getgid),
-      SCMP_SYS(getgroups), SCMP_SYS(getpgid), SCMP_SYS(getpid), SCMP_SYS(getppid),
-      SCMP_SYS(getpriority), SCMP_SYS(getrandom), SCMP_SYS(getresgid), SCMP_SYS(getresuid),
-      SCMP_SYS(getrlimit), SCMP_SYS(getrusage), SCMP_SYS(getsid), SCMP_SYS(getsockname),
-      SCMP_SYS(gettid), SCMP_SYS(getuid), SCMP_SYS(ioctl), SCMP_SYS(lseek),
-      SCMP_SYS(lstat), SCMP_SYS(madvise), SCMP_SYS(mbind), SCMP_SYS(membarrier),
-      SCMP_SYS(mincore), SCMP_SYS(mmap), SCMP_SYS(mprotect), SCMP_SYS(mremap),
-      SCMP_SYS(munmap), SCMP_SYS(nanosleep), SCMP_SYS(newfstatat), SCMP_SYS(open),
-      SCMP_SYS(openat), SCMP_SYS(pipe), SCMP_SYS(pipe2), SCMP_SYS(poll),
-      SCMP_SYS(ppoll), SCMP_SYS(prctl), SCMP_SYS(pread64), SCMP_SYS(prlimit64),
-      SCMP_SYS(read), SCMP_SYS(readlink), SCMP_SYS(readlinkat), SCMP_SYS(recvfrom),
-      SCMP_SYS(recvmsg), SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask),
-      SCMP_SYS(rt_sigreturn), SCMP_SYS(sched_getaffinity), SCMP_SYS(sched_getparam), SCMP_SYS(sched_getscheduler),
-      SCMP_SYS(sched_setaffinity), SCMP_SYS(sched_yield), SCMP_SYS(sendto), SCMP_SYS(set_mempolicy),
-      SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), SCMP_SYS(setgid), SCMP_SYS(setgroups),
-      SCMP_SYS(setpriority), SCMP_SYS(setresgid), SCMP_SYS(setresuid), SCMP_SYS(setrlimit),
-      SCMP_SYS(sigaltstack), SCMP_SYS(socket), SCMP_SYS(socketpair), SCMP_SYS(stat),
-      SCMP_SYS(statfs), SCMP_SYS(statx), SCMP_SYS(sysinfo), SCMP_SYS(tgkill),
-      SCMP_SYS(tkill), SCMP_SYS(umask), SCMP_SYS(uname), SCMP_SYS(write),
-      SCMP_SYS(writev)
-    }},
-    {language_enum::CPP, {
-              SCMP_SYS(access), SCMP_SYS(arch_prctl), SCMP_SYS(bind), SCMP_SYS(brk),
-      SCMP_SYS(clock_getres), SCMP_SYS(clock_gettime), SCMP_SYS(clock_nanosleep), SCMP_SYS(clone),
-      SCMP_SYS(clone3), SCMP_SYS(close), SCMP_SYS(connect), SCMP_SYS(dup),
-      SCMP_SYS(dup2), SCMP_SYS(dup3), SCMP_SYS(epoll_create1), SCMP_SYS(epoll_ctl),
-      SCMP_SYS(epoll_pwait), SCMP_SYS(epoll_pwait2), SCMP_SYS(epoll_wait), SCMP_SYS(eventfd2),
-      SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(faccessat),
-      SCMP_SYS(fchownat), SCMP_SYS(fcntl), SCMP_SYS(fstat), SCMP_SYS(fstatfs),
-      SCMP_SYS(futex), SCMP_SYS(get_mempolicy), SCMP_SYS(getcpu), SCMP_SYS(getcwd),
-      SCMP_SYS(getdents64), SCMP_SYS(getegid), SCMP_SYS(geteuid), SCMP_SYS(getgid),
-      SCMP_SYS(getgroups), SCMP_SYS(getpgid), SCMP_SYS(getpid), SCMP_SYS(getppid),
-      SCMP_SYS(getpriority), SCMP_SYS(getrandom), SCMP_SYS(getresgid), SCMP_SYS(getresuid),
-      SCMP_SYS(getrlimit), SCMP_SYS(getrusage), SCMP_SYS(getsid), SCMP_SYS(getsockname),
-      SCMP_SYS(gettid), SCMP_SYS(getuid), SCMP_SYS(ioctl), SCMP_SYS(lseek),
-      SCMP_SYS(lstat), SCMP_SYS(madvise), SCMP_SYS(mbind), SCMP_SYS(membarrier),
-      SCMP_SYS(mincore), SCMP_SYS(mmap), SCMP_SYS(mprotect), SCMP_SYS(mremap),
-      SCMP_SYS(munmap), SCMP_SYS(nanosleep), SCMP_SYS(newfstatat), SCMP_SYS(open),
-      SCMP_SYS(openat), SCMP_SYS(pipe), SCMP_SYS(pipe2), SCMP_SYS(poll),
-      SCMP_SYS(ppoll), SCMP_SYS(prctl), SCMP_SYS(pread64), SCMP_SYS(prlimit64),
-      SCMP_SYS(read), SCMP_SYS(readlink), SCMP_SYS(readlinkat), SCMP_SYS(recvfrom),
-      SCMP_SYS(recvmsg), SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask),
-      SCMP_SYS(rt_sigreturn), SCMP_SYS(sched_getaffinity), SCMP_SYS(sched_getparam), SCMP_SYS(sched_getscheduler),
-      SCMP_SYS(sched_setaffinity), SCMP_SYS(sched_yield), SCMP_SYS(sendto), SCMP_SYS(set_mempolicy),
-      SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), SCMP_SYS(setgid), SCMP_SYS(setgroups),
-      SCMP_SYS(setpriority), SCMP_SYS(setresgid), SCMP_SYS(setresuid), SCMP_SYS(setrlimit),
-      SCMP_SYS(sigaltstack), SCMP_SYS(socket), SCMP_SYS(socketpair), SCMP_SYS(stat),
-      SCMP_SYS(statfs), SCMP_SYS(statx), SCMP_SYS(sysinfo), SCMP_SYS(tgkill),
-      SCMP_SYS(tkill), SCMP_SYS(umask), SCMP_SYS(uname), SCMP_SYS(write),
-      SCMP_SYS(writev)
-    }},
-    {language_enum::RUST, {
-             SCMP_SYS(access), SCMP_SYS(arch_prctl), SCMP_SYS(bind), SCMP_SYS(brk),
-      SCMP_SYS(clock_getres), SCMP_SYS(clock_gettime), SCMP_SYS(clock_nanosleep), SCMP_SYS(clone),
-      SCMP_SYS(clone3), SCMP_SYS(close), SCMP_SYS(connect), SCMP_SYS(dup),
-      SCMP_SYS(dup2), SCMP_SYS(dup3), SCMP_SYS(epoll_create1), SCMP_SYS(epoll_ctl),
-      SCMP_SYS(epoll_pwait), SCMP_SYS(epoll_pwait2), SCMP_SYS(epoll_wait), SCMP_SYS(eventfd2),
-      SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(faccessat),
-      SCMP_SYS(fchownat), SCMP_SYS(fcntl), SCMP_SYS(fstat), SCMP_SYS(fstatfs),
-      SCMP_SYS(futex), SCMP_SYS(get_mempolicy), SCMP_SYS(getcpu), SCMP_SYS(getcwd),
-      SCMP_SYS(getdents64), SCMP_SYS(getegid), SCMP_SYS(geteuid), SCMP_SYS(getgid),
-      SCMP_SYS(getgroups), SCMP_SYS(getpgid), SCMP_SYS(getpid), SCMP_SYS(getppid),
-      SCMP_SYS(getpriority), SCMP_SYS(getrandom), SCMP_SYS(getresgid), SCMP_SYS(getresuid),
-      SCMP_SYS(getrlimit), SCMP_SYS(getrusage), SCMP_SYS(getsid), SCMP_SYS(getsockname),
-      SCMP_SYS(gettid), SCMP_SYS(getuid), SCMP_SYS(ioctl), SCMP_SYS(lseek),
-      SCMP_SYS(lstat), SCMP_SYS(madvise), SCMP_SYS(mbind), SCMP_SYS(membarrier),
-      SCMP_SYS(mincore), SCMP_SYS(mmap), SCMP_SYS(mprotect), SCMP_SYS(mremap),
-      SCMP_SYS(munmap), SCMP_SYS(nanosleep), SCMP_SYS(newfstatat), SCMP_SYS(open),
-      SCMP_SYS(openat), SCMP_SYS(pipe), SCMP_SYS(pipe2), SCMP_SYS(poll),
-      SCMP_SYS(ppoll), SCMP_SYS(prctl), SCMP_SYS(pread64), SCMP_SYS(prlimit64),
-      SCMP_SYS(read), SCMP_SYS(readlink), SCMP_SYS(readlinkat), SCMP_SYS(recvfrom),
-      SCMP_SYS(recvmsg), SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask),
-      SCMP_SYS(rt_sigreturn), SCMP_SYS(sched_getaffinity), SCMP_SYS(sched_getparam), SCMP_SYS(sched_getscheduler),
-      SCMP_SYS(sched_setaffinity), SCMP_SYS(sched_yield), SCMP_SYS(sendto), SCMP_SYS(set_mempolicy),
-      SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), SCMP_SYS(setgid), SCMP_SYS(setgroups),
-      SCMP_SYS(setpriority), SCMP_SYS(setresgid), SCMP_SYS(setresuid), SCMP_SYS(setrlimit),
-      SCMP_SYS(sigaltstack), SCMP_SYS(socket), SCMP_SYS(socketpair), SCMP_SYS(stat),
-      SCMP_SYS(statfs), SCMP_SYS(statx), SCMP_SYS(sysinfo), SCMP_SYS(tgkill),
-      SCMP_SYS(tkill), SCMP_SYS(umask), SCMP_SYS(uname), SCMP_SYS(write),
-      SCMP_SYS(writev)
-    }},
-    {language_enum::PYTHON, {
-              SCMP_SYS(access), SCMP_SYS(arch_prctl), SCMP_SYS(bind), SCMP_SYS(brk),
-      SCMP_SYS(clock_getres), SCMP_SYS(clock_gettime), SCMP_SYS(clock_nanosleep), SCMP_SYS(clone),
-      SCMP_SYS(clone3), SCMP_SYS(close), SCMP_SYS(connect), SCMP_SYS(dup),
-      SCMP_SYS(dup2), SCMP_SYS(dup3), SCMP_SYS(epoll_create1), SCMP_SYS(epoll_ctl),
-      SCMP_SYS(epoll_pwait), SCMP_SYS(epoll_pwait2), SCMP_SYS(epoll_wait), SCMP_SYS(eventfd2),
-      SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(faccessat),
-      SCMP_SYS(fchownat), SCMP_SYS(fcntl), SCMP_SYS(fstat), SCMP_SYS(fstatfs),
-      SCMP_SYS(futex), SCMP_SYS(get_mempolicy), SCMP_SYS(getcpu), SCMP_SYS(getcwd),
-      SCMP_SYS(getdents64), SCMP_SYS(getegid), SCMP_SYS(geteuid), SCMP_SYS(getgid),
-      SCMP_SYS(getgroups), SCMP_SYS(getpgid), SCMP_SYS(getpid), SCMP_SYS(getppid),
-      SCMP_SYS(getpriority), SCMP_SYS(getrandom), SCMP_SYS(getresgid), SCMP_SYS(getresuid),
-      SCMP_SYS(getrlimit), SCMP_SYS(getrusage), SCMP_SYS(getsid), SCMP_SYS(getsockname),
-      SCMP_SYS(gettid), SCMP_SYS(getuid), SCMP_SYS(ioctl), SCMP_SYS(lseek),
-      SCMP_SYS(lstat), SCMP_SYS(madvise), SCMP_SYS(mbind), SCMP_SYS(membarrier),
-      SCMP_SYS(mincore), SCMP_SYS(mmap), SCMP_SYS(mprotect), SCMP_SYS(mremap),
-      SCMP_SYS(munmap), SCMP_SYS(nanosleep), SCMP_SYS(newfstatat), SCMP_SYS(open),
-      SCMP_SYS(openat), SCMP_SYS(pipe), SCMP_SYS(pipe2), SCMP_SYS(poll),
-      SCMP_SYS(ppoll), SCMP_SYS(prctl), SCMP_SYS(pread64), SCMP_SYS(prlimit64),
-      SCMP_SYS(read), SCMP_SYS(readlink), SCMP_SYS(readlinkat), SCMP_SYS(recvfrom),
-      SCMP_SYS(recvmsg), SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask),
-      SCMP_SYS(rt_sigreturn), SCMP_SYS(sched_getaffinity), SCMP_SYS(sched_getparam), SCMP_SYS(sched_getscheduler),
-      SCMP_SYS(sched_setaffinity), SCMP_SYS(sched_yield), SCMP_SYS(sendto), SCMP_SYS(set_mempolicy),
-      SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), SCMP_SYS(setgid), SCMP_SYS(setgroups),
-      SCMP_SYS(setpriority), SCMP_SYS(setresgid), SCMP_SYS(setresuid), SCMP_SYS(setrlimit),
-      SCMP_SYS(sigaltstack), SCMP_SYS(socket), SCMP_SYS(socketpair), SCMP_SYS(stat),
-      SCMP_SYS(statfs), SCMP_SYS(statx), SCMP_SYS(sysinfo), SCMP_SYS(tgkill),
-      SCMP_SYS(tkill), SCMP_SYS(umask), SCMP_SYS(uname), SCMP_SYS(write),
-      SCMP_SYS(writev)
-    }}
-};
-
-static int install_seccomp_whitelist(const std::string& exec_path , language_enum language)
+static int install_seccomp_whitelist(const std::string& exec_path)
 {
   scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_KILL_PROCESS);
   if (!ctx) return -1;
@@ -134,7 +10,38 @@ static int install_seccomp_whitelist(const std::string& exec_path , language_enu
     return true;
   };
 
-  for (int s : allowed_syscalls[language])
+  int syscalls[] = {
+      SCMP_SYS(access), SCMP_SYS(arch_prctl), SCMP_SYS(bind), SCMP_SYS(brk),
+      SCMP_SYS(clock_getres), SCMP_SYS(clock_gettime), SCMP_SYS(clock_nanosleep), SCMP_SYS(clone),
+      SCMP_SYS(clone3), SCMP_SYS(close), SCMP_SYS(connect), SCMP_SYS(dup),
+      SCMP_SYS(dup2), SCMP_SYS(dup3), SCMP_SYS(epoll_create1), SCMP_SYS(epoll_ctl),
+      SCMP_SYS(epoll_pwait), SCMP_SYS(epoll_pwait2), SCMP_SYS(epoll_wait), SCMP_SYS(eventfd2),
+      SCMP_SYS(execve), SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(faccessat),
+      SCMP_SYS(fchownat), SCMP_SYS(fcntl), SCMP_SYS(fstat), SCMP_SYS(fstatfs),
+      SCMP_SYS(futex), SCMP_SYS(get_mempolicy), SCMP_SYS(getcpu), SCMP_SYS(getcwd),
+      SCMP_SYS(getdents64), SCMP_SYS(getegid), SCMP_SYS(geteuid), SCMP_SYS(getgid),
+      SCMP_SYS(getgroups), SCMP_SYS(getpgid), SCMP_SYS(getpid), SCMP_SYS(getppid),
+      SCMP_SYS(getpriority), SCMP_SYS(getrandom), SCMP_SYS(getresgid), SCMP_SYS(getresuid),
+      SCMP_SYS(getrlimit), SCMP_SYS(getrusage), SCMP_SYS(getsid), SCMP_SYS(getsockname),
+      SCMP_SYS(gettid), SCMP_SYS(getuid), SCMP_SYS(ioctl), SCMP_SYS(lseek),
+      SCMP_SYS(lstat), SCMP_SYS(madvise), SCMP_SYS(mbind), SCMP_SYS(membarrier),
+      SCMP_SYS(mincore), SCMP_SYS(mmap), SCMP_SYS(mprotect), SCMP_SYS(mremap),
+      SCMP_SYS(munmap), SCMP_SYS(nanosleep), SCMP_SYS(newfstatat), SCMP_SYS(open),
+      SCMP_SYS(openat), SCMP_SYS(pipe), SCMP_SYS(pipe2), SCMP_SYS(poll),
+      SCMP_SYS(ppoll), SCMP_SYS(prctl), SCMP_SYS(pread64), SCMP_SYS(prlimit64),
+      SCMP_SYS(read), SCMP_SYS(readlink), SCMP_SYS(readlinkat), SCMP_SYS(recvfrom),
+      SCMP_SYS(recvmsg), SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask),
+      SCMP_SYS(rt_sigreturn), SCMP_SYS(sched_getaffinity), SCMP_SYS(sched_getparam), SCMP_SYS(sched_getscheduler),
+      SCMP_SYS(sched_setaffinity), SCMP_SYS(sched_yield), SCMP_SYS(sendto), SCMP_SYS(set_mempolicy),
+      SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), SCMP_SYS(setgid), SCMP_SYS(setgroups),
+      SCMP_SYS(setpriority), SCMP_SYS(setresgid), SCMP_SYS(setresuid), SCMP_SYS(setrlimit),
+      SCMP_SYS(sigaltstack), SCMP_SYS(socket), SCMP_SYS(socketpair), SCMP_SYS(stat),
+      SCMP_SYS(statfs), SCMP_SYS(statx), SCMP_SYS(sysinfo), SCMP_SYS(tgkill),
+      SCMP_SYS(tkill), SCMP_SYS(umask), SCMP_SYS(uname), SCMP_SYS(write),
+      SCMP_SYS(writev)
+  };
+
+  for (int s : syscalls)
   {
     if (!add(s))
     {
@@ -438,7 +345,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
 
-    if (install_seccomp_whitelist(exec_path , submission_manager::get_instance().get_submission(submission_id).language) != 0)
+    if (install_seccomp_whitelist(exec_path) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to install seccomp filter");
       _exit(127);
