@@ -174,8 +174,9 @@ void receive_request(int client_fd)
     {
         rem_fd(client_fd);
         request_state_table.erase(client_fd);
+        return;
     }  
-    
+
     (*request_state_table[client_fd]) -> add();
 
     if(*request_state_table[client_fd] == nullptr)
