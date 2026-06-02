@@ -1,0 +1,17 @@
+{
+  "title": "Distanțe",
+  "time_limit": "1",
+  "memory_limit": "268435456",
+  "difficulty": "EASY",
+  "tags": [],
+  "problemId": "Distanțe",
+  "timeLimit": 1000,
+  "memoryLimit": 268435456,
+  "difficultyLevel": 1,
+  "revId": 0,
+  "problemStyle": "IOI",
+  "problemType": "Batch",
+  "inputFile": "stdin",
+  "outputFile": "stdout",
+  "authors": []
+}

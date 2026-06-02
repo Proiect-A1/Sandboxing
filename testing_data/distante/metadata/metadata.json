@@ -1,0 +1,17 @@
+{
+  "title": "Drumuri",
+  "time_limit": "1",
+  "memory_limit": "268435456",
+  "difficulty": "MEDIUM",
+  "tags": [],
+  "problemId": "Drumuri",
+  "timeLimit": 1000,
+  "memoryLimit": 268435456,
+  "difficultyLevel": 2,
+  "revId": 0,
+  "problemStyle": "IOI",
+  "problemType": "Batch",
+  "inputFile": "stdin",
+  "outputFile": "stdout",
+  "authors": []
+}

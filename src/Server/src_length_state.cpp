@@ -8,6 +8,14 @@
 
 void src_length_state::add()
 {
+    if(completed == expected_length)
+    {
+        LOG_ERROR(std::string("Invalid request received: "));
+        *founding_ptr = nullptr;
+        delete this;
+        return;
+    }
+
     while(1)
     {
         int rem = expected_length - completed;
