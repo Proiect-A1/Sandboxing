@@ -1,5 +1,24 @@
 #include <Tasks/super_runner_task.h>
 #include <Singletoni/submission_manager.h>
+#include <Tasks/super_runner_task.h>
+
+super_runner_task::super_runner_task(std::string submission_id, std::string exec_path, std::string stdin_redirection_path, std::string stdout_redirection_path, std::string stderr_redirection_path, float time_limit, long memory_limit, std::vector<std::string> input_files, std::vector<std::string> output_files, std::vector<std::string> arguments, bool strong_user)
+{
+   this -> submission_id = submission_id;
+   this -> exec_path = exec_path;
+   this -> stdin_redirection_path = stdin_redirection_path;
+   this ->stdout_redirection_path = stdout_redirection_path;
+   this -> stderr_redirection_path = stderr_redirection_path;
+   this -> time_limit = time_limit;
+   this -> memory_limit = memory_limit;
+   this -> time_consumed = 0;
+   this -> memory_consumed = 0;
+   this -> input_files = input_files;
+   this -> output_files = output_files;
+   this -> arguments = arguments;
+   this -> strong_user = strong_user;
+   this -> language = submission_manager::get_instance().get_submission(submission_id).language;
+}
 
 static int install_seccomp_whitelist(const std::string& exec_path , language_enum language = language_enum::CPP)
 {

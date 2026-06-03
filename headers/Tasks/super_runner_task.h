@@ -35,6 +35,7 @@ class super_runner_task : public task
   std::string stdin_redirection_path;
   std::string stdout_redirection_path;
   std::string stderr_redirection_path;
+  language_enum language;
   float time_limit;     // in milliseconds
   long memory_limit;    // in bytes
   float time_consumed;  // in milliseconds
@@ -47,21 +48,7 @@ class super_runner_task : public task
   std::vector<std::string> arguments; // argumente cu care sa fie rulat programul, inclusiv numele executabilului
 
 public:
-  super_runner_task(std::string submission_id, std::string exec_path, std::string stdin_redirection_path, std::string stdout_redirection_path, std::string stderr_redirection_path, float time_limit, long memory_limit, std::vector<std::string> input_files, std::vector<std::string> output_files, std::vector<std::string> arguments, bool strong_user = false):
-      submission_id(submission_id),
-      exec_path(exec_path),
-      stdin_redirection_path(stdin_redirection_path),
-      stdout_redirection_path(stdout_redirection_path),
-      stderr_redirection_path(stderr_redirection_path),
-      time_limit(time_limit),
-      memory_limit(memory_limit),
-      time_consumed(0),
-      memory_consumed(0),
-      input_files(input_files),
-      output_files(output_files),
-      arguments(arguments),
-      strong_user(strong_user) {}
-
+  super_runner_task(std::string submission_id, std::string exec_path, std::string stdin_redirection_path, std::string stdout_redirection_path, std::string stderr_redirection_path, float time_limit, long memory_limit, std::vector<std::string> input_files, std::vector<std::string> output_files, std::vector<std::string> arguments, bool strong_user = false);
   bool check_permissions(int user_id) override {return true;};
   bool check_permissions(int user_id, bool abso);
   bool check_permissions_before_sandboxing(int user_id);
