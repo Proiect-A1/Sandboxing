@@ -21,21 +21,21 @@ super_runner_task::super_runner_task(std::string submission_id, std::string exec
 }
 
 std::map<language_enum, const std::vector<int>> allowed_syscalls = {
-   {language_enum::C, {
+  {language_enum::C, {
         SCMP_SYS(brk), SCMP_SYS(close), SCMP_SYS(execve), SCMP_SYS(exit), 
         SCMP_SYS(exit_group), SCMP_SYS(faccessat), SCMP_SYS(fstat), SCMP_SYS(futex), 
         SCMP_SYS(getrandom), SCMP_SYS(mmap), SCMP_SYS(mprotect), SCMP_SYS(munmap), 
-        SCMP_SYS(openat), SCMP_SYS(pread64), SCMP_SYS(read), SCMP_SYS(rseq), 
-        SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), SCMP_SYS(write), 
-        SCMP_SYS(writev)
+        SCMP_SYS(newfstatat), SCMP_SYS(openat), SCMP_SYS(pread64), SCMP_SYS(read), 
+        SCMP_SYS(rseq), SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), 
+        SCMP_SYS(write)
     }},
     {language_enum::CPP, {
         SCMP_SYS(brk), SCMP_SYS(close), SCMP_SYS(execve), SCMP_SYS(exit), 
         SCMP_SYS(exit_group), SCMP_SYS(faccessat), SCMP_SYS(fstat), SCMP_SYS(futex), 
         SCMP_SYS(getrandom), SCMP_SYS(mmap), SCMP_SYS(mprotect), SCMP_SYS(munmap), 
-        SCMP_SYS(openat), SCMP_SYS(pread64), SCMP_SYS(prlimit64), SCMP_SYS(read), 
-        SCMP_SYS(rseq), SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), 
-        SCMP_SYS(write), SCMP_SYS(writev)
+        SCMP_SYS(newfstatat), SCMP_SYS(openat), SCMP_SYS(pread64), SCMP_SYS(prlimit64), 
+        SCMP_SYS(read), SCMP_SYS(rseq), SCMP_SYS(set_robust_list), 
+        SCMP_SYS(set_tid_address), SCMP_SYS(write)
     }},
     {language_enum::RUST, {
         SCMP_SYS(brk), SCMP_SYS(clock_gettime), SCMP_SYS(close), SCMP_SYS(execve), 
