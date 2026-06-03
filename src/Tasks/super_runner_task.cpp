@@ -23,22 +23,27 @@ super_runner_task::super_runner_task(std::string submission_id, std::string exec
 std::map<language_enum, const std::vector<int>> allowed_syscalls = {
    {language_enum::C, {
         SCMP_SYS(brk), SCMP_SYS(close), SCMP_SYS(execve), SCMP_SYS(exit), 
-        SCMP_SYS(exit_group), SCMP_SYS(futex), SCMP_SYS(getrandom), SCMP_SYS(lseek), 
-        SCMP_SYS(madvise), SCMP_SYS(mmap), SCMP_SYS(mprotect), SCMP_SYS(mremap), 
-        SCMP_SYS(munmap), SCMP_SYS(newfstatat), SCMP_SYS(openat), SCMP_SYS(pread64), 
-        SCMP_SYS(read), SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask), 
+        SCMP_SYS(exit_group), SCMP_SYS(faccessat), SCMP_SYS(fcntl), SCMP_SYS(futex), 
+        SCMP_SYS(getpid), SCMP_SYS(getrandom), SCMP_SYS(gettid), SCMP_SYS(ioctl), 
+        SCMP_SYS(lseek), SCMP_SYS(madvise), SCMP_SYS(mmap), SCMP_SYS(mprotect), 
+        SCMP_SYS(mremap), SCMP_SYS(munmap), SCMP_SYS(newfstatat), SCMP_SYS(openat), 
+        SCMP_SYS(prctl), SCMP_SYS(pread64), SCMP_SYS(read), SCMP_SYS(readlinkat), 
+        SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask), 
         SCMP_SYS(rt_sigreturn), SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), 
-        SCMP_SYS(uname), SCMP_SYS(write), SCMP_SYS(writev)
+        SCMP_SYS(statx), SCMP_SYS(uname), SCMP_SYS(write), SCMP_SYS(writev)
     }},
     {language_enum::CPP, {
         SCMP_SYS(brk), SCMP_SYS(clock_gettime), SCMP_SYS(close), SCMP_SYS(execve), 
-        SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(futex), SCMP_SYS(getrandom), 
-        SCMP_SYS(lseek), SCMP_SYS(madvise), SCMP_SYS(mmap), SCMP_SYS(mprotect), 
-        SCMP_SYS(mremap), SCMP_SYS(munmap), SCMP_SYS(newfstatat), SCMP_SYS(openat), 
-        SCMP_SYS(pread64), SCMP_SYS(prlimit64), SCMP_SYS(read), SCMP_SYS(rseq), 
-        SCMP_SYS(rt_sigaction), SCMP_SYS(rt_sigprocmask), SCMP_SYS(rt_sigreturn), 
-        SCMP_SYS(sched_yield), SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), 
-        SCMP_SYS(sysinfo), SCMP_SYS(uname), SCMP_SYS(write), SCMP_SYS(writev)
+        SCMP_SYS(exit), SCMP_SYS(exit_group), SCMP_SYS(faccessat), SCMP_SYS(fcntl), 
+        SCMP_SYS(futex), SCMP_SYS(getpid), SCMP_SYS(getrandom), SCMP_SYS(gettid), 
+        SCMP_SYS(ioctl), SCMP_SYS(lseek), SCMP_SYS(madvise), SCMP_SYS(mmap), 
+        SCMP_SYS(mprotect), SCMP_SYS(mremap), SCMP_SYS(munmap), SCMP_SYS(newfstatat), 
+        SCMP_SYS(openat), SCMP_SYS(prctl), SCMP_SYS(pread64), SCMP_SYS(prlimit64), 
+        SCMP_SYS(read), SCMP_SYS(readlinkat), SCMP_SYS(rseq), SCMP_SYS(rt_sigaction), 
+        SCMP_SYS(rt_sigprocmask), SCMP_SYS(rt_sigreturn), SCMP_SYS(sched_yield), 
+        SCMP_SYS(set_robust_list), SCMP_SYS(set_tid_address), SCMP_SYS(sigaltstack), 
+        SCMP_SYS(statx), SCMP_SYS(sysinfo), SCMP_SYS(uname), SCMP_SYS(write), 
+        SCMP_SYS(writev)
     }},
     {language_enum::RUST, {
         SCMP_SYS(brk), SCMP_SYS(clock_gettime), SCMP_SYS(close), SCMP_SYS(execve), 
