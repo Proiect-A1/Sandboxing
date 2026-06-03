@@ -1,7 +1,7 @@
 #include <Tasks/super_runner_task.h>
 #include <Singletoni/submission_manager.h>
 
-static int install_seccomp_whitelist(const std::string& exec_path , language_enum language)
+static int install_seccomp_whitelist(const std::string& exec_path , language_enum language = language_enum::CPP)
 {
   scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_KILL_PROCESS);
   if (!ctx) return -1;
@@ -346,7 +346,7 @@ result_enum super_runner_task::execute(pthread_t thread_id, int user_id)
       _exit(127);
     }
 
-    if (install_seccomp_whitelist(exec_path , submission_manager::get_instance().get_submission(submission_id).language) != 0)
+    if (install_seccomp_whitelist(exec_path) != 0)
     {
       LOG_ERROR_USER(user_id, "Failed to install seccomp filter");
       _exit(127);
