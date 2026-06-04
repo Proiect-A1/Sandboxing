@@ -22,9 +22,26 @@
 #include<utility>
 #include<memory>
 
+enum parser_behavior_t{
+    DEFAULT,
+    STRICT,
+    IGNORE_WHITESPACE
+};
+template<unsigned buffer_size = 4096>
 class parser{
-    int line_no=1;
-    std::istream* in;
+    unsigned line_no=1;
+    FILE* in;
+    char buff[buffer_size+1];
+    unsigned bpos;
+    parser_behavior_t def_behaviour;
+protected:
+    inline void refresh_buffer(){
+        if(bpos>=buffer_size){
+            size_t chars_read = fread(buff, 1, buffer_size, in);
+            if(chars_read < buffer_size) buff[chars_read] = EOF;
+            bpos = 0;
+        }
+    }
 public:
     enum parse_error{
         OK,
@@ -36,27 +53,53 @@ public:
         UNEXPECTED_NONPRINT,
         OTHER
     };
-    parser(){
-        in=&std::cin;
+    
+    parser(parser_behavior_t default_behaviour = parser_behavior_t::STRICT){
+        static_assert(buffer_size>0, "buffer size must be positive");
+        def_behaviour = default_behaviour;
+        in=stdin;
+        bzero(buff, sizeof buff);
+        bpos = buffer_size;
     }
-    parser(std::istream& in_stream){
-        in=&in_stream;
+    parser(const char* path, parser_behavior_t default_behaviour = parser_behavior_t::STRICT){
+        static_assert(buffer_size>0, "buffer size must be positive");
+        def_behaviour = default_behaviour;
+        in=fopen(path,"r");
+        if(in == NULL)
+            throw std::ios_base::failure("[parser] Could not open file");
+        bzero(buff, sizeof buff);
+        bpos = buffer_size;
     }
-    int line(){
+    inline void setDefaultBehaviour(parser_behavior_t default_behaviour){
+        def_behaviour = default_behaviour;
+    }
+    inline parser_behavior_t getDefaultBehaviour(){
+        return def_behaviour;
+    }
+    inline bool eof(){
+        refresh_buffer();
+        return buff[bpos]==EOF;
+    }
+    inline int line(){
         return line_no;
     }
-    char peek(){
-        return in->peek();
+    inline char peek(){
+        refresh_buffer();
+        return buff[bpos];
     }
     char get(){
-        char c=in->peek();
-        if(c==(char)EOF) return c;
+        refresh_buffer();
+        if(eof()) return EOF;
+        char c=buff[bpos++];
         if(c=='\n') line_no++;
-        return in->get();
+        return c;
     }
-    std::string readToken(bool ignore_whitespace = false){
+    std::string readToken(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
+        
         std::string s;
-        if(ignore_whitespace){
+        if(behavior==parser_behavior_t::DEFAULT)
+            behavior=def_behaviour;
+        if(behavior==parser_behavior_t::IGNORE_WHITESPACE){
             while(isspace(peek())) get();
         }
         while(true){
@@ -126,7 +169,7 @@ enum verdict_t{
 class validator{
 protected:
     bool eof=0;
-    parser p;
+    parser<4096> p;
     bool peek_eof(){
         return p.peek()==(char)EOF;
     }
@@ -142,10 +185,14 @@ public:
         this->require_eof=false;
         this->translate_pe=verdict_t::FAIL;
         this->translate_wa=verdict_t::FAIL;
+        p=parser(parser_behavior_t::STRICT);
     }
-    validator(std::istream& in){
-        p=parser(in);
+    validator(const char* path){
         this->eof=false;
+        this->require_eof=false;
+        this->translate_pe=verdict_t::FAIL;
+        this->translate_wa=verdict_t::FAIL;
+        p=parser(path, parser_behavior_t::STRICT);
     }
     virtual void vpquitf(verdict_t verdict, float points, const char* fmt, va_list args){
         if(verdict!=verdict_t::OK) /// validators must return OK or FAIL
@@ -244,14 +291,14 @@ public:
         return c;
     }
 
-    std::string readToken(bool ignore_whitespace = false){
-        return p.readToken(ignore_whitespace);
+    std::string readToken(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
+        return p.readToken(behavior);
     }
 
-    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = false){
-        std::string word=p.readToken(ignore_whitespace);
-        std::pair<parser::parse_error, int64_t> token=parser::parseInt(word);
-        using pe=parser::parse_error;
+    int64_t readInt(int64_t Min, int64_t Max, parser_behavior_t behavior = parser_behavior_t::DEFAULT){
+        std::string word=p.readToken(behavior);
+        using pe=parser<>::parse_error;
+        std::pair<pe, int64_t> token=parser<>::parseInt(word);
         switch(token.first){
             case pe::OK: break;
             case pe::NUM_TOO_LARGE: quitf(translate_pe, "Integer \"%s\" cannot fit inside a 64-bit signed integer", word.c_str(), line()); break;
@@ -267,13 +314,13 @@ public:
         }
         return result;
     }
-    virtual int64_t readInt(bool ignore_whitespace = false){
-        return readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
+    int64_t readInt(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
+        return readInt(INT64_MIN, INT64_MAX, behavior);
     }
-    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = false){
-        std::string word=p.readToken(ignore_whitespace);
-        std::pair<parser::parse_error, uint64_t> token=parser::parseUint(word);
-        using pe=parser::parse_error;
+    uint64_t readUnsigned(uint64_t Min, uint64_t Max, parser_behavior_t behavior = parser_behavior_t::DEFAULT){
+        std::string word=p.readToken(behavior);
+        using pe=parser<>::parse_error;
+        std::pair<parser<>::parse_error, uint64_t> token=parser<>::parseUint(word);
         switch(token.first){
             case pe::OK: break;
             case pe::NUM_TOO_LARGE: quitf(translate_pe, "Integer \"%s\" cannot fit inside a 64-bit unsigned integer", word.c_str(), line()); break;
@@ -290,8 +337,8 @@ public:
         }
         return result;
     }
-    virtual uint64_t readUnsigned(bool ignore_whitespace = false){
-        return readUnsigned(0, UINT64_MAX, ignore_whitespace);
+    uint64_t readUnsigned(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
+        return readUnsigned(0, UINT64_MAX, behavior);
     }
     ~validator(){
         if(this->require_eof)
@@ -301,17 +348,18 @@ public:
 class in_validator : public validator{
 public:
     in_validator(){
+        this->eof=false;
+        this->require_eof=false;
         this->translate_pe=verdict_t::FAIL;
         this->translate_wa=verdict_t::FAIL;
-        this->require_eof=false;
-        this->eof=false;
+        p=parser(parser_behavior_t::IGNORE_WHITESPACE);
     }
-    in_validator(std::istream& in){
-        p=parser(in);
+    in_validator(const char* path){
+        this->eof=false;
+        this->require_eof=false;
         this->translate_pe=verdict_t::FAIL;
         this->translate_wa=verdict_t::FAIL;
-        this->require_eof=false;
-        this->eof=false;
+        p=parser(path, parser_behavior_t::IGNORE_WHITESPACE);
     }
 public:
     virtual void vpquitf(verdict_t verdict, float points, const char* fmt, va_list args){
@@ -345,33 +393,22 @@ public:
         va_end(args);
         exit(-1);
     }
-    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = true){
-        return validator::readInt(Min, Max, ignore_whitespace);
-    }
-    virtual int64_t readInt(bool ignore_whitespace = true){
-        return validator::readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
-    }
-    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = true){
-        return validator::readUnsigned(Min, Max, ignore_whitespace);
-    }
-    virtual uint64_t readUnsigned(bool ignore_whitespace = true){
-        return validator::readUnsigned(0, UINT64_MAX, ignore_whitespace);
-    }
 };
 class out_validator : public validator{
 public:
     out_validator(){
         this->eof=false;
+        this->require_eof=false;
         this->translate_pe=verdict_t::PE;
         this->translate_wa=verdict_t::WA;
-        this->require_eof=false;
+        p=parser(parser_behavior_t::IGNORE_WHITESPACE);
     }
-    out_validator(std::istream& in){
-        p=parser(in);
+    out_validator(const char* path){
         this->eof=false;
+        this->require_eof=false;
         this->translate_pe=verdict_t::PE;
         this->translate_wa=verdict_t::WA;
-        this->require_eof=false;
+        p=parser(path, parser_behavior_t::IGNORE_WHITESPACE);
     }
     virtual void vpquitf(verdict_t verdict, float points, const char* fmt, va_list args){
         fprintf(stdout, "%.2f", points);
@@ -401,52 +438,17 @@ public:
         exit(-1);
     }
 };
-class ok_validator : public in_validator{
-public:
-    ok_validator(){
-        this->eof=false;
-        this->translate_pe=verdict_t::FAIL;
-        this->translate_wa=verdict_t::FAIL;
-        this->require_eof=false;
-    }
-    ok_validator(std::istream& in){
-        p=parser(in);
-        this->eof=false;
-        this->translate_pe=verdict_t::FAIL;
-        this->translate_wa=verdict_t::FAIL;
-        this->require_eof=false;
-    }
-    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = false){
-        return validator::readInt(Min, Max, ignore_whitespace);
-    }
-    virtual int64_t readInt(bool ignore_whitespace = false){
-        return validator::readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
-    }
-    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = false){
-        return validator::readUnsigned(Min, Max, ignore_whitespace);
-    }
-    virtual uint64_t readUnsigned(bool ignore_whitespace = false){
-        return validator::readUnsigned(0, UINT64_MAX, ignore_whitespace);
-    }
-protected:
-};
+typedef in_validator ok_validator;
 class checker{
 public:
     in_validator in;
     out_validator out;
     ok_validator ok;
-private:
-    std::ifstream in_stream;
-    std::ifstream out_stream;
-    std::ifstream ok_stream;
 public:
     checker(int argc, char** argv){
-        in_stream.open(argv[CHECKER_IN_ARG]);
-        out_stream.open(argv[CHECKER_OUT_ARG]);
-        ok_stream.open(argv[CHECKER_OK_ARG]);
-        in=in_validator(in_stream);
-        ok=ok_validator(ok_stream);
-        out=out_validator(out_stream);
+        in=in_validator(argv[CHECKER_IN_ARG]);
+        out=out_validator(argv[CHECKER_OUT_ARG]);
+        ok=ok_validator(argv[CHECKER_OK_ARG]);
     }
     virtual void vpquitf(verdict_t verdict, float points, const char* fmt, va_list args){
         fprintf(stdout, "%.2f", points);
