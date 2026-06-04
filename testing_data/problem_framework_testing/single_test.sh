@@ -10,14 +10,14 @@ echo "$partexec"
 g++ -std=c++14 -o $mainexec $mainpath
 g++ -std=c++14 -o $partexec $partpath
 
-./gen 100 100 > in.txt
+./gen > in.txt
 
 if [ $? -ne 0 ]; then
     echo "generation failed"
     exit $?
 fi
 
-./val 100 100 < in.txt
+./val 100000 1000 < in.txt
 if [ $? -ne 0 ]; then
     echo "validation failed"
     exit $?
@@ -37,7 +37,7 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
-./checker in.txt out.txt ok.txt $partpath 100 100 10000
+./checker in.txt out.txt ok.txt $partpath 100000 1000
 
 echo $?
 

@@ -22,106 +22,49 @@
 #include<utility>
 #include<memory>
 
-enum parser_behavior_t{
-    DEFAULT,
-    STRICT,
-    IGNORE_WHITESPACE
-};
-template<unsigned buffer_size = 4096>
 class parser{
-protected:
-    unsigned line_no=1;
-    FILE* in;
-    char buff[buffer_size+1];
-    unsigned bpos;
-    parser_behavior_t def_behaviour;
-    inline void refresh_buffer(){
-        if(bpos>=buffer_size){
-            size_t chars_read = fread(buff, 1, buffer_size, in);
-            if(chars_read < buffer_size) buff[chars_read] = (char)EOF;
-            bpos = 0;
-        }
-    }
+    int line_no=1;
+    std::istream* in;
 public:
-    class uint_too_large_exception : public std::exception{
-        char msg[128]{};
-    public:
-        uint_too_large_exception(uint64_t num, char nxt){
-            snprintf(msg, 128, "Number \"%lu%c...\" cannot fit inside a 64-bit unsigned integer", num, nxt);
-        }
-        const char* what() const noexcept override{
-            return msg;
-        }
+    enum parse_error{
+        OK,
+        NUM_TOO_LARGE,
+        NUM_NOT_IN_RANGE,
+        UNEXPECTED_SPACE,
+        UNEXPECTED_EOLN,
+        UNEXPECTED_EOF,
+        UNEXPECTED_NONPRINT,
+        OTHER
     };
-    class int_too_large_exception : public std::exception{
-        char msg[128]{};
-    public:
-        int_too_large_exception(uint64_t num, bool sign){
-            if(!sign)
-                snprintf(msg, 128, "Number \"%lu\" cannot fit inside a 64-bit signed integer", num);
-            else
-                snprintf(msg, 128, "Number \"-%lu\" cannot fit inside a 64-bit signed integer", num);
-        }
-        const char* what() const noexcept override{
-            return msg;
-        }
-    };
-    parser(parser_behavior_t default_behaviour = parser_behavior_t::STRICT){
-        static_assert(buffer_size>0, "buffer size must be positive");
-        def_behaviour = default_behaviour;
-        in=stdin;
-        bzero(buff, sizeof buff);
-        bpos = buffer_size;
+    parser(){
+        in=&std::cin;
     }
-    parser(const char* path, parser_behavior_t default_behaviour = parser_behavior_t::STRICT){
-        static_assert(buffer_size>0, "buffer size must be positive");
-        def_behaviour = default_behaviour;
-        in=fopen(path,"r");
-        if(in == NULL)
-            throw std::ios_base::failure("[parser] Could not open file");
-        bzero(buff, sizeof buff);
-        bpos = buffer_size;
+    parser(std::istream& in_stream){
+        in=&in_stream;
     }
-    inline void setDefaultBehaviour(parser_behavior_t default_behaviour){
-        def_behaviour = default_behaviour;
-    }
-    inline parser_behavior_t getDefaultBehaviour(){
-        return def_behaviour;
-    }
-    inline bool eof(){
-        refresh_buffer();
-        return buff[bpos]==(char)EOF;
-    }
-    inline int line(){
+    int line(){
         return line_no;
     }
-    inline char peek(){
-        refresh_buffer();
-        return buff[bpos];
-    }
-    inline void ignore_whitespace(){
-         while(isspace(peek())) get();
+    char peek(){
+        return in->peek();
     }
     char get(){
-        refresh_buffer();
-        if(eof()) return (char)EOF;
-        char c=buff[bpos++];
+        char c=in->peek();
+        if(c==(char)EOF) return c;
         if(c=='\n') line_no++;
-        return c;
+        return in->get();
     }
-    std::string readToken(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
-        if(behavior==parser_behavior_t::DEFAULT)
-            behavior=def_behaviour;
-        if(behavior==parser_behavior_t::IGNORE_WHITESPACE)
-            ignore_whitespace();
-        
+    std::string readToken(bool ignore_whitespace = false){
         std::string s;
+        if(ignore_whitespace){
+            while(isspace(peek())) get();
+        }
         while(true){
             char c=peek();
             if(c==(char)EOF || isspace(c)){
                 if(s.empty()){
-                    throw c; // Expected string, found "c"
-                    return s;
+                    s.push_back(c);
+                    get();
                 }
                 return s;
             }
@@ -130,51 +73,40 @@ public:
         }
         return s;
     }
-    uint64_t readUnsigned(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
-        if(behavior==parser_behavior_t::DEFAULT)
-            behavior=def_behaviour;
-        if(behavior==parser_behavior_t::IGNORE_WHITESPACE)
-            ignore_whitespace();
+    static std::pair<parse_error, uint64_t> parseUint(const std::string& s){
+        if(s.empty()) return std::make_pair(parse_error::OTHER, 0);
         uint64_t result=0;  
-        bool first=1;
-        while(true){
-            char c=peek();
+        bool first=0;
+        for(char c : s){
             if(!isdigit(c)){
-                if(first || (c!=(char)EOF && !isspace(c))){
-                    throw c;
+                if(first){
+                    if(c==' ') return std::make_pair(parse_error::UNEXPECTED_SPACE, result);
+                    if(c=='\n') return std::make_pair(parse_error::UNEXPECTED_EOLN, result);
+                    if(c==(char)EOF) return std::make_pair(parse_error::UNEXPECTED_EOF, result);
+                    if(!isprint(c)) return std::make_pair(parse_error::UNEXPECTED_NONPRINT, result);
                 }
-                return result;
+                return std::make_pair(parse_error::OTHER, result);
             }
-            first=0;
             uint64_t digit=c-'0';
             if(result>(ULLONG_MAX-digit)/10){
-                throw uint_too_large_exception(result, c);
-                return result;
+                return std::make_pair(parse_error::NUM_TOO_LARGE, result);
             }
-            result=(result<<1)+(result<<3)+digit;
-            get();
+            result=result*10+digit;
         }
-        return result;
+        return std::make_pair(parse_error::OK,result);
     }
-    int64_t readInt(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
-        if(behavior==parser_behavior_t::DEFAULT)
-            behavior=def_behaviour;
-        if(behavior==parser_behavior_t::IGNORE_WHITESPACE)
-            ignore_whitespace();
+    static std::pair<parse_error, int64_t> parseInt(const std::string& s){
+        if(s.empty()) return std::make_pair(parse_error::OTHER, 0);
         bool minus=0;
-        if(peek()=='-') minus=1, get();
-        uint64_t result;
-        try{
-            result=readUnsigned(parser_behavior_t::STRICT);
-        }catch(uint_too_large_exception e){
-            throw e;
-        }catch(char c){
-            throw c;
-        }
+        std::pair<parse_error, uint64_t> tmp;
+        if(s[0]=='-') minus=1, tmp=parseUint(s.substr(1));
+        else tmp=parseUint(s);
+        if(tmp.first!=parse_error::OK) return std::make_pair(tmp.first, (int64_t)tmp.second);
+        uint64_t result=tmp.second;
         int64_t actual_result=0;
         if(minus){
             if(result>(uint64_t)LLONG_MAX+1)
-                throw int_too_large_exception(result, minus);
+                return std::make_pair(parse_error::NUM_TOO_LARGE, (int64_t)result);
             else if(result==(uint64_t)LLONG_MAX+1)
                 actual_result=LLONG_MIN;
             else 
@@ -182,11 +114,10 @@ public:
         }
         else{
             if(result>(uint64_t)LLONG_MAX)
-                throw int_too_large_exception(result, minus);
-            else
-                actual_result=result;
+                return std::make_pair(parse_error::NUM_TOO_LARGE, (int64_t)result);
+            actual_result=result;
         }
-        return actual_result;
+        return std::make_pair(parse_error::OK, actual_result);
     }
 };
 enum verdict_t{
@@ -194,12 +125,12 @@ enum verdict_t{
 };
 class validator{
 protected:
-    bool eof;
-    parser<4096> p;
-    inline bool peek_eof(){
+    bool eof=0;
+    parser p;
+    bool peek_eof(){
         return p.peek()==(char)EOF;
     }
-    inline char peek(){
+    char peek(){
         return p.peek();
     }
     bool require_eof;
@@ -211,14 +142,10 @@ public:
         this->require_eof=false;
         this->translate_pe=verdict_t::FAIL;
         this->translate_wa=verdict_t::FAIL;
-        p=parser(parser_behavior_t::STRICT);
     }
-    validator(const char* path){
+    validator(std::istream& in){
+        p=parser(in);
         this->eof=false;
-        this->require_eof=false;
-        this->translate_pe=verdict_t::FAIL;
-        this->translate_wa=verdict_t::FAIL;
-        p=parser(path, parser_behavior_t::STRICT);
     }
     virtual void vpquitf(verdict_t verdict, float points, const char* fmt, va_list args){
         if(verdict!=verdict_t::OK) /// validators must return OK or FAIL
@@ -244,22 +171,6 @@ public:
         va_end(args);
         exit(-1);
     }
-protected:
-    void __fail_expected_char_but_found(const char* expected, char found){
-        if(found==(char)EOF) quitf(translate_pe,"Expected %s, found EOF (line %d)", expected, line());
-        if(found=='\n') quitf(translate_pe,"Expected %s, found EOLN (line %d)", expected, line());
-        if(found==' ') quitf(translate_pe,"Expected %s, found space (line %d)", expected, line());
-        if(isprint(found)) quitf(translate_pe,"Expected %s, found character \"%c\" (line %d)", expected, found, line()); 
-        quitf(translate_pe,"Expected %s, found non-printable character \"%d\" (line %d)", expected, found, line());
-    }
-    void __fail_expected_token_but_found(const char* expected, char found){
-       if(found==(char)EOF) quitf(translate_pe,"Expected %s, found EOF (line %d)", expected, line());
-        if(found=='\n') quitf(translate_pe,"Expected %s, found EOLN (line %d)", expected, line());
-        if(found==' ') quitf(translate_pe,"Expected %s, found space (line %d)", expected, line());
-        if(isprint(found)) quitf(translate_pe,"Expected %s, found token containing character \"%c\" (line %d)", expected, found, line()); 
-        quitf(translate_pe,"Expected %s, found token containing non-printable character \"%d\" (line %d)", expected, found, line());
-    }
-public:
     virtual void quitf(verdict_t verdict, const char* fmt, ...){
         if(require_eof && verdict==verdict_t::OK && !eof){
             quitf(verdict_t::FAIL,"validator::readEof() was not called");
@@ -278,11 +189,8 @@ public:
             exit(-1);
         }
     }
-    inline int line(){
+    int line(){
         return p.line();
-    }
-    void ignoreWhitespace(){
-        p.ignore_whitespace();
     }
     void readEof(){
         if(peek_eof()){
@@ -291,67 +199,99 @@ public:
                 quitf(verdict_t::OK, "Ok");
             else return;
         }
-        __fail_expected_char_but_found("EOF", p.get());
+        char c=p.get();
+        if(c==' ') quitf(translate_pe,"Expected EOF, found space (line %d)", line());
+        if(c=='\n') quitf(translate_pe,"Expected EOF, found EOLN (line %d)", line());
+        if(isprint(c)) quitf(translate_pe,"Expected EOF, found '%c' (line %d)", c, line());
+        quitf(translate_pe,"Expected EOF, found ascii character %d (line %d)", c, line());
     }
     char readChar(const char* charset){ /// if charset = NULL, then all characters are accepted
+        if(peek_eof()) quitf(translate_pe, "Expected character from charset \"%s\", found EOF (line %d)", charset, line());
         char c=p.get();
-        if(charset!=NULL && !strchr(charset, c))
-            __fail_expected_char_but_found(((std::string)"character from charset \""+charset+"\"").c_str(), c);
-        if(charset==NULL && c==(char)EOF) __fail_expected_char_but_found("character", c);
+        if(charset!=NULL && !strchr(charset, c)){
+            if(c==' ') quitf(translate_pe,"Expected character from charset \"%s\", found space (line %d)", line(), charset);
+            if(c=='\n') quitf(translate_pe,"Expected character from charset \"%s\", found EOLN (line %d)", line(), charset);
+            if(c==EOF) quitf(translate_pe,"Expected character from charset \"%s\", found EOF (line %d)", line(), charset);
+            if(isprint(c)) quitf(translate_pe,"Expected character from charset \"%s\", found '%c' (line %d)", c, line(), charset);
+            quitf(translate_pe,"Expected character from charset \"%s\", found ascii character %d (line %d)", c, line(), charset);
+        }
         return c;
     }
 
     char readSpace(){
+        if(peek_eof()) quitf(translate_pe, "Expected space, found EOF (line %d)", line());
         char c=p.get();
-        if(c!=' ')
-            __fail_expected_char_but_found("space", c);
+        if(c!=' '){
+            if(c==' ') quitf(translate_pe,"Expected space, found space (line %d)", line());
+            if(c=='\n') quitf(translate_pe,"Expected space, found EOLN (line %d)", line());
+            if(c==EOF) quitf(translate_pe,"Expected space, found EOF (line %d)", line());
+            if(isprint(c)) quitf(translate_pe,"Expected space, found '%c' (line %d)", c, line());
+            quitf(translate_pe,"Expected space, found ascii character %d (line %d)", c, line());
+        }
         return c;
     }
 
     char readEoln(){
+        if(peek_eof()) quitf(translate_pe, "Expected EOLN, found EOF (line %d)", line());
         char c=p.get();
-        if(c!='\n')
-            __fail_expected_char_but_found("EOLN", c);
+        if(c!='\n'){
+            if(c==' ') quitf(translate_pe,"Expected EOLN, found space (line %d)", line());
+            if(c=='\n') quitf(translate_pe,"Expected EOLN, found EOLN (line %d)", line());
+            if(c==EOF) quitf(translate_pe,"Expected EOLN, found EOF (line %d)", line());
+            if(isprint(c)) quitf(translate_pe,"Expected EOLN, found '%c' (line %d)", c, line());
+            quitf(translate_pe, "found ascii character %d (line %d)", c, line());
+        }
         return c;
     }
 
-    std::string readToken(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
-        return p.readToken(behavior);
+    std::string readToken(bool ignore_whitespace = false){
+        return p.readToken(ignore_whitespace);
     }
 
-    int64_t readInt(int64_t Min, int64_t Max, parser_behavior_t behavior = parser_behavior_t::DEFAULT){
-        try{
-            int64_t result = p.readInt(behavior);
-            if(result<Min || result>Max){
-                quitf(translate_pe,"Number %lld is not inside the range [%lld, %lld] (line %d)", result, Min, Max, line());
-            }
-            return result;
-        }catch(char c){
-            __fail_expected_token_but_found("integer", c);
-        }catch(parser<>::uint_too_large_exception e){
-            quitf(translate_pe, e.what());
+    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = false){
+        std::string word=p.readToken(ignore_whitespace);
+        std::pair<parser::parse_error, int64_t> token=parser::parseInt(word);
+        using pe=parser::parse_error;
+        switch(token.first){
+            case pe::OK: break;
+            case pe::NUM_TOO_LARGE: quitf(translate_pe, "Integer \"%s\" cannot fit inside a 64-bit signed integer", word.c_str(), line()); break;
+            case pe::UNEXPECTED_SPACE: quitf(translate_pe,"Expected integer, found space (line %d)", line()); break;
+            case pe::UNEXPECTED_EOLN: quitf(translate_pe,"Expected integer, found EOLN (line %d)", line()); break;
+            case pe::UNEXPECTED_EOF: quitf(translate_pe,"Expected integer, found EOF (line %d)", line()); break;
+            case pe::UNEXPECTED_NONPRINT: quitf(translate_pe,"Expected integer, found ascii character %d (line %d)", word[0], line()); break;
+            default: quitf(translate_pe,"Expected integer, found \"%s\" (line %d)", word.c_str(), line()); break;
         }
-        return -1;
-    }
-    int64_t readInt(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
-        return readInt(INT64_MIN, INT64_MAX, behavior);
-    }
-    uint64_t readUnsigned(uint64_t Min, uint64_t Max, parser_behavior_t behavior = parser_behavior_t::DEFAULT){
-        try{
-            uint64_t result = p.readUnsigned(behavior);
-            if(result<Min || result>Max){
-                quitf(translate_pe,"Number %llu is not inside the range [%llu, %llu] (line %d)", result, Min, Max, line());
-            }
-            return result;
-        }catch(char c){
-            __fail_expected_token_but_found("unsigned integer", c);
-        }catch(parser<>::uint_too_large_exception e){
-            quitf(translate_pe, e.what());
+        int64_t result=token.second;
+        if(result<Min || result>Max){
+            quitf(translate_pe,"Number %lld is not inside the range [%lld, %lld] (line %d)", result, Min, Max, line());
         }
-        return -1;
+        return result;
     }
-    uint64_t readUnsigned(parser_behavior_t behavior = parser_behavior_t::DEFAULT){
-        return readUnsigned(0, UINT64_MAX, behavior);
+    virtual int64_t readInt(bool ignore_whitespace = false){
+        return readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = false){
+        std::string word=p.readToken(ignore_whitespace);
+        std::pair<parser::parse_error, uint64_t> token=parser::parseUint(word);
+        using pe=parser::parse_error;
+        switch(token.first){
+            case pe::OK: break;
+            case pe::NUM_TOO_LARGE: quitf(translate_pe, "Integer \"%s\" cannot fit inside a 64-bit unsigned integer", word.c_str(), line()); break;
+            case pe::UNEXPECTED_SPACE: quitf(translate_pe,"Expected unsigned integer, found space (line %d)", line()); break;
+            case pe::UNEXPECTED_EOLN: quitf(translate_pe,"Expected unsigned integer, found EOLN (line %d)", line()); break;
+            case pe::UNEXPECTED_EOF: quitf(translate_pe,"Expected unsigned integer, found EOF (line %d)", line()); break;
+            case pe::UNEXPECTED_NONPRINT: quitf(translate_pe,"Expected unsigned integer, found ascii character %d (line %d)", word[0], line()); break;
+            default: quitf(translate_pe,"Expected unsigned integer, found \"%s\" (line %d)", word.c_str(), line()); break;
+        
+        }
+        uint64_t result=token.second;
+        if(result<Min || result>Max){
+            quitf(translate_pe,"Number %llu is not inside the range [%llu, %llu] (line %d)", result, Min, Max, line());
+        }
+        return result;
+    }
+    virtual uint64_t readUnsigned(bool ignore_whitespace = false){
+        return readUnsigned(0, UINT64_MAX, ignore_whitespace);
     }
     ~validator(){
         if(this->require_eof)
@@ -361,18 +301,17 @@ public:
 class in_validator : public validator{
 public:
     in_validator(){
-        this->eof=false;
-        this->require_eof=false;
         this->translate_pe=verdict_t::FAIL;
         this->translate_wa=verdict_t::FAIL;
-        p=parser(parser_behavior_t::IGNORE_WHITESPACE);
+        this->require_eof=false;
+        this->eof=false;
     }
-    in_validator(const char* path){
-        this->eof=false;
-        this->require_eof=false;
+    in_validator(std::istream& in){
+        p=parser(in);
         this->translate_pe=verdict_t::FAIL;
         this->translate_wa=verdict_t::FAIL;
-        p=parser(path, parser_behavior_t::IGNORE_WHITESPACE);
+        this->require_eof=false;
+        this->eof=false;
     }
 public:
     virtual void vpquitf(verdict_t verdict, float points, const char* fmt, va_list args){
@@ -394,22 +333,45 @@ public:
         fflush(stderr);
         exit(verdict);
     }
+    virtual void pquitf(verdict_t verdict, float points, const char* fmt, ...){
+        va_list args; va_start(args, fmt);
+        vpquitf(verdict, points, fmt, args);
+        va_end(args);
+        exit(-1);
+    }
+    virtual void quitf(verdict_t verdict, const char* fmt, ...){
+        va_list args; va_start(args, fmt);
+        vquitf(verdict, fmt, args);
+        va_end(args);
+        exit(-1);
+    }
+    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = true){
+        return validator::readInt(Min, Max, ignore_whitespace);
+    }
+    virtual int64_t readInt(bool ignore_whitespace = true){
+        return validator::readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = true){
+        return validator::readUnsigned(Min, Max, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(bool ignore_whitespace = true){
+        return validator::readUnsigned(0, UINT64_MAX, ignore_whitespace);
+    }
 };
 class out_validator : public validator{
 public:
     out_validator(){
         this->eof=false;
-        this->require_eof=false;
         this->translate_pe=verdict_t::PE;
         this->translate_wa=verdict_t::WA;
-        p=parser(parser_behavior_t::IGNORE_WHITESPACE);
+        this->require_eof=false;
     }
-    out_validator(const char* path){
+    out_validator(std::istream& in){
+        p=parser(in);
         this->eof=false;
-        this->require_eof=false;
         this->translate_pe=verdict_t::PE;
         this->translate_wa=verdict_t::WA;
-        p=parser(path, parser_behavior_t::IGNORE_WHITESPACE);
+        this->require_eof=false;
     }
     virtual void vpquitf(verdict_t verdict, float points, const char* fmt, va_list args){
         fprintf(stdout, "%.2f", points);
@@ -426,34 +388,65 @@ public:
         fflush(stderr);
         exit(verdict);
     }
+    virtual void pquitf(verdict_t verdict, float points, const char* fmt, ...){
+        va_list args; va_start(args, fmt);
+        vpquitf(verdict, points, fmt, args);
+        va_end(args);
+        exit(-1);
+    }
+    virtual void quitf(verdict_t verdict, const char* fmt, ...){
+        va_list args; va_start(args, fmt);
+        vquitf(verdict, fmt, args);
+        va_end(args);
+        exit(-1);
+    }
 };
 class ok_validator : public in_validator{
 public:
     ok_validator(){
         this->eof=false;
-        this->require_eof=false;
         this->translate_pe=verdict_t::FAIL;
         this->translate_wa=verdict_t::FAIL;
-        p=parser(parser_behavior_t::IGNORE_WHITESPACE);
+        this->require_eof=false;
     }
-    ok_validator(const char* path){
+    ok_validator(std::istream& in){
+        p=parser(in);
         this->eof=false;
-        this->require_eof=false;
         this->translate_pe=verdict_t::FAIL;
         this->translate_wa=verdict_t::FAIL;
-        p=parser(path, parser_behavior_t::IGNORE_WHITESPACE);
+        this->require_eof=false;
     }
+    virtual int64_t readInt(int64_t Min, int64_t Max, bool ignore_whitespace = false){
+        return validator::readInt(Min, Max, ignore_whitespace);
+    }
+    virtual int64_t readInt(bool ignore_whitespace = false){
+        return validator::readInt(INT64_MIN, INT64_MAX, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(uint64_t Min, uint64_t Max, bool ignore_whitespace = false){
+        return validator::readUnsigned(Min, Max, ignore_whitespace);
+    }
+    virtual uint64_t readUnsigned(bool ignore_whitespace = false){
+        return validator::readUnsigned(0, UINT64_MAX, ignore_whitespace);
+    }
+protected:
 };
 class checker{
 public:
     in_validator in;
     out_validator out;
     ok_validator ok;
+private:
+    std::ifstream in_stream;
+    std::ifstream out_stream;
+    std::ifstream ok_stream;
 public:
     checker(int argc, char** argv){
-        in=in_validator(argv[CHECKER_IN_ARG]);
-        out=out_validator(argv[CHECKER_OUT_ARG]);
-        ok=ok_validator(argv[CHECKER_OK_ARG]);
+        in_stream.open(argv[CHECKER_IN_ARG]);
+        out_stream.open(argv[CHECKER_OUT_ARG]);
+        ok_stream.open(argv[CHECKER_OK_ARG]);
+        in=in_validator(in_stream);
+        ok=ok_validator(ok_stream);
+        out=out_validator(out_stream);
     }
     virtual void vpquitf(verdict_t verdict, float points, const char* fmt, va_list args){
         fprintf(stdout, "%.2f", points);
@@ -489,19 +482,16 @@ public:
 
 class generator{
     class invalid_string_length_exception : public std::exception{
-    public:
         const char* what() const noexcept override{
             return "[generator::nextString] len must be greater than or equal to 0";
         }
     };
     class invalid_interval_exception : public std::exception{
-    public:
         const char* what() const noexcept override{
             return "[generator::nextInt] l must be less than or equal to r";
         }
     };
     class invalid_double_interval_exception : public std::exception{
-    public:
         const char* what() const noexcept override{
             return "[generator::nextDouble] l must be strictly less than r";
         }

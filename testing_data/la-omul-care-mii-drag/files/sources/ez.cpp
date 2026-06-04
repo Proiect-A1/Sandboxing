@@ -40,7 +40,6 @@
 using namespace std;
 
 // ______________________________________ v CODE v ______________________________________
-#pragma GCC target("avx2")
 #define int ll
 #define ld long double
 const int mod = 1000000007;
