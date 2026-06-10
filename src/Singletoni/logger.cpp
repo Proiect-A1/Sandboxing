@@ -98,10 +98,68 @@ void Logger::open_log_file() {
 
 }
 
+
+void Logger::open_log_file_unsafe() {
+    if (log_file != nullptr) {
+        fclose(log_file);
+    }
+    current_date = get_only_date();
+    const std::string log_dir = "logs";
+    std::filesystem::create_directories(log_dir);
+
+    auto build_log_filename = [](const std::string& dir, const std::string& date, int instance) {
+        char suffix[64];
+        snprintf(suffix, sizeof(suffix), "%s-%03d.log", date.c_str(), instance);
+        return dir + "/" + std::string(suffix);
+    };
+
+    auto open_unique_log_file = [](const std::string& filename) -> FILE* {
+        int fd = open(filename.c_str(), O_CREAT | O_EXCL | O_WRONLY, 0644);
+        if (fd < 0) {
+            return nullptr;
+        }
+
+        FILE* file = fdopen(fd, "a");
+        if (file == nullptr) {
+            close(fd);
+            std::filesystem::remove(filename);
+        }
+        return file;
+    };
+
+    FILE* new_file = nullptr;
+    std::string filename;
+
+    for (int instance = 0; instance < 1000; ++instance) {
+        filename = build_log_filename(log_dir, current_date, instance);
+        new_file = open_unique_log_file(filename);
+        if (new_file != nullptr) {
+            break;
+        }
+        if (errno != EEXIST) {
+            break;
+        }
+    }
+
+    if (new_file == nullptr) {
+        if (filename.empty()) {
+            filename = build_log_filename(log_dir, current_date, 0);
+        }
+        new_file = fopen(filename.c_str(), "a");
+    }
+
+    log_file = new_file;
+
+    if (log_file != nullptr) {
+        setvbuf(log_file, NULL, _IONBF, 0);
+    }
+    log_unsafe(LogLevel::INFO, __FILE__, __LINE__, "Opened log file: " + filename + " linked to file descriptor: " + std::to_string(fileno(log_file)));
+}
+
 void Logger::check_rotation() {
     std::string today = get_only_date();
     if (today != current_date) {
-        open_log_file();
+        open_log_file_unsafe();
     }
 }
 
@@ -202,9 +260,43 @@ void Logger::log(LogLevel level, const char* file, int line, const std::string& 
     pthread_mutex_unlock(&mtx);
 }
 
+void Logger::log_unsafe(LogLevel level, const char* file, int line, const std::string& message) {
+    //pthread_mutex_lock(&mtx);
+
+    check_rotation();
+
+    std::string timestamp_str = get_only_timestamp();
+    const char *level_str = level_to_string(level);
+    const char *color = level_to_color(level);
+    const char *reset = "\033[0m";
+    char level_with_brackets[32];
+    snprintf(level_with_brackets, sizeof(level_with_brackets), "[%s]", level_str);
+
+    // aici poate schimbam cu thread_id din context, nu stiu exact cum se comporta gettid
+    unsigned long thread_id = (unsigned long)gettid();
+
+    if (log_file != nullptr) {
+        fprintf(log_file, "[%s] %-9s [TID:%6ld] [%s:%d] %s\n", timestamp_str.c_str(), level_with_brackets, thread_id, file, line, message.c_str());
+        fflush(log_file);
+    }
+    std::string stdout_message = colorize_verdicts_in_message(message);
+    fprintf(stdout, "[%s] %s%-9s%s [TID:%6ld] [%s:%d] %s\n", timestamp_str.c_str(), color, level_with_brackets, reset, thread_id, file, line, stdout_message.c_str());
+    fflush(stdout);
+
+//    pthread_mutex_unlock(&mtx);
+}
+
+
 void Logger::log(LogLevel level, const char* file, int line, long long user_id, const std::string& message) {
     char uid_with_padding[32];
     snprintf(uid_with_padding, sizeof(uid_with_padding), "[UID:%2lld]", user_id);
     const std::string message_with_user = std::string(uid_with_padding) + " " + message;
     log(level, file, line, message_with_user);
+}
+
+void Logger::log_unsafe(LogLevel level, const char* file, int line, long long user_id, const std::string& message) {
+    char uid_with_padding[32];
+    snprintf(uid_with_padding, sizeof(uid_with_padding), "[UID:%2lld]", user_id);
+    const std::string message_with_user = std::string(uid_with_padding) + " " + message;
+    log_unsafe(level, file, line, message_with_user);
 }
